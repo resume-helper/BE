@@ -13,20 +13,21 @@
 ### 1-1. CI/CD 인프라 구축
 
 > 상세 플랜: `phases/phase-1-foundation/CICD_IMPL_PLAN.md`
+> 트러블슈팅: `phases/phase-1-foundation/TROUBLESHOOTING.md`
 
 | # | 작업 | 담당 | 상태 |
 |---|------|------|------|
-| 1 | EC2 서버 초기 환경 구성 (Docker, Nginx) | | 🔴 |
-| 2 | EC2 IAM Role 설정 (SSM 접근 권한) | | 🔴 |
-| 3 | AWS SSM Parameter Store 환경변수 등록 | | 🔴 |
-| 4 | SSL 인증서 설정 (Let's Encrypt + Certbot) | | 🔴 |
-| 5 | Nginx Blue/Green 설정 | | 🔴 |
-| 6 | Redis 로컬(EC2) 설치 | | 🔴 |
-| 7 | Dockerfile 작성 | | 🔴 |
-| 8 | 배포 스크립트 작성 (deploy.sh, rollback.sh) | | 🔴 |
-| 9 | GitHub Actions Workflow 작성 | | 🔴 |
-| 10 | Spring Boot Actuator 설정 | | 🔴 |
-| 11 | 첫 배포 검증 | | 🔴 |
+| 1 | EC2 서버 초기 환경 구성 (Docker, Nginx, AWS CLI) | | 🟢 |
+| 2 | EC2 IAM Role 설정 (SSM 접근 권한) | | 🟢 |
+| 3 | AWS SSM Parameter Store 환경변수 등록 | | 🟢 |
+| 4 | SSL 인증서 설정 (Let's Encrypt + Certbot) | | ⏸ 도메인 확보 후 |
+| 5 | Nginx Blue/Green 설정 | | 🟢 |
+| 6 | Redis (ElastiCache TLS 연결) | | 🟢 |
+| 7 | Dockerfile 작성 (eclipse-temurin:21-jre-alpine) | | 🟢 |
+| 8 | 배포 스크립트 작성 (deploy.sh, rollback.sh) | | 🟢 |
+| 9 | GitHub Actions Workflow (동적 보안그룹 방식) | | 🟢 |
+| 10 | Spring Boot Actuator Health Check 설정 | | 🟢 |
+| 11 | 첫 배포 검증 | | 🟢 |
 
 ### 1-2. 프로젝트 초기 설정
 
@@ -149,5 +150,7 @@
 | 블록 버전 관리 | block_versions 테이블 + 스냅샷 JSON 병행 | 2026-04-30 |
 | Redis HA | 단일 Redis (JWT Refresh Token 전용) | 2026-04-30 |
 | 코드 컨벤션 | 초안 전체 확정 | 2026-04-30 |
-| 인프라 | EC2 + Nginx + Let's Encrypt + SSM | 2026-05-01 |
-| CI/CD | GitHub Actions + Blue/Green 배포 | 2026-05-01 |
+| 인프라 | EC2(Ubuntu 26.04) + Nginx + SSM Parameter Store | 2026-05-01 |
+| CI/CD | GitHub Actions + Blue/Green 배포 + 동적 보안그룹 | 2026-05-01 |
+| Redis | ElastiCache TLS 연결 (ssl.enabled=true, Primary 엔드포인트) | 2026-05-01 |
+| RDB | AWS RDS MySQL 8.4 + dev 데이터베이스 생성 | 2026-05-01 |
