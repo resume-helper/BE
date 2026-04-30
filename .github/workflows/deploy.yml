@@ -43,6 +43,24 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Add runner IP to security group
+        run: |
+          RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
+          echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr "$RUNNER_IP/32"
+          echo "✅ Runner IP $RUNNER_IP 보안그룹 허용"
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -73,3 +91,13 @@ jobs:
           script: |
             chmod +x ~/deploy/scripts/deploy.sh
             ~/deploy/scripts/deploy.sh ${{ github.sha }}
+
+      - name: Remove runner IP from security group
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr "$RUNNER_IP/32"
+          echo "✅ Runner IP $RUNNER_IP 보안그룹 제거"
