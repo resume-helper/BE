@@ -1,6 +1,10 @@
 package com.atomiccv.shared.common.exception
 
-enum class ErrorCode(val httpStatus: Int, val code: String, val defaultMessage: String) {
+enum class ErrorCode(
+    val httpStatus: Int,
+    val code: String,
+    val defaultMessage: String
+) {
     VALIDATION_FAILED(400, "VALIDATION_FAILED", "입력값 유효성 검증 실패"),
     UNAUTHORIZED(401, "UNAUTHORIZED", "인증이 필요합니다"),
     FORBIDDEN(403, "FORBIDDEN", "접근 권한이 없습니다"),
