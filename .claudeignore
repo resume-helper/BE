@@ -1,0 +1,25 @@
+# 빌드 산출물
+build/
+.gradle/
+out/
+
+# IDE 설정
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# 바이너리 / 캐시
+*.class
+*.jar
+*.war
+
+# 민감 파일
+*.pem
+.env
+*.local
+
+# 문서 이미지
+*.png
+*.jpg
+*.pdf
