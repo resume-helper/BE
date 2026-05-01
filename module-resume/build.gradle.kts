@@ -1,23 +1,32 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
-    id("org.springframework.boot")
+    kotlin("plugin.jpa")
     id("io.spring.dependency-management")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.14")
+    }
 }
 
 dependencies {
     implementation(project(":module-shared"))
-    implementation(project(":module-auth"))
-    implementation(project(":module-resume"))
-    // implementation(project(":module-feedback"))  // ⏸
-    // implementation(project(":module-analytics"))  // ⏸
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.mysql:mysql-connector-j")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
 }
