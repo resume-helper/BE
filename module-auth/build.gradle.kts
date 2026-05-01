@@ -2,16 +2,10 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     kotlin("plugin.jpa")
-    id("io.spring.dependency-management")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.14")
-    }
 }
 
 dependencies {
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.14"))
     implementation(project(":module-shared"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")

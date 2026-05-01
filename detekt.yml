@@ -1,0 +1,45 @@
+build:
+  maxIssues: 0
+
+complexity:
+  LongMethod:
+    threshold: 40
+  LongParameterList:
+    functionThreshold: 6
+    constructorThreshold: 8
+  CyclomaticComplexMethod:
+    threshold: 15
+
+naming:
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+    excludes: ['**/test/**', '**/*Test.kt', '**/*Spec.kt']
+
+style:
+  MaxLineLength:
+    maxLineLength: 120
+  WildcardImport:
+    active: true
+  UnusedImports:
+    active: true
+  MagicNumber:
+    active: false
+
+performance:
+  SpreadOperator:
+    active: false
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: true
+
+comments:
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
