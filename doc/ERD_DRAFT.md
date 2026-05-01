@@ -217,7 +217,7 @@ erDiagram
 | password | VARCHAR(255) | NULL 허용 | BCrypt 해시 저장. 소셜 전용 회원은 NULL |
 | profile_image_url | VARCHAR(500) | NULL 허용 | S3 또는 소셜 프로필 이미지 URL |
 | role | ENUM('USER','ADMIN') | NOT NULL, DEFAULT 'USER' | 권한 레벨 |
-| is_active | BOOLEAN | NOT NULL, DEFAULT TRUE | false = 이메일 미인증 또는 정지 계정 |
+| is_active | BOOLEAN | NOT NULL, DEFAULT FALSE | false = 이메일 미인증 또는 정지 계정 (이메일 인증 완료 후 true로 전환) |
 | created_at | DATETIME | NOT NULL | 가입 일시 |
 | updated_at | DATETIME | NOT NULL | 마지막 수정 일시 |
 | deleted_at | DATETIME | NULL 허용 | Soft Delete 처리 일시. NOT NULL이면 탈퇴 회원 |
