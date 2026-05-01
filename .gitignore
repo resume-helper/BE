@@ -42,3 +42,7 @@ out/
 ### Sensitive config ###
 src/main/resources/application.yaml
 src/main/resources/application-local.yaml
+resume-dev.pem
+
+### Claude local settings (팀원별 로컬 설정 — 공유 불필요) ###
+.claude/settings.local.json
