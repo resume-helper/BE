@@ -48,13 +48,13 @@
 
 ---
 
-### ❓ [3] API 응답 포맷 & 예외 처리 구조
+### ✅ [3] API 응답 포맷 & 예외 처리 구조
 
 | 항목 | 내용 |
 |------|------|
-| **목적** | FE·BE 간 계약, 에러 핸들링 일관성 확보 |
-| **담당** | BE + FE 협의 |
-| **결정 기한** | Step 2 시작 전 (5/8 이전) |
+| **결정** | 공통 래퍼(선택지 B) 사용 — `ApiResponse<T>` |
+| **상세 명세** | `doc/API_RESPONSE.md` |
+| **결정일** | 2026-05-01 |
 
 **논의 포인트**:
 
@@ -397,11 +397,28 @@ val user = userRepository.findById(userId)
 
 ---
 
+### ❓ [17] module-feedback / module-analytics 분리 여부
+
+| 항목 | 내용 |
+|------|------|
+| **현황** | 초안: 두 모듈 분리. 재검토 필요 |
+| **결정 기한** | 멀티모듈 구조 설정 착수 전 (TASKS.md 1-2-2) |
+
+**선택지**:
+- A. 분리 유지 (`module-feedback` + `module-analytics`)
+- B. `module-engagement`로 통합 — 두 기능 모두 `ResumePublishedEvent` 기반, MVP 규모에 적합
+- C. `module-resume`에 흡수 — 모듈 최소화, 단 resume 모듈 비대화 우려
+
+**배경**: 두 모듈 모두 이력서 발행 이후 동작. B가 응집도 자연스러우나 팀 합의 필요.
+
+---
+
 ## 확정 사항 요약
 
 | # | 항목 | 결정 내용 | 결정일 |
 |---|------|----------|--------|
 | 1 | 이메일 인증 | Gmail SMTP 사용 | 2026-04-30 |
+| 3 | API 응답 포맷 | 공통 래퍼 `ApiResponse<T>` 사용, 상세: `doc/API_RESPONSE.md` | 2026-05-01 |
 | 4 | Spring Boot 버전 | 3.x 유지 (Kotlin 4.x 미호환) | 2026-04-30 |
 | 5 | 로컬 개발 환경 | DB: AWS RDB 연결 / Redis: 로컬 구동 | 2026-04-30 |
 | 6 | 브랜치 전략 | main + feature/fix/chore, PR: Merge / AI 승인 / 템플릿 사용 | 2026-04-30 |

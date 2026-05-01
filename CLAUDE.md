@@ -31,6 +31,7 @@
 | `doc/INFRA_DESIGN.md` | 인프라 아키텍처, 환경변수 관리 |
 | `doc/API_RESPONSE.md` | API 응답 포맷, 에러코드 명세 |
 | `doc/CONVENTION.md` | Claude 작업 공용 프롬프트 패턴 |
+| `doc/MODULE_STRUCTURE.md` | 멀티모듈 구조 설계 (모듈 목록, 패키지 구조, 의존성) |
 | `doc/phases/` | Phase별 세부 구현 계획 및 트러블슈팅 |
 
 ---
@@ -139,7 +140,7 @@ main ← 프로덕션 (직접 push 금지)
   └─ chore/{작업명}
 ```
 
-PR 머지 방식: Merge | 승인: AI | 템플릿: `docs/pipeline/pr-template.md`
+PR 머지 방식: Merge | 승인: AI | 템플릿: `.github/pull_request_template.md`
 
 ---
 

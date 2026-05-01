@@ -154,6 +154,9 @@ doc/
 ├── INFRA_DESIGN.md           # 인프라 아키텍처
 ├── TASKS.md                  # 작업 현황 트래킹
 ├── discussion.md             # 팀 결정 사항 기록
+├── API_RESPONSE.md           # API 응답 포맷, 에러코드 명세
+├── CONVENTION.md             # Claude 작업 공용 프롬프트 패턴 (이 파일)
+├── MODULE_STRUCTURE.md       # 멀티모듈 구조 설계
 └── phases/
     ├── phase-1-foundation/   # Phase 1 상세 계획 및 문서
     ├── phase-2-core/         # Phase 2 상세 계획 및 문서
@@ -199,7 +202,7 @@ Claude가 코드를 작성할 때 팀원 전원이 공통으로 기대하는 기
 
 - ktlint 설정을 따른다
 - 함수는 단일 책임 원칙을 지킨다
-- 레이어: Controller → Service → Repository 구분 유지
+- 레이어: interfaces → application(UseCase) → domain → infrastructure 의존성 방향 유지
 - 예외는 글로벌 핸들러(`@RestControllerAdvice`)로 처리
 
 ### 응답 형식
@@ -212,12 +215,13 @@ ApiResponse<T>
 ### 커밋 메시지
 
 ```
-feat: [기능명] 구현
-fix: [버그명] 수정
-refactor: [대상] 리팩터링
+feat(module): [기능명] 구현
+fix(module): [버그명] 수정
+refactor(module): [대상] 리팩터링
 docs: [문서명] 업데이트
-test: [테스트 대상] 테스트 추가
+test(module): [테스트 대상] 추가
 ci: CI/CD 설정 변경
+chore: 의존성·설정 변경
 ```
 
 ---

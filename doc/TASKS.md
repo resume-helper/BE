@@ -39,7 +39,7 @@
 | 4 | pre-commit hook 설정 | | 🔴 |
 | 5 | application.yml 프로파일 분리 (dev/prod) | | 🔴 |
 | 6 | CLAUDE.md 작성 (권장 범위 B) | | 🔴 |
-| 7 | PR 템플릿 작성 (`docs/pipeline/pr-template.md`) | | 🔴 |
+| 7 | PR 템플릿 작성 (`.github/pull_request_template.md`) | | 🔴 |
 
 ### 1-3. 인증 (Auth) 구현
 
