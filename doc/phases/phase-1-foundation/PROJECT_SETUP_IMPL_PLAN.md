@@ -663,7 +663,7 @@ Expected: `{"status":"UP"}`
 - [x] `./gradlew detekt` — BUILD SUCCESSFUL
 - [x] pre-commit hook이 ktlint 실패 시 커밋을 차단함 (실제 커밋 시 동작 확인)
 - [x] `SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun` — 앱 정상 기동 (DB 연결 성공, 1.88초 기동 확인)
-- [ ] `curl http://localhost:8080/actuator/health` — `{"status":"DOWN"}` (Redis localhost:6379 연결 거부 — Docker Redis 기동 필요)
+- [x] `curl http://localhost:8080/actuator/health` — `{"status":"UP"}`
 - [x] `doc/TASKS.md` 1-2-1 ~ 1-2-5 항목 상태 🟢 업데이트
 
 ---
