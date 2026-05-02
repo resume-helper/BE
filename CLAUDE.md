@@ -33,6 +33,7 @@
 | `doc/CONVENTION.md` | Claude 작업 공용 프롬프트 패턴 |
 | `doc/MODULE_STRUCTURE.md` | 멀티모듈 구조 설계 (모듈 목록, 패키지 구조, 의존성) |
 | `doc/phases/` | Phase별 세부 구현 계획 및 트러블슈팅 |
+| `module-{name}/CLAUDE.md` | 모듈 전용 설계 명세 (해당 모듈 작업 시 참조) |
 
 ---
 
@@ -59,6 +60,7 @@ AWS SSM Parameter Store → 앱 실행 환경변수 (경로: /atomiccv/prod/*)
 4. **새 기능은 UseCase 단위로 분리한다** — 하나의 UseCase = 하나의 비즈니스 행위.
 5. **응답은 한국어로, 코드 주석은 한국어 허용.**
 6. **작업 완료 시 `doc/TASKS.md`의 해당 항목 상태를 🟢로 업데이트한다.**
+7. **모듈 전용 설계 문서는 해당 모듈 내부에 작성한다** — `module-{name}/CLAUDE.md`에 저장하며 `doc/`에 중복 작성하지 않는다. 모듈 작업 시작 전 해당 파일을 먼저 읽는다.
 
 ---
 
