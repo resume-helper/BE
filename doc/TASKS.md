@@ -1,6 +1,6 @@
 # Atomic CV — 작업 현황 트래킹
 
-> 최종 업데이트: 2026-05-02 (1-2-1 ~ 1-2-4 완료)
+> 최종 업데이트: 2026-05-03 (1-3 인증 모듈 완료)
 > 상태: 🔴 미시작 / 🟡 진행중 / 🟢 완료 / ⏸ 보류
 
 ---
@@ -45,11 +45,11 @@
 
 | # | 작업 | 담당 | 상태 |
 |---|------|------|------|
-| 1 | 소셜 로그인 구현 (Google / Kakao / Naver OAuth2) | | 🔴 |
-| 2 | JWT Access Token 발급 / 검증 | | 🔴 |
-| 3 | JWT Refresh Token 발급 / Redis 저장 | | 🔴 |
-| 4 | Token Refresh API | | 🔴 |
-| 5 | 로그아웃 (Blacklist 처리) | | 🔴 |
+| 1 | 소셜 로그인 구현 (Google / Kakao / Naver OAuth2) | | 🟢 |
+| 2 | JWT Access Token 발급 / 검증 | | 🟢 |
+| 3 | JWT Refresh Token 발급 / Redis 저장 | | 🟢 |
+| 4 | Token Refresh API | | 🟢 |
+| 5 | 로그아웃 (Blacklist 처리) | | 🟢 |
 
 ---
 
