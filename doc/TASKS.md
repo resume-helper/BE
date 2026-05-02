@@ -1,6 +1,6 @@
 # Atomic CV — 작업 현황 트래킹
 
-> 최종 업데이트: 2026-05-01 (1-2-6, 1-2-7 완료)
+> 최종 업데이트: 2026-05-02 (1-2-1 ~ 1-2-4 완료)
 > 상태: 🔴 미시작 / 🟡 진행중 / 🟢 완료 / ⏸ 보류
 
 ---
@@ -33,10 +33,10 @@
 
 | # | 작업 | 담당 | 상태 |
 |---|------|------|------|
-| 1 | Spring Boot 프로젝트 생성 (Kotlin, Gradle) | | 🔴 |
-| 2 | 멀티모듈 구조 설정 | | 🔴 |
-| 3 | ktlint + detekt 설정 | | 🔴 |
-| 4 | pre-commit hook 설정 | | 🔴 |
+| 1 | Spring Boot 프로젝트 생성 (Kotlin, Gradle) | | 🟢 |
+| 2 | 멀티모듈 구조 설정 | | 🟢 |
+| 3 | ktlint + detekt 설정 | | 🟢 |
+| 4 | pre-commit hook 설정 | | 🟢 |
 | 5 | application.yml 프로파일 분리 (dev/prod) | | 🔴 |
 | 6 | CLAUDE.md 작성 (권장 범위 B) | | 🟢 |
 | 7 | PR 템플릿 작성 (`.github/pull_request_template.md`) | | 🟢 |
