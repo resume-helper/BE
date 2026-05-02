@@ -37,7 +37,7 @@
 | 2 | 멀티모듈 구조 설정 | | 🟢 |
 | 3 | ktlint + detekt 설정 | | 🟢 |
 | 4 | pre-commit hook 설정 | | 🟢 |
-| 5 | application.yml 프로파일 분리 (dev/prod) | | 🔴 |
+| 5 | application.yml 프로파일 분리 (dev/prod) | | 🟢 |
 | 6 | CLAUDE.md 작성 (권장 범위 B) | | 🟢 |
 | 7 | PR 템플릿 작성 (`.github/pull_request_template.md`) | | 🟢 |
 
