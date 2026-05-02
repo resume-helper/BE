@@ -61,6 +61,7 @@ AWS SSM Parameter Store → 앱 실행 환경변수 (경로: /atomiccv/prod/*)
 5. **응답은 한국어로, 코드 주석은 한국어 허용.**
 6. **작업 완료 시 `doc/TASKS.md`의 해당 항목 상태를 🟢로 업데이트한다.**
 7. **모듈 전용 설계 문서는 해당 모듈 내부에 작성한다** — `module-{name}/CLAUDE.md`에 저장하며 `doc/`에 중복 작성하지 않는다. 모듈 작업 시작 전 해당 파일을 먼저 읽는다.
+8. **TASK 완료 시 GitHub Wiki에 기술 결정 기록을 작성하고 push한다** — 파일명: `Task-{Phase번호}-{서브번호}-{기능명}.md`. 기술 의사결정·Kotlin 패턴·구현 내용·트레이드오프를 포함한다. 상세 프로세스 및 템플릿: `doc/CONVENTION.md` [8. Wiki 문서화 프로세스] 참조.
 
 ---
 
