@@ -21,3 +21,17 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val envFile = rootProject.file(".env")
+    if (envFile.exists()) {
+        val lines = envFile.readLines()
+        val entries = lines.filter { line -> line.isNotBlank() && !line.startsWith("#") }
+        entries.forEach { line ->
+            val idx = line.indexOf('=')
+            if (idx > 0) {
+                environment(line.substring(0, idx).trim(), line.substring(idx + 1).trim())
+            }
+        }
+    }
+}
