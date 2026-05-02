@@ -1,7 +1,7 @@
 # Atomic CV — ERD 초안 (Draft v0.1)
 
-> 작성일: 2026-04-30  
-> 상태: 초안 (팀 회의 논의용)  
+> 작성일: 2026-04-30
+> 상태: 초안 (팀 회의 논의용)
 > 기반: DDD Bounded Context 설계 / MySQL
 
 ---
@@ -48,7 +48,7 @@ erDiagram
         BIGINT id PK
         VARCHAR email UK
         VARCHAR name
-        VARCHAR password "nullable - 소셜 전용 회원은 NULL"
+        VARCHAR password "nullable - 소셜 로그인 전용으로 항상 NULL"
         VARCHAR profile_image_url
         ENUM role "USER | ADMIN"
         BOOLEAN is_active
@@ -214,10 +214,10 @@ erDiagram
 | id | BIGINT | PK, AUTO_INCREMENT | 회원 고유 식별자 |
 | email | VARCHAR(255) | UNIQUE, NOT NULL | 로그인 이메일. 소셜 로그인 시 소셜 이메일 사용 |
 | name | VARCHAR(100) | NOT NULL | 표시 이름 |
-| password | VARCHAR(255) | NULL 허용 | BCrypt 해시 저장. 소셜 전용 회원은 NULL |
+| password | VARCHAR(255) | NULL 허용 | 소셜 로그인 전용으로 항상 NULL (일반 로그인 미사용) |
 | profile_image_url | VARCHAR(500) | NULL 허용 | S3 또는 소셜 프로필 이미지 URL |
 | role | ENUM('USER','ADMIN') | NOT NULL, DEFAULT 'USER' | 권한 레벨 |
-| is_active | BOOLEAN | NOT NULL, DEFAULT FALSE | false = 이메일 미인증 또는 정지 계정 (이메일 인증 완료 후 true로 전환) |
+| is_active | BOOLEAN | NOT NULL, DEFAULT TRUE | 소셜 로그인 시 즉시 활성화. false = 정지 계정 |
 | created_at | DATETIME | NOT NULL | 가입 일시 |
 | updated_at | DATETIME | NOT NULL | 마지막 수정 일시 |
 | deleted_at | DATETIME | NULL 허용 | Soft Delete 처리 일시. NOT NULL이면 탈퇴 회원 |
@@ -322,8 +322,8 @@ erDiagram
 **제약**
 - UNIQUE(resume_id, block_id) — 같은 이력서에 같은 블록 중복 추가 방지
 
-> **설계 의도**: `resume_blocks`는 현재 편집 중인 이력서 구성(실시간)을 관리한다.  
-> 발행(publish) 시점에 `resume_versions.snapshot_data`에 전체 블록 내용을 JSON으로 스냅샷 저장하여,  
+> **설계 의도**: `resume_blocks`는 현재 편집 중인 이력서 구성(실시간)을 관리한다.
+> 발행(publish) 시점에 `resume_versions.snapshot_data`에 전체 블록 내용을 JSON으로 스냅샷 저장하여,
 > 이후 블록이 수정되더라도 과거 버전 복원이 가능하다.
 
 ---

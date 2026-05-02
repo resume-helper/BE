@@ -202,7 +202,7 @@ Claude가 코드를 작성할 때 팀원 전원이 공통으로 기대하는 기
 
 - ktlint 설정을 따른다
 - 함수는 단일 책임 원칙을 지킨다
-- 레이어: interfaces → application(UseCase) → domain → infrastructure 의존성 방향 유지
+- 레이어 의존성 방향: `interfaces → application → domain` / `infrastructure → domain` (infrastructure가 domain을 구현, application은 infrastructure를 모름)
 - 예외는 글로벌 핸들러(`@RestControllerAdvice`)로 처리
 
 ### 응답 형식

@@ -79,10 +79,9 @@ module-{domain}/
 
 | 담당 기능 | 상세 |
 |-----------|------|
-| OAuth2 소셜 로그인 | Google, Kakao |
+| OAuth2 소셜 로그인 | Google, Kakao, Naver |
 | JWT 발급 / 검증 | Access Token, Refresh Token |
 | Redis Blacklist | 로그아웃 처리 |
-| 이메일 인증 | Gmail SMTP (JavaMailSender) |
 
 ### :module-resume
 

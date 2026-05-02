@@ -149,10 +149,15 @@ EC2 IAM Role            → EC2가 별도 키 없이 SSM에 직접 접근
 /atomiccv/prod/DB_USERNAME
 /atomiccv/prod/DB_PASSWORD
 /atomiccv/prod/JWT_SECRET
-/atomiccv/prod/JWT_EXPIRY
+/atomiccv/prod/JWT_ACCESS_EXPIRY
+/atomiccv/prod/JWT_REFRESH_EXPIRY
 /atomiccv/prod/REDIS_HOST
-/atomiccv/prod/SMTP_USERNAME
-/atomiccv/prod/SMTP_PASSWORD
+/atomiccv/prod/GOOGLE_CLIENT_ID
+/atomiccv/prod/GOOGLE_CLIENT_SECRET
+/atomiccv/prod/KAKAO_CLIENT_ID
+/atomiccv/prod/KAKAO_CLIENT_SECRET
+/atomiccv/prod/NAVER_CLIENT_ID
+/atomiccv/prod/NAVER_CLIENT_SECRET
 ```
 
 ### EC2 IAM Role 정책 (최소 권한)
