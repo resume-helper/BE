@@ -658,13 +658,13 @@ Expected: `{"status":"UP"}`
 
 ## 완료 기준 체크리스트
 
-- [ ] `./gradlew build -x test` — BUILD SUCCESSFUL
-- [ ] `./gradlew ktlintCheck` — BUILD SUCCESSFUL
-- [ ] `./gradlew detekt` — BUILD SUCCESSFUL
-- [ ] pre-commit hook이 ktlint 실패 시 커밋을 차단함
-- [ ] `SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun` — 앱 정상 기동
-- [ ] `curl http://localhost:8080/actuator/health` — `{"status":"UP"}`
-- [ ] `doc/TASKS.md` 1-2-1 ~ 1-2-5 항목 상태 🟢 업데이트
+- [x] `./gradlew build -x test` — BUILD SUCCESSFUL
+- [x] `./gradlew ktlintCheck` — BUILD SUCCESSFUL
+- [x] `./gradlew detekt` — BUILD SUCCESSFUL
+- [x] pre-commit hook이 ktlint 실패 시 커밋을 차단함 (실제 커밋 시 동작 확인)
+- [ ] `SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun` — 앱 정상 기동 (로컬 DB_URL 환경변수 설정 후 확인 필요)
+- [ ] `curl http://localhost:8080/actuator/health` — `{"status":"UP"}` (위 항목 선행 필요)
+- [x] `doc/TASKS.md` 1-2-1 ~ 1-2-5 항목 상태 🟢 업데이트
 
 ---
 
