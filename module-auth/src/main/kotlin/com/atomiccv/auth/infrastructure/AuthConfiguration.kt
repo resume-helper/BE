@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class AuthConfiguration {
-
     @Bean
     fun oAuthLoginUseCase(
         userRepository: UserRepository,
