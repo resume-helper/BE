@@ -24,13 +24,13 @@ data class TokenResult(
     val refreshToken: String,
 )
 
+@Transactional
 class OAuthLoginUseCase(
     private val userRepository: UserRepository,
     private val socialAccountRepository: SocialAccountRepository,
     private val jwtPort: JwtPort,
     private val refreshTokenPort: RefreshTokenPort,
 ) {
-    @Transactional
     fun login(command: OAuthLoginCommand): TokenResult {
         val user = resolveUser(command)
 
