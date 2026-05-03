@@ -4,6 +4,7 @@ import com.atomiccv.auth.domain.model.SocialAccount
 import com.atomiccv.auth.domain.model.SocialProvider
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
@@ -11,9 +12,14 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
+// social_accounts는 생성 이후 수정이 없으므로 createdAt만 관리한다.
+// BaseJpaEntity(createdAt + updatedAt)를 상속하지 않고 @CreatedDate를 직접 선언한다.
 @Entity
+@EntityListeners(AuditingEntityListener::class)
 @Table(
     name = "social_accounts",
     uniqueConstraints = [UniqueConstraint(columnNames = ["provider", "provider_user_id"])],
@@ -28,9 +34,12 @@ class SocialAccountJpaEntity(
     val provider: SocialProvider,
     @Column(name = "provider_user_id", nullable = false)
     val providerUserId: String,
-    @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    lateinit var createdAt: LocalDateTime
+        protected set
+
     fun toDomain() =
         SocialAccount(
             id = id,
@@ -47,7 +56,6 @@ class SocialAccountJpaEntity(
                 userId = account.userId,
                 provider = account.provider,
                 providerUserId = account.providerUserId,
-                createdAt = account.createdAt,
             )
     }
 }

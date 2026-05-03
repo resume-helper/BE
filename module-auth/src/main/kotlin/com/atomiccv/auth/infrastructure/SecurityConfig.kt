@@ -29,6 +29,9 @@ class SecurityConfig(
                         "/oauth2/**",
                         "/login/**",
                         "/actuator/health",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
                     ).permitAll()
                 it.anyRequest().authenticated()
             }.oauth2Login {

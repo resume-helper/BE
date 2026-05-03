@@ -242,6 +242,7 @@ main          ← 프로덕션 배포 브랜치 (직접 push 금지)
 | Use Case | `UseCase` | `PublishResumeUseCase` |
 | Domain Service | `DomainService` | `AuthDomainService` |
 | Repository Interface | `Repository` | `ResumeRepository` |
+| JPA Base Entity | `BaseJpaEntity` (module-shared 상속) | `BaseJpaEntity` |
 | JPA Repository | `JpaRepository` | `ResumeJpaRepository` |
 | Repository Impl | `RepositoryImpl` | `ResumeRepositoryImpl` |
 | REST Controller | `Controller` | `ResumeController` |
@@ -308,10 +309,19 @@ class GlobalExceptionHandler {
 
 ```kotlin
 // ✅ 트랜잭션 경계는 application 레이어 UseCase에만 선언
-@Service
+// UseCase는 Spring 어노테이션 없이 순수 Kotlin으로 작성
 @Transactional
 class PublishResumeUseCase(...) { ... }
 
+// ✅ UseCase 빈 등록은 infrastructure 레이어의 @Configuration 클래스에서 담당
+// (DDD 원칙: application 레이어는 Spring 의존성 없음)
+@Configuration
+class ResumeConfiguration {
+    @Bean
+    fun publishResumeUseCase(...): PublishResumeUseCase = PublishResumeUseCase(...)
+}
+
+// ❌ UseCase에 @Service 금지 — application 레이어에 Spring 침투
 // ❌ domain Service에 @Transactional 금지 (인프라 의존)
 // ❌ Controller에 @Transactional 금지
 ```

@@ -87,6 +87,12 @@ infrastructure/persistence/
   UserRepositoryImpl.kt
   SocialAccountRepositoryImpl.kt
 
+# 공통 베이스 (module-shared)
+shared/infrastructure/persistence/
+  BaseJpaEntity.kt    # @MappedSuperclass — createdAt + updatedAt JPA Auditing 자동 관리
+                      # UserJpaEntity 등 createdAt/updatedAt이 모두 필요한 엔티티가 상속
+                      # createdAt만 필요한 엔티티(SocialAccountJpaEntity)는 @CreatedDate 직접 선언
+
 infrastructure/client/
   JwtProvider.kt                        # JwtPort 구현
   RefreshTokenRedisAdapter.kt           # RefreshTokenPort 구현

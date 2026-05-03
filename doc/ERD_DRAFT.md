@@ -48,21 +48,18 @@ erDiagram
         BIGINT id PK
         VARCHAR email UK
         VARCHAR name
-        VARCHAR password "nullable - 소셜 로그인 전용으로 항상 NULL"
         VARCHAR profile_image_url
         ENUM role "USER | ADMIN"
         BOOLEAN is_active
         DATETIME created_at
         DATETIME updated_at
-        DATETIME deleted_at "soft delete"
     }
 
     social_accounts {
         BIGINT id PK
         BIGINT user_id FK
         ENUM provider "GOOGLE | KAKAO | NAVER"
-        VARCHAR provider_id "소셜 플랫폼의 유저 고유 ID"
-        VARCHAR provider_email "소셜 계정 이메일"
+        VARCHAR provider_user_id "소셜 플랫폼의 유저 고유 ID"
         DATETIME created_at
     }
 
@@ -214,13 +211,11 @@ erDiagram
 | id | BIGINT | PK, AUTO_INCREMENT | 회원 고유 식별자 |
 | email | VARCHAR(255) | UNIQUE, NOT NULL | 로그인 이메일. 소셜 로그인 시 소셜 이메일 사용 |
 | name | VARCHAR(100) | NOT NULL | 표시 이름 |
-| password | VARCHAR(255) | NULL 허용 | 소셜 로그인 전용으로 항상 NULL (일반 로그인 미사용) |
 | profile_image_url | VARCHAR(500) | NULL 허용 | S3 또는 소셜 프로필 이미지 URL |
 | role | ENUM('USER','ADMIN') | NOT NULL, DEFAULT 'USER' | 권한 레벨 |
 | is_active | BOOLEAN | NOT NULL, DEFAULT TRUE | 소셜 로그인 시 즉시 활성화. false = 정지 계정 |
 | created_at | DATETIME | NOT NULL | 가입 일시 |
 | updated_at | DATETIME | NOT NULL | 마지막 수정 일시 |
-| deleted_at | DATETIME | NULL 허용 | Soft Delete 처리 일시. NOT NULL이면 탈퇴 회원 |
 
 **인덱스**
 - `idx_users_email` — 로그인 조회 최적화
@@ -234,12 +229,11 @@ erDiagram
 | id | BIGINT | PK, AUTO_INCREMENT | 소셜 계정 고유 식별자 |
 | user_id | BIGINT | FK → users.id, NOT NULL | 연동된 회원 |
 | provider | ENUM('GOOGLE','KAKAO','NAVER') | NOT NULL | OAuth2 제공자 |
-| provider_id | VARCHAR(255) | NOT NULL | 소셜 플랫폼이 발급한 유저 고유 ID |
-| provider_email | VARCHAR(255) | NULL 허용 | 소셜 계정 이메일 (users.email과 다를 수 있음) |
+| provider_user_id | VARCHAR(255) | NOT NULL | 소셜 플랫폼이 발급한 유저 고유 ID |
 | created_at | DATETIME | NOT NULL | 연동 일시 |
 
 **제약**
-- UNIQUE(user_id, provider) — 같은 소셜 플랫폼에 이중 연동 방지
+- UNIQUE(provider, provider_user_id) — 동일 소셜 플랫폼의 동일 유저 중복 등록 방지
 
 ---
 
@@ -431,7 +425,7 @@ erDiagram
 
 ### ✅ 확정된 사항
 
-- 인증: Gmail SMTP 사용 (이메일 인증 도입, 비용 절감 우선)
+- 인증: 소셜 로그인 전용 (Google / Kakao / Naver OAuth2) — 이메일 인증 미사용 (2026-05-02 결정)
 - PDF 생성: FE 단독 처리, BE는 데이터 API + S3 업로드 API만 제공
 - Slug 방식: UUID 기반 자동 생성 (사용자 지정 slug 미지원 — MVP 이후 검토)
 - 소셜 로그인: Google, Kakao, Naver 3종

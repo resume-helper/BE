@@ -2,6 +2,7 @@ package com.atomiccv.auth.infrastructure.persistence
 
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.model.UserRole
+import com.atomiccv.shared.infrastructure.persistence.BaseJpaEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -10,7 +11,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -28,11 +28,7 @@ class UserJpaEntity(
     val role: UserRole = UserRole.USER,
     @Column(name = "is_active", nullable = false)
     val isActive: Boolean = true,
-    @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
-    @Column(name = "updated_at", nullable = false)
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
-) {
+) : BaseJpaEntity() {
     fun toDomain() =
         User(
             id = id,
@@ -54,8 +50,6 @@ class UserJpaEntity(
                 profileImageUrl = user.profileImageUrl,
                 role = user.role,
                 isActive = user.isActive,
-                createdAt = user.createdAt,
-                updatedAt = user.updatedAt,
             )
     }
 }

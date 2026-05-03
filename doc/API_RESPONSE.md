@@ -1,6 +1,6 @@
 # API 응답 포맷 명세
 
-> 출처: doc/discussion.md [3] 확정 대기 중 — 초안 사용
+> 출처: doc/discussion.md [3] 확정
 
 ## 성공 응답 (공통 래퍼)
 
@@ -20,8 +20,7 @@
   "message": "이메일 형식이 올바르지 않습니다.",
   "errors": [
     { "field": "email", "message": "올바른 이메일 형식을 입력해주세요." }
-  ],
-  "timestamp": "2026-05-01T09:30:00"
+  ]
 }
 ```
 

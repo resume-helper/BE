@@ -77,17 +77,17 @@
 - ~~일반 로그인 (이메일 + 비밀번호)~~ — 미사용 (2026-05-02 결정)
 
 **인증 구조**:
-- Access Token: JWT (단기 만료, 클라이언트 메모리 저장)
+- Access Token: JWT (단기 만료, HttpOnly Cookie 전달 — XSS 방어)
 - Refresh Token: Redis 저장 (장기 만료)
 - 로그아웃: Redis Blacklist로 토큰 무효화
 
 ~~**이메일 인증**~~ — 미사용 (소셜 로그인 전용으로 결정, 2026-05-02)
 
 **수용 기준 (Acceptance Criteria)**:
-- [ ] 소셜 로그인 3종(Google, Kakao, Naver) 모두 동작
-- [ ] 로그인 후 JWT Access Token / Refresh Token 발급
-- [ ] Refresh Token으로 Access Token 재발급
-- [ ] 로그아웃 시 토큰 즉시 무효화
+- [x] 소셜 로그인 3종(Google, Kakao, Naver) 모두 동작
+- [x] 로그인 후 JWT Access Token / Refresh Token 발급
+- [x] Refresh Token으로 Access Token 재발급
+- [x] 로그아웃 시 토큰 즉시 무효화
 
 ---
 
