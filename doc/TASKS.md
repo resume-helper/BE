@@ -1,6 +1,6 @@
 # Atomic CV — 작업 현황 트래킹
 
-> 최종 업데이트: 2026-05-03 (1-3 인증 모듈 완료)
+> 최종 업데이트: 2026-05-04 (1-3 인증 모듈 PR 머지 완료 — [resume-helper/BE#3](https://github.com/resume-helper/BE/pull/3))
 > 상태: 🔴 미시작 / 🟡 진행중 / 🟢 완료 / ⏸ 보류
 
 ---

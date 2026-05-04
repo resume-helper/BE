@@ -18,7 +18,7 @@
 | 로그인 방식 | OAuth2 소셜 로그인 (Google / Kakao / Naver) |
 | 일반 로그인 | 미사용 |
 | 이메일 인증 | 미사용 |
-| 토큰 전달 방식 | HttpOnly Cookie (XSS 방어) |
+| 토큰 전달 방식 | HttpOnly Cookie + SameSite=Lax (XSS + CSRF 방어) |
 | 동일 이메일 계정 처리 | 자동 연동 (같은 이메일이면 하나의 User로 통합) |
 | 토큰 저장소 | Redis (Refresh Token 저장, Blacklist 관리) |
 
@@ -139,17 +139,18 @@ OAuth2AuthenticationSuccessHandler
   → OAuthLoginUseCase.login()
       → 신규: User + SocialAccount 생성
       → 재방문: SocialAccount 연동 확인 (없으면 추가)
-      → Set-Cookie: access_token (1h); HttpOnly; Secure
-      → Set-Cookie: refresh_token (7d); HttpOnly; Secure; Path=/api/auth/refresh
+      → Set-Cookie: access_token (1h); HttpOnly; Secure; SameSite=Lax
+      → Set-Cookie: refresh_token (7d); HttpOnly; Secure; SameSite=Lax; Path=/api/auth/refresh
 
 [토큰 갱신]
-TokenRefreshUseCase → 새 Access Token Cookie 설정
+TokenRefreshUseCase → 새 Access Token Cookie 설정 (SameSite=Lax)
 
 [로그아웃]
 LogoutUseCase
+  → validateToken() 실패 시 조용히 성공 (만료·위변조 토큰도 idempotent 처리)
   → TokenBlacklistPort.add(accessToken)
   → RefreshTokenPort.delete(userId)
-  → Cookie Max-Age=0
+  → Cookie Max-Age=0; SameSite=Lax
 ```
 
 ---
