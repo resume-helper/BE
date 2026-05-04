@@ -19,6 +19,7 @@ class GlobalExceptionHandler {
         )
 
     @ExceptionHandler(Exception::class)
+    @Suppress("UnusedParameter")
     fun handleException(e: Exception): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(500).body(
             ErrorResponse(

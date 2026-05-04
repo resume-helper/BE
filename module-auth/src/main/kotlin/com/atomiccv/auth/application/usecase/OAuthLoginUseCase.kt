@@ -53,35 +53,23 @@ class OAuthLoginUseCase(
                 ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
         }
 
-        // 2. 이메일로 기존 User 조회 (타 제공자 연동)
-        val existingUser = userRepository.findByEmail(command.email)
-        if (existingUser != null) {
-            socialAccountRepository.save(
-                SocialAccount(
-                    userId = existingUser.id,
-                    provider = command.provider,
-                    providerUserId = command.providerUserId,
-                ),
-            )
-            return existingUser
-        }
-
-        // 3. 신규 가입
-        val newUser =
-            userRepository.save(
-                User(
-                    email = command.email,
-                    name = command.name,
-                    profileImageUrl = command.profileImageUrl,
-                ),
-            )
+        // 2. 이메일로 기존 User 조회 (타 제공자 연동) or 3. 신규 가입
+        val user =
+            userRepository.findByEmail(command.email)
+                ?: userRepository.save(
+                    User(
+                        email = command.email,
+                        name = command.name,
+                        profileImageUrl = command.profileImageUrl,
+                    ),
+                )
         socialAccountRepository.save(
             SocialAccount(
-                userId = newUser.id,
+                userId = user.id,
                 provider = command.provider,
                 providerUserId = command.providerUserId,
             ),
         )
-        return newUser
+        return user
     }
 }
