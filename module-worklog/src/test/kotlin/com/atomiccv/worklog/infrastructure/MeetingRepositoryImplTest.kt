@@ -7,12 +7,14 @@ import com.atomiccv.worklog.infrastructure.persistence.MeetingRepositoryImpl
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @SpringBootTest(classes = [WorklogTestApplication::class])
+@ActiveProfiles("test")
 class MeetingRepositoryImplTest {
     @Autowired
     lateinit var meetingRepository: MeetingRepositoryImpl
