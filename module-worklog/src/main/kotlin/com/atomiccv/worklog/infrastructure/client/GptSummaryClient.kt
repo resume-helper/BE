@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 
 data class GptMessage(
     val role: String,
@@ -58,7 +59,7 @@ class GptSummaryClient(
                 ?.message
                 ?.content
                 ?: "요약 실패"
-        } catch (e: Exception) {
+        } catch (e: RestClientException) {
             log.warn("GPT 요약 실패: ${e.message}")
             "요약 실패 — 다시 시도해주세요"
         }

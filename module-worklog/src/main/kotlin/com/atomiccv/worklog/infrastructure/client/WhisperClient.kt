@@ -31,6 +31,6 @@ class WhisperClient(
             .body(body)
             .retrieve()
             .body(String::class.java)
-            ?: throw RuntimeException("Whisper API 응답이 없습니다")
+            ?: throw IllegalStateException("Whisper API 응답이 없습니다")
     }
 }

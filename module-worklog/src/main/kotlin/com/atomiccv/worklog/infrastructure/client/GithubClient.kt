@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.benmanes.caffeine.cache.Cache
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 import java.time.LocalDate
 
 data class GithubSearchCommitsResponse(
@@ -75,7 +76,7 @@ class GithubClient(
             val commits = fetchCommits(date)
             val (prs, issues) = fetchPrsAndIssues(date)
             GithubActivity(commits = commits, pullRequests = prs, issues = issues)
-        } catch (e: Exception) {
+        } catch (e: RestClientException) {
             log.warn("GitHub API 조회 실패: ${e.message}")
             GithubActivity()
         }
