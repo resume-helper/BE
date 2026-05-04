@@ -1,6 +1,6 @@
 # Atomic CV — 작업 현황 트래킹
 
-> 최종 업데이트: 2026-05-02 (1-2-1 ~ 1-2-4 완료)
+> 최종 업데이트: 2026-05-03 (1-3 인증 모듈 완료)
 > 상태: 🔴 미시작 / 🟡 진행중 / 🟢 완료 / ⏸ 보류
 
 ---
@@ -31,26 +31,25 @@
 
 ### 1-2. 프로젝트 초기 설정
 
-| # | 작업 | 담당 | 상태 |
-|---|------|------|------|
-| 1 | Spring Boot 프로젝트 생성 (Kotlin, Gradle) | | 🟢 |
-| 2 | 멀티모듈 구조 설정 | | 🟢 |
-| 3 | ktlint + detekt 설정 | | 🟢 |
-| 4 | pre-commit hook 설정 | | 🟢 |
-| 5 | application.yml 프로파일 분리 (dev/prod) | | 🟢 |
-| 6 | CLAUDE.md 작성 (권장 범위 B) | | 🟢 |
+| # | 작업                                            | 담당 | 상태 |
+|---|-----------------------------------------------|------|------|
+| 1 | Spring Boot 프로젝트 생성 (Kotlin, Gradle)          | | 🟢 |
+| 2 | 멀티모듈 구조 설정                                    | | 🟢 |
+| 3 | ktlint + detekt 설정                            | | 🟢 |
+| 4 | pre-commit hook 설정                            | | 🟢 |
+| 5 | application.yml 프로파일 분리 (dev/prod)            | | 🟢 |
+| 6 | CLAUDE.md 작성 (권장 범위 B)                        | | 🟢 |
 | 7 | PR 템플릿 작성 (`.github/pull_request_template.md`) | | 🟢 |
 
 ### 1-3. 인증 (Auth) 구현
 
 | # | 작업 | 담당 | 상태 |
 |---|------|------|------|
-| 1 | 소셜 로그인 구현 (Google / Kakao OAuth2) | | 🔴 |
-| 2 | JWT Access Token 발급 / 검증 | | 🔴 |
-| 3 | JWT Refresh Token 발급 / Redis 저장 | | 🔴 |
-| 4 | Token Refresh API | | 🔴 |
-| 5 | 로그아웃 (Blacklist 처리) | | 🔴 |
-| 6 | 이메일 인증 (Gmail SMTP) | | 🔴 |
+| 1 | 소셜 로그인 구현 (Google / Kakao / Naver OAuth2) | | 🟢 |
+| 2 | JWT Access Token 발급 / 검증 | | 🟢 |
+| 3 | JWT Refresh Token 발급 / Redis 저장 | | 🟢 |
+| 4 | Token Refresh API | | 🟢 |
+| 5 | 로그아웃 (Blacklist 처리) | | 🟢 |
 
 ---
 
@@ -141,7 +140,7 @@
 
 | 항목 | 결정 내용 | 결정일 |
 |------|----------|--------|
-| 이메일 인증 | Gmail SMTP (JavaMailSender) | 2026-04-30 |
+| 이메일 인증 | 미사용 (소셜 로그인 전용으로 결정) | 2026-05-02 |
 | Spring Boot 버전 | 3.x 유지 | 2026-04-30 |
 | 로컬 개발 환경 | DB: AWS RDB / Redis: 로컬 | 2026-04-30 |
 | 브랜치 전략 | main + feature/fix/chore, PR Merge, AI 승인 | 2026-04-30 |

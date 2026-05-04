@@ -1,7 +1,7 @@
 # Atomic CV — 백엔드 논의 사항 리스트
 
-> 작성일: 2026-04-30  
-> 목적: 팀 회의 전 사전 정리 / 하나씩 확정해 나가는 추적 문서  
+> 작성일: 2026-04-30
+> 목적: 팀 회의 전 사전 정리 / 하나씩 확정해 나가는 추적 문서
 > 상태 표기: ✅ 확정 / ❓ 논의 필요 / 🔜 나중에 결정
 
 ---
@@ -24,10 +24,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **결정** | Gmail SMTP (JavaMailSender) 사용 |
-| **이유** | 비용 절감 우선 (AWS SES $0.10/1,000건 vs Gmail 무료), MVP 발송량 500건/일 한도 이내 예상 |
-| **제약사항** | 발송량 500건/일 초과 시 AWS SES로 전환 필요 |
-| **결정일** | 2026-04-30 |
+| **결정** | 미사용 — 소셜 로그인 전용으로 결정 |
+| **이유** | 일반 로그인(이메일+비밀번호) 미구현으로 이메일 인증 불필요 |
+| **결정일** | 2026-05-02 |
 
 ---
 
@@ -243,6 +242,7 @@ main          ← 프로덕션 배포 브랜치 (직접 push 금지)
 | Use Case | `UseCase` | `PublishResumeUseCase` |
 | Domain Service | `DomainService` | `AuthDomainService` |
 | Repository Interface | `Repository` | `ResumeRepository` |
+| JPA Base Entity | `BaseJpaEntity` (module-shared 상속) | `BaseJpaEntity` |
 | JPA Repository | `JpaRepository` | `ResumeJpaRepository` |
 | Repository Impl | `RepositoryImpl` | `ResumeRepositoryImpl` |
 | REST Controller | `Controller` | `ResumeController` |
@@ -309,10 +309,19 @@ class GlobalExceptionHandler {
 
 ```kotlin
 // ✅ 트랜잭션 경계는 application 레이어 UseCase에만 선언
-@Service
+// UseCase는 Spring 어노테이션 없이 순수 Kotlin으로 작성
 @Transactional
 class PublishResumeUseCase(...) { ... }
 
+// ✅ UseCase 빈 등록은 infrastructure 레이어의 @Configuration 클래스에서 담당
+// (DDD 원칙: application 레이어는 Spring 의존성 없음)
+@Configuration
+class ResumeConfiguration {
+    @Bean
+    fun publishResumeUseCase(...): PublishResumeUseCase = PublishResumeUseCase(...)
+}
+
+// ❌ UseCase에 @Service 금지 — application 레이어에 Spring 침투
 // ❌ domain Service에 @Transactional 금지 (인프라 의존)
 // ❌ Controller에 @Transactional 금지
 ```
@@ -417,7 +426,7 @@ val user = userRepository.findById(userId)
 
 | # | 항목 | 결정 내용 | 결정일 |
 |---|------|----------|--------|
-| 1 | 이메일 인증 | Gmail SMTP 사용 | 2026-04-30 |
+| 1 | 이메일 인증 | 미사용 (소셜 로그인 전용) | 2026-05-02 |
 | 3 | API 응답 포맷 | 공통 래퍼 `ApiResponse<T>` 사용, 상세: `doc/API_RESPONSE.md` | 2026-05-01 |
 | 4 | Spring Boot 버전 | 3.x 유지 (Kotlin 4.x 미호환) | 2026-04-30 |
 | 5 | 로컬 개발 환경 | DB: AWS RDB 연결 / Redis: 로컬 구동 | 2026-04-30 |
@@ -427,7 +436,7 @@ val user = userRepository.findById(userId)
 | 9 | 블록 버전 관리 | block_versions 별도 테이블 + 스냅샷 JSON 병행 | 2026-04-30 |
 | 11 | Redis HA | 단일 Redis (JWT Refresh Token 관리 전용) | 2026-04-30 |
 | 12 | 코드 컨벤션 | 초안 전체 확정 (네이밍/Suffix/패키지/의존성/예외/트랜잭션/테스트/도구/주석) | 2026-04-30 |
-| — | 인증 방식 | JWT + Redis Blacklist (ADR-01) | 2026-04-29 |
+| — | 인증 방식 | JWT + Redis Blacklist + HttpOnly Cookie 전달 (ADR-01) | 2026-04-29 |
 | — | 비동기 처리 | Kotlin Coroutine 우선 (ADR-02) | 2026-04-29 |
 | — | PDF 생성 | FE 전담 (ADR-03) | 2026-04-29 |
 | — | 아키텍처 | Full Monolith → Modular Monolith (ADR-04) | 2026-04-29 |

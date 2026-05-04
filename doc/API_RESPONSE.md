@@ -1,6 +1,6 @@
 # API 응답 포맷 명세
 
-> 출처: doc/discussion.md [3] 확정 대기 중 — 초안 사용
+> 출처: doc/discussion.md [3] 확정
 
 ## 성공 응답 (공통 래퍼)
 
@@ -20,8 +20,7 @@
   "message": "이메일 형식이 올바르지 않습니다.",
   "errors": [
     { "field": "email", "message": "올바른 이메일 형식을 입력해주세요." }
-  ],
-  "timestamp": "2026-05-01T09:30:00"
+  ]
 }
 ```
 
@@ -30,12 +29,15 @@
 | HTTP | 에러 코드 | 설명 |
 |------|----------|------|
 | 400 | `VALIDATION_FAILED` | 입력값 유효성 검증 실패 |
-| 401 | `UNAUTHORIZED` | 인증 토큰 없음 또는 만료 |
+| 401 | `UNAUTHORIZED` | 인증 토큰 없음 |
+| 401 | `TOKEN_EXPIRED` | Access Token 만료 |
+| 401 | `INVALID_TOKEN` | 토큰 형식 오류 또는 위변조 |
 | 403 | `FORBIDDEN` | 권한 없음 |
 | 404 | `RESOURCE_NOT_FOUND` | 리소스 없음 |
 | 409 | `DUPLICATE_EMAIL` | 이메일 중복 |
 | 429 | `RATE_LIMIT_EXCEEDED` | Rate Limit 초과 |
 | 500 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
+| 502 | `OAUTH2_PROVIDER_ERROR` | 소셜 로그인 제공자 응답 오류 |
 
 ## Kotlin 구현 참조
 
