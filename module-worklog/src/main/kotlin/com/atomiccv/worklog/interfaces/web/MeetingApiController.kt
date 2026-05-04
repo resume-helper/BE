@@ -50,8 +50,10 @@ class MeetingApiController(
 
     private fun validateAudioFile(audioFile: MultipartFile): String? {
         val contentType = audioFile.contentType ?: ""
-        if (contentType !in ALLOWED_AUDIO_TYPES) return "지원하지 않는 파일 형식입니다. (mp3, mp4, wav만 허용)"
-        if (audioFile.size > MAX_FILE_SIZE_BYTES) return "파일 크기는 25MB를 초과할 수 없습니다."
-        return null
+        return when {
+            contentType !in ALLOWED_AUDIO_TYPES -> "지원하지 않는 파일 형식입니다. (mp3, mp4, wav만 허용)"
+            audioFile.size > MAX_FILE_SIZE_BYTES -> "파일 크기는 25MB를 초과할 수 없습니다."
+            else -> null
+        }
     }
 }
