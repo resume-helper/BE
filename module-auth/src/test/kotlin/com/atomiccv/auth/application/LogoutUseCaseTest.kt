@@ -18,6 +18,7 @@ class LogoutUseCaseTest {
 
     @Test
     fun `로그아웃 시 Access Token이 Blacklist에 등록되고 Refresh Token이 삭제된다`() {
+        every { jwtPort.validateToken("access-token") } returns true
         every { jwtPort.extractUserId("access-token") } returns 1L
         every { jwtPort.getRemainingTtl("access-token") } returns Duration.ofHours(1)
         every { tokenBlacklistPort.add("access-token", any()) } returns Unit
@@ -27,5 +28,15 @@ class LogoutUseCaseTest {
 
         verify { tokenBlacklistPort.add("access-token", any()) }
         verify { refreshTokenPort.deleteByUserId(1L) }
+    }
+
+    @Test
+    fun `만료된 Access Token으로 로그아웃 시 조용히 성공한다`() {
+        every { jwtPort.validateToken("expired-token") } returns false
+
+        useCase.logout("expired-token")
+
+        verify(exactly = 0) { tokenBlacklistPort.add(any(), any()) }
+        verify(exactly = 0) { refreshTokenPort.deleteByUserId(any()) }
     }
 }

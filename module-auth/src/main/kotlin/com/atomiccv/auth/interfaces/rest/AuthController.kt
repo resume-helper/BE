@@ -12,15 +12,17 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 @Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회")
@@ -54,13 +56,17 @@ class AuthController(
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         val newAccessToken = tokenRefreshUseCase.refresh(refreshToken)
-        response.addCookie(
-            Cookie("access_token", newAccessToken).apply {
-                isHttpOnly = true
-                secure = true
-                path = "/"
-                maxAge = 3600
-            },
+        response.addHeader(
+            HttpHeaders.SET_COOKIE,
+            ResponseCookie
+                .from("access_token", newAccessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .sameSite("Lax")
+                .build()
+                .toString(),
         )
         return ResponseEntity.ok(ApiResponse.ok())
     }
@@ -89,13 +95,17 @@ class AuthController(
         logoutUseCase.logout(accessToken)
 
         listOf("access_token", "refresh_token").forEach { cookieName ->
-            response.addCookie(
-                Cookie(cookieName, "").apply {
-                    isHttpOnly = true
-                    secure = true
-                    path = "/"
-                    maxAge = 0
-                },
+            response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                ResponseCookie
+                    .from(cookieName, "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(Duration.ZERO)
+                    .sameSite("Lax")
+                    .build()
+                    .toString(),
             )
         }
         return ResponseEntity.ok(ApiResponse.ok())
