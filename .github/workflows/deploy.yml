@@ -65,10 +65,17 @@ jobs:
             --group-ids ${{ secrets.SECURITY_GROUP_ID }} \
             --query "SecurityGroups[0].IpPermissions[?FromPort==\`22\`]" \
             --output json
-          echo "=== EC2 인스턴스에 실제 부착된 Security Groups ==="
+          echo "=== EC2_HOST DNS 조회 ==="
+          dig +short ${{ secrets.EC2_HOST }} || echo "(IP 직접 입력이거나 조회 실패)"
+          echo "=== EC2 인스턴스 정보 (IP로 조회) ==="
           aws ec2 describe-instances \
             --filters "Name=ip-address,Values=${{ secrets.EC2_HOST }}" \
-            --query "Reservations[0].Instances[0].SecurityGroups" \
+            --query "Reservations[0].Instances[0].{InstanceId:InstanceId,State:State.Name,PublicIp:PublicIpAddress,PrivateIp:PrivateIpAddress,SecurityGroups:SecurityGroups,SubnetId:SubnetId}" \
+            --output json
+          echo "=== EC2 인스턴스 정보 (DNS명으로 조회) ==="
+          aws ec2 describe-instances \
+            --filters "Name=dns-name,Values=${{ secrets.EC2_HOST }}" \
+            --query "Reservations[0].Instances[0].{InstanceId:InstanceId,State:State.Name,PublicIp:PublicIpAddress,PrivateIp:PrivateIpAddress,SecurityGroups:SecurityGroups,SubnetId:SubnetId}" \
             --output json
 
       - name: Grant execute permission for gradlew
