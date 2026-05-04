@@ -29,13 +29,9 @@ class MeetingApiController(
         @RequestParam audioFile: MultipartFile,
         model: Model,
     ): String {
-        val contentType = audioFile.contentType ?: ""
-        if (contentType !in ALLOWED_AUDIO_TYPES) {
-            model.addAttribute("error", "지원하지 않는 파일 형식입니다. (mp3, mp4, wav만 허용)")
-            return "worklog/meeting-card :: error-card"
-        }
-        if (audioFile.size > MAX_FILE_SIZE_BYTES) {
-            model.addAttribute("error", "파일 크기는 25MB를 초과할 수 없습니다.")
+        val validationError = validateAudioFile(audioFile)
+        if (validationError != null) {
+            model.addAttribute("error", validationError)
             return "worklog/meeting-card :: error-card"
         }
 
@@ -50,5 +46,14 @@ class MeetingApiController(
             )
         model.addAttribute("meeting", meeting)
         return "worklog/meeting-card :: meeting-card"
+    }
+
+    private fun validateAudioFile(audioFile: MultipartFile): String? {
+        val contentType = audioFile.contentType ?: ""
+        return when {
+            contentType !in ALLOWED_AUDIO_TYPES -> "지원하지 않는 파일 형식입니다. (mp3, mp4, wav만 허용)"
+            audioFile.size > MAX_FILE_SIZE_BYTES -> "파일 크기는 25MB를 초과할 수 없습니다."
+            else -> null
+        }
     }
 }

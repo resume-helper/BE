@@ -22,6 +22,7 @@ class UploadMeetingUseCase(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Suppress("TooGenericExceptionCaught")
     fun execute(command: UploadMeetingCommand): Meeting =
         try {
             val transcript = whisperPort.transcribe(command.audioBytes, command.fileName)

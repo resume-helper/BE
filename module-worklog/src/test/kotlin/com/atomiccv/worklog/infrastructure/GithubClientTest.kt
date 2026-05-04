@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClient
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -62,7 +63,7 @@ class GithubClientTest {
         every { restClient.get() } returns requestSpec
         every { requestSpec.uri(any<String>()) } returns requestSpec
         every { requestSpec.header(any(), any()) } returns requestSpec
-        every { requestSpec.retrieve() } throws RuntimeException("GitHub API 오류")
+        every { requestSpec.retrieve() } throws ResourceAccessException("GitHub API 오류")
 
         val result = client.getActivity(date)
 

@@ -55,3 +55,12 @@ jwt:
 
 app:
   frontend-url: http://localhost:3000
+
+worklog:
+  openai:
+    api-key: test-openai-key
+  github:
+    token: test-github-token
+    org: resume-helper
+  audio:
+    upload-dir: /tmp/worklog/audio
