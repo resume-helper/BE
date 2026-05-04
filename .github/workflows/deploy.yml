@@ -65,6 +65,11 @@ jobs:
             --group-ids ${{ secrets.SECURITY_GROUP_ID }} \
             --query "SecurityGroups[0].IpPermissions[?FromPort==\`22\`]" \
             --output json
+          echo "=== EC2 인스턴스에 실제 부착된 Security Groups ==="
+          aws ec2 describe-instances \
+            --filters "Name=ip-address,Values=${{ secrets.EC2_HOST }}" \
+            --query "Reservations[0].Instances[0].SecurityGroups" \
+            --output json
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
