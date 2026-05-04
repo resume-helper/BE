@@ -10,6 +10,8 @@
 1. [UseCase 빈 등록 누락 — NoSuchBeanDefinitionException](#1-usecase-빈-등록-누락--nosuchbeandefinitionexception)
 2. [Kotlin final 클래스 + CGLIB 프록시 충돌 — AopConfigException](#2-kotlin-final-클래스--cglib-프록시-충돌--aopconfigexception)
 3. [app 통합 테스트 환경 설정 누락 — PlaceholderResolutionException](#3-app-통합-테스트-환경-설정-누락--placeholderresolutionexception)
+4. [gradle.properties 로컬 Java 경로로 CI 빌드 실패](#4-gradleproperties-로컬-java-경로로-ci-빌드-실패)
+5. [detekt 위반 — ReturnCount, UnusedParameter](#5-detekt-위반--returncount-unusedparameter)
 
 ---
 
@@ -240,6 +242,115 @@ app:
 
 ---
 
+---
+
+## 4. gradle.properties 로컬 Java 경로로 CI 빌드 실패
+
+### 문제
+
+```
+Value '/Users/Sunro1994/Library/Java/JavaVirtualMachines/ms-21.0.10/Contents/Home'
+given for org.gradle.java.home Gradle property is invalid
+(Java home supplied is invalid)
+```
+
+GitHub Actions CI (ubuntu-latest) 에서 빌드 실패.
+
+### 원인
+
+`gradle.properties`에 로컬 Mac의 절대 경로가 하드코딩되어 있었다.
+
+```properties
+# gradle.properties — 문제 있는 설정
+org.gradle.java.home=/Users/Sunro1994/Library/Java/JavaVirtualMachines/ms-21.0.10/Contents/Home
+```
+
+CI 환경(Ubuntu)에는 해당 경로가 존재하지 않는다.
+
+### 해결
+
+`gradle.properties`에서 `org.gradle.java.home` 줄을 제거했다.
+CI는 `actions/setup-java`로 Java 21을 설정하므로 별도 지정이 불필요하다.
+
+```yaml
+# .github/workflows/deploy.yml — 이미 Java 21 설정
+- name: Set up JDK 21
+  uses: actions/setup-java@v4
+  with:
+    java-version: '21'
+    distribution: 'temurin'
+```
+
+### 로컬 개발 환경 설정
+
+`gradle.properties`에서 제거 후 로컬에서 Java 17이 기본으로 잡힐 수 있다.
+셸 프로파일(`.zshrc` / `.bashrc`)에 추가:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+```
+
+또는 빌드 시 명시:
+
+```bash
+JAVA_HOME=/Users/Sunro1994/Library/Java/JavaVirtualMachines/ms-21.0.10/Contents/Home ./gradlew test
+```
+
+---
+
+## 5. detekt 위반 — ReturnCount, UnusedParameter
+
+### 문제
+
+```
+FAILURE: Build failed with an exception.
+Execution failed for task ':module-auth:detekt'.
+> Analysis failed with 2 weighted issues.
+
+OAuthLoginUseCase.kt:44:17: Function resolveUser has 3 return statements
+  which exceeds the limit of 2. [ReturnCount]
+GlobalExceptionHandler.kt:22:25: Function parameter `e` is unused. [UnusedParameter]
+```
+
+### 원인 및 해결
+
+**ReturnCount (`OAuthLoginUseCase.resolveUser`)**
+
+`resolveUser()`가 3개의 return을 갖고 있었다 (신규/재방문/이메일연동 분기).
+이메일 조회와 신규 가입 분기를 엘비스 연산자로 합쳐 return 2개로 축소했다.
+
+```kotlin
+// Before — return 3개
+if (existingSocial != null) return userRepository.findById(...)
+val existingUser = userRepository.findByEmail(...)
+if (existingUser != null) {
+    socialAccountRepository.save(...); return existingUser
+}
+val newUser = userRepository.save(...)
+socialAccountRepository.save(...); return newUser
+
+// After — return 2개 (로직 동일)
+if (existingSocial != null) return userRepository.findById(...)
+val user = userRepository.findByEmail(command.email)
+    ?: userRepository.save(User(...))
+socialAccountRepository.save(SocialAccount(userId = user.id, ...))
+return user
+```
+
+**UnusedParameter (`GlobalExceptionHandler.handleException`)**
+
+`handleException(e: Exception)`의 파라미터 `e`를 바디에서 사용하지 않았다.
+(범용 500 에러 메시지를 반환하므로 예외 내용 불필요)
+함수 레벨에 `@Suppress("UnusedParameter")` 추가로 해결.
+
+```kotlin
+@ExceptionHandler(Exception::class)
+@Suppress("UnusedParameter")
+fun handleException(e: Exception): ResponseEntity<ErrorResponse> = ...
+```
+
+---
+
 ## 최종 결과
 
 | 항목 | 결과 |
@@ -247,4 +358,4 @@ app:
 | module-auth 단위 테스트 | ✅ 전체 통과 (UseCase 3개, Controller) |
 | AtomicCvApplicationTests.contextLoads() | ✅ 통과 |
 | ktlint 검사 | ✅ 통과 |
-| PR 생성 | ✅ [resume-helper/BE#1](https://github.com/resume-helper/BE/pull/1) |
+| PR 생성 | ✅ [resume-helper/BE#3](https://github.com/resume-helper/BE/pull/3) |
