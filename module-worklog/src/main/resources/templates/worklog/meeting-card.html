@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="meeting-card" class="meeting-card">
+  <div class="meeting-card-header">
+    <span class="meeting-title" th:text="${meeting.title}">회의 제목</span>
+    <span class="meeting-time" th:text="${#temporals.format(meeting.createdAt, 'HH:mm')}">10:00</span>
+    <span class="meeting-status-badge"
+          th:classappend="${meeting.status.name() == 'FAILED'} ? 'badge-failed' : 'badge-ok'"
+          th:text="${meeting.status.name() == 'FAILED'} ? '실패' : '완료'">완료</span>
+  </div>
+  <div class="meeting-summary" th:text="${meeting.summary}">요약 내용</div>
+</div>
+
+<div th:fragment="error-card" class="meeting-card meeting-card--error">
+  <span th:text="${error}">오류 메시지</span>
+</div>
+
+</body>
+</html>

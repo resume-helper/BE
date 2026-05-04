@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worklog Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <style>
+    body { background: #f8f9fa; }
+    .dashboard-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); height: 100%; }
+    .meeting-card { border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; margin-bottom: 0.75rem; }
+    .meeting-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .meeting-title { font-weight: 600; flex: 1; }
+    .meeting-time { color: #6c757d; font-size: 0.875rem; }
+    .meeting-summary { font-size: 0.875rem; color: #495057; white-space: pre-line; }
+    .badge-ok { background: #d1fae5; color: #065f46; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; }
+    .badge-failed { background: #fee2e2; color: #991b1b; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; }
+    .meeting-card--error { border-color: #f87171; background: #fff5f5; color: #991b1b; }
+    .commit-item { font-size: 0.875rem; padding: 0.25rem 0; border-bottom: 1px solid #f1f3f5; }
+    .repo-badge { background: #e9ecef; color: #495057; border-radius: 3px; padding: 1px 5px; font-size: 0.75rem; }
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator { display: inline; }
+  </style>
+</head>
+<body>
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="mb-0 fw-bold">Worklog Dashboard</h4>
+    <div class="d-flex align-items-center gap-2">
+      <a th:href="@{/worklog(date=${prevDate})}" class="btn btn-sm btn-outline-secondary">&lt;</a>
+      <span class="fw-semibold" th:text="${#temporals.format(worklog.date, 'yyyy-MM-dd (E)', new java.util.Locale('ko'))}">2026-05-05</span>
+      <a th:href="@{/worklog(date=${nextDate})}" class="btn btn-sm btn-outline-secondary"
+         th:classappend="${isToday} ? 'disabled'">&gt;</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-md-6">
+      <div class="dashboard-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="mb-0 fw-semibold">오늘의 미팅</h6>
+          <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#uploadForm">
+            + 음성 업로드
+          </button>
+        </div>
+
+        <div class="collapse mb-3" id="uploadForm">
+          <form hx-post="/worklog/meetings"
+                hx-target="#meetings-list"
+                hx-swap="beforeend"
+                hx-encoding="multipart/form-data"
+                hx-indicator="#upload-spinner"
+                enctype="multipart/form-data"
+                class="border rounded p-3">
+            <div class="mb-2">
+              <input type="text" name="title" class="form-control form-control-sm"
+                     placeholder="회의 제목" required>
+            </div>
+            <div class="mb-2">
+              <input type="hidden" name="meetingDate" th:value="${worklog.date}">
+              <input type="file" name="audioFile" class="form-control form-control-sm"
+                     accept="audio/mpeg,audio/mp4,audio/wav" required>
+              <div class="form-text">mp3, mp4, wav — 최대 25MB</div>
+            </div>
+            <button type="submit" class="btn btn-sm btn-success">
+              업로드
+              <span id="upload-spinner" class="htmx-indicator ms-1">처리 중...</span>
+            </button>
+          </form>
+        </div>
+
+        <div id="meetings-list">
+          <div th:if="${worklog.meetings.empty}" class="text-muted text-center py-3" style="font-size:0.875rem">
+            오늘 등록된 회의가 없습니다
+          </div>
+          <div th:each="meeting : ${worklog.meetings}" class="meeting-card">
+            <div class="meeting-card-header">
+              <span class="meeting-title" th:text="${meeting.title}"></span>
+              <span class="meeting-time" th:text="${#temporals.format(meeting.createdAt, 'HH:mm')}"></span>
+              <span class="meeting-status-badge"
+                    th:classappend="${meeting.status.name() == 'FAILED'} ? 'badge-failed' : 'badge-ok'"
+                    th:text="${meeting.status.name() == 'FAILED'} ? '실패' : '완료'"></span>
+            </div>
+            <div class="meeting-summary" th:text="${meeting.summary}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="dashboard-card">
+        <h6 class="mb-3 fw-semibold">GitHub 활동</h6>
+
+        <div class="d-flex gap-3 mb-3">
+          <span class="badge bg-dark" th:text="'커밋 ' + ${worklog.githubActivity.commitCount}">커밋 0</span>
+          <span class="badge bg-primary" th:text="'PR ' + ${worklog.githubActivity.prCount}">PR 0</span>
+          <span class="badge bg-secondary" th:text="'이슈 ' + ${worklog.githubActivity.issueCount}">이슈 0</span>
+        </div>
+
+        <div th:if="${!worklog.githubActivity.commits.empty}">
+          <p class="text-muted mb-1" style="font-size:0.8rem">커밋</p>
+          <div th:each="commit : ${worklog.githubActivity.commits}" class="commit-item">
+            <code class="me-1 text-muted" th:text="${commit.sha}"></code>
+            <span th:text="${commit.message}"></span>
+            <span class="repo-badge ms-1" th:text="${commit.repoName}"></span>
+          </div>
+        </div>
+
+        <div th:if="${!worklog.githubActivity.pullRequests.empty}" class="mt-2">
+          <p class="text-muted mb-1" style="font-size:0.8rem">PR</p>
+          <div th:each="pr : ${worklog.githubActivity.pullRequests}" class="commit-item">
+            <span th:text="'#' + ${pr.number} + ' ' + ${pr.title}"></span>
+            <span class="repo-badge ms-1" th:text="${pr.repoName}"></span>
+            <span class="ms-1" th:classappend="${pr.state == 'open'} ? 'text-success' : 'text-secondary'"
+                  th:text="${pr.state}"></span>
+          </div>
+        </div>
+
+        <div th:if="${!worklog.githubActivity.issues.empty}" class="mt-2">
+          <p class="text-muted mb-1" style="font-size:0.8rem">이슈</p>
+          <div th:each="issue : ${worklog.githubActivity.issues}" class="commit-item">
+            <span th:text="'#' + ${issue.number} + ' ' + ${issue.title}"></span>
+            <span class="repo-badge ms-1" th:text="${issue.repoName}"></span>
+          </div>
+        </div>
+
+        <div th:if="${worklog.githubActivity.commitCount == 0 and worklog.githubActivity.prCount == 0 and worklog.githubActivity.issueCount == 0}"
+             class="text-muted text-center py-3" style="font-size:0.875rem">
+          GitHub 활동이 없습니다
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -59,3 +59,20 @@ springdoc:
     enabled: true
   api-docs:
     enabled: true
+
+worklog:
+  openai:
+    api-key: ${OPENAI_API_KEY}
+  github:
+    token: ${GITHUB_TOKEN}
+    org: resume-helper
+  audio:
+    upload-dir: /var/worklog/audio
+
+spring:
+  thymeleaf:
+    cache: true
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 26MB
