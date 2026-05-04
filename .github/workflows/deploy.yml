@@ -58,8 +58,25 @@ jobs:
             --group-id ${{ secrets.SECURITY_GROUP_ID }} \
             --protocol tcp \
             --port 22 \
-            --cidr "$RUNNER_IP/32"
+            --cidr "$RUNNER_IP/32" || true
           echo "✅ Runner IP $RUNNER_IP 보안그룹 허용"
+          echo "=== 현재 SG 인바운드 규칙 (port 22) ==="
+          aws ec2 describe-security-groups \
+            --group-ids ${{ secrets.SECURITY_GROUP_ID }} \
+            --query "SecurityGroups[0].IpPermissions[?FromPort==\`22\`]" \
+            --output json
+          echo "=== EC2_HOST DNS 조회 ==="
+          dig +short ${{ secrets.EC2_HOST }} || echo "(IP 직접 입력이거나 조회 실패)"
+          echo "=== EC2 인스턴스 정보 (IP로 조회) ==="
+          aws ec2 describe-instances \
+            --filters "Name=ip-address,Values=${{ secrets.EC2_HOST }}" \
+            --query "Reservations[0].Instances[0].{InstanceId:InstanceId,State:State.Name,PublicIp:PublicIpAddress,PrivateIp:PrivateIpAddress,SecurityGroups:SecurityGroups,SubnetId:SubnetId}" \
+            --output json
+          echo "=== EC2 인스턴스 정보 (DNS명으로 조회) ==="
+          aws ec2 describe-instances \
+            --filters "Name=dns-name,Values=${{ secrets.EC2_HOST }}" \
+            --query "Reservations[0].Instances[0].{InstanceId:InstanceId,State:State.Name,PublicIp:PublicIpAddress,PrivateIp:PrivateIpAddress,SecurityGroups:SecurityGroups,SubnetId:SubnetId}" \
+            --output json
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -72,6 +89,11 @@ jobs:
 
       - name: Save Docker image
         run: docker save atomiccv:${{ github.sha }} | gzip > atomiccv.tar.gz
+
+      - name: Test SSH connectivity
+        run: |
+          echo "=== EC2 포트 22 연결 테스트 ==="
+          nc -zv -w 10 ${{ secrets.EC2_HOST }} 22 && echo "✅ 포트 22 접근 가능" || echo "❌ 포트 22 접근 불가"
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
