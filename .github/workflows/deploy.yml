@@ -58,7 +58,7 @@ jobs:
             --group-id ${{ secrets.SECURITY_GROUP_ID }} \
             --protocol tcp \
             --port 22 \
-            --cidr "$RUNNER_IP/32"
+            --cidr "$RUNNER_IP/32" || true
           echo "✅ Runner IP $RUNNER_IP 보안그룹 허용"
 
       - name: Grant execute permission for gradlew
