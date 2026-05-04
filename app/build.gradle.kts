@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":module-shared"))
     implementation(project(":module-auth"))
     implementation(project(":module-resume"))
+    implementation(project(":module-worklog"))
     // implementation(project(":module-feedback"))  // ⏸
     // implementation(project(":module-analytics"))  // ⏸
 
