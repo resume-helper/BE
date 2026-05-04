@@ -1,0 +1,57 @@
+name: Discord PR Merge 알림
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  notify:
+    name: Discord 알림 전송
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Discord 웹훅 전송
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_COMMITS: ${{ github.event.pull_request.commits }}
+          PR_FILES: ${{ github.event.pull_request.changed_files }}
+          PR_ADDITIONS: ${{ github.event.pull_request.additions }}
+          PR_DELETIONS: ${{ github.event.pull_request.deletions }}
+        run: |
+          # PR 내용 1000자 제한 (Discord embed 필드 최대 1024자)
+          BODY_TRUNCATED="${PR_BODY:0:1000}"
+          [ ${#PR_BODY} -gt 1000 ] && BODY_TRUNCATED="${BODY_TRUNCATED}
+          *(이하 생략 — PR에서 전문 확인)*"
+
+          jq -n \
+            --arg title "✅  PR #${PR_NUMBER} 머지 완료" \
+            --arg desc "### ${PR_TITLE}" \
+            --arg author "${PR_AUTHOR}" \
+            --arg branch "\`${PR_HEAD}\` → \`${PR_BASE}\`" \
+            --arg stats "커밋 **${PR_COMMITS}**개  |  +${PR_ADDITIONS} / -${PR_DELETIONS}  |  파일 **${PR_FILES}**개" \
+            --arg body "${BODY_TRUNCATED}" \
+            --arg url "${PR_URL}" \
+            '{
+              embeds: [{
+                title: $title,
+                description: $desc,
+                color: 5763719,
+                url: $url,
+                fields: [
+                  {name: "👤 작성자", value: $author, inline: true},
+                  {name: "🔀 브랜치", value: $branch, inline: true},
+                  {name: "📊 변경 규모", value: $stats, inline: false},
+                  {name: "📋 PR 내용", value: $body, inline: false}
+                ],
+                footer: {text: "Atomic CV Backend"}
+              }]
+            }' | curl -s -H "Content-Type: application/json" -X POST -d @- "$DISCORD_WEBHOOK"
