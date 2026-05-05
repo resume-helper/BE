@@ -20,7 +20,7 @@
 | 1 | EC2 서버 초기 환경 구성 (Docker, Nginx, AWS CLI) | | 🟢 |
 | 2 | EC2 IAM Role 설정 (SSM 접근 권한) | | 🟢 |
 | 3 | AWS SSM Parameter Store 환경변수 등록 | | 🟢 |
-| 4 | SSL 인증서 설정 (Let's Encrypt + Certbot) | | ⏸ 도메인 확보 후 |
+| 4 | SSL 인증서 설정 (Let's Encrypt + Certbot) | | 🟢 |
 | 5 | Nginx Blue/Green 설정 | | 🟢 |
 | 6 | Redis (ElastiCache TLS 연결) | | 🟢 |
 | 7 | Dockerfile 작성 (eclipse-temurin:21-jre-alpine) | | 🟢 |
@@ -151,5 +151,9 @@
 | 코드 컨벤션 | 초안 전체 확정 | 2026-04-30 |
 | 인프라 | EC2(Ubuntu 26.04) + Nginx + SSM Parameter Store | 2026-05-01 |
 | CI/CD | GitHub Actions + Blue/Green 배포 + 동적 보안그룹 | 2026-05-01 |
+| SSL/TLS | Let's Encrypt + Certbot, 도메인 developlife.co.kr | 2026-05-05 |
+| 메모리 최적화 | Swap 2GB 추가, JVM 힙 제한 (-Xms256m -Xmx512m) | 2026-05-05 |
+| Reverse Proxy 헤더 | server.forward-headers-strategy=framework (HTTPS OAuth redirect 정상화) | 2026-05-05 |
+| Swagger | prod 환경 활성화 (FE 팀 API 확인용) | 2026-05-05 |
 | Redis | ElastiCache TLS 연결 (ssl.enabled=true, Primary 엔드포인트) | 2026-05-01 |
 | RDB | AWS RDS MySQL 8.4 + dev 데이터베이스 생성 | 2026-05-01 |

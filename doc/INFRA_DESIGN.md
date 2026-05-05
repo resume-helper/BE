@@ -43,8 +43,9 @@
 
 | 항목 | 내용 |
 |------|------|
-| **OS** | Amazon Linux 2023 |
-| **설치 소프트웨어** | Docker, Docker Compose, Nginx, Certbot |
+| **OS** | Ubuntu 26.04 LTS |
+| **설치 소프트웨어** | Docker, Nginx, Certbot, AWS CLI |
+| **Swap** | 2GB (`/swapfile`) |
 | **포트** | 22 (SSH), 80 (HTTP → HTTPS 리다이렉트), 443 (HTTPS), 8080/8081 (앱 내부) |
 | **IAM Role** | SSM Parameter Store 읽기 권한 포함 |
 
@@ -82,16 +83,16 @@ upstream app {
 
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name developlife.co.kr;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name your-domain.com;
+    server_name developlife.co.kr;
 
-    ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/developlife.co.kr/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/developlife.co.kr/privkey.pem;
 
     location / {
         proxy_pass http://app;
@@ -99,6 +100,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
     }
 }
 ```
@@ -110,9 +112,10 @@ server {
 | 항목 | 내용 |
 |------|------|
 | **도구** | Certbot (Let's Encrypt) |
+| **도메인** | developlife.co.kr |
 | **비용** | 무료 |
 | **갱신** | 90일마다 자동 갱신 (cron 설정) |
-| **설치 명령** | `certbot --nginx -d your-domain.com` |
+| **설치 명령** | `sudo certbot --nginx -d developlife.co.kr --non-interactive --agree-tos -m gwangjulsr@gmail.com` |
 
 ### 자동 갱신 cron 설정
 
@@ -137,10 +140,13 @@ EC2 IAM Role            → EC2가 별도 키 없이 SSM에 직접 접근
 
 | Secret 이름 | 용도 |
 |------------|------|
-| `EC2_HOST` | EC2 Public IP |
-| `EC2_USER` | EC2 접속 유저 (ec2-user) |
+| `EC2_HOST` | EC2 Elastic IP (`13.209.183.54`) |
+| `EC2_USER` | EC2 접속 유저 (`ubuntu`) |
 | `EC2_SSH_KEY` | EC2 SSH Private Key |
 | `AWS_REGION` | AWS 리전 |
+| `AWS_ACCESS_KEY_ID` | AWS 액세스 키 |
+| `AWS_SECRET_ACCESS_KEY` | AWS 시크릿 키 |
+| `SECURITY_GROUP_ID` | 동적 SG 제어용 보안그룹 ID |
 
 ### SSM Parameter Store 경로 구조
 
@@ -366,3 +372,4 @@ echo "✅ 롤백 완료 — Active Port: $ROLLBACK_PORT"
 | 날짜 | 내용 |
 |------|------|
 | 2026-05-01 | 최초 작성 |
+| 2026-05-05 | OS Ubuntu 26.04로 수정, 도메인 developlife.co.kr 반영, SSL 적용 완료, Swap 2GB 추가, GitHub Secrets 목록 보완 |
