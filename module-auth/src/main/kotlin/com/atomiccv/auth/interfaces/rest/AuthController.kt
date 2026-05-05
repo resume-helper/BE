@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -36,6 +37,7 @@ class AuthController(
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
+    @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
 ) {
     @Operation(
         summary = "Access Token 갱신",
@@ -68,7 +70,7 @@ class AuthController(
                 .secure(true)
                 .path("/")
                 .maxAge(Duration.ofHours(1))
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build()
                 .toString(),
         )
@@ -107,7 +109,7 @@ class AuthController(
                     .secure(true)
                     .path("/")
                     .maxAge(Duration.ZERO)
-                    .sameSite("Lax")
+                    .sameSite(cookieSameSite)
                     .build()
                     .toString(),
             )
@@ -151,7 +153,7 @@ class AuthController(
                     .secure(true)
                     .path("/")
                     .maxAge(Duration.ZERO)
-                    .sameSite("Lax")
+                    .sameSite(cookieSameSite)
                     .build()
                     .toString(),
             )

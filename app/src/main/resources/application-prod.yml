@@ -62,6 +62,7 @@ jwt:
 
 app:
   frontend-url: ${APP_FRONTEND_URL}
+  cookie-same-site: None
 
 springdoc:
   swagger-ui:
