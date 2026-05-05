@@ -2,7 +2,7 @@
 set -e
 
 echo "▶ ktlint 검사 실행..."
-./gradlew ktlintCheck --daemon -q
+JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew ktlintCheck --daemon -q
 
 if [ $? -ne 0 ]; then
   echo "❌ ktlint 검사 실패 — 코드 스타일 오류를 수정 후 다시 커밋하세요."
