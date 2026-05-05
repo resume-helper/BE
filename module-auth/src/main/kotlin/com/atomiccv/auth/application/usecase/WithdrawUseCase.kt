@@ -37,12 +37,16 @@ class WithdrawUseCase(
         )
 
         if (socialAccountRepository.countActiveByUserId(command.userId) == 0) {
-            val user =
-                userRepository.findById(command.userId)
-                    ?: throw BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다.")
-            userRepository.save(user.copy(isActive = false, deletedAt = LocalDateTime.now()))
-            invalidateTokens(command)
+            deactivateUserAndInvalidateTokens(command)
         }
+    }
+
+    private fun deactivateUserAndInvalidateTokens(command: WithdrawCommand) {
+        val user =
+            userRepository.findById(command.userId)
+                ?: throw BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다.")
+        userRepository.save(user.copy(isActive = false, deletedAt = LocalDateTime.now()))
+        invalidateTokens(command)
     }
 
     private fun invalidateTokens(command: WithdrawCommand) {
