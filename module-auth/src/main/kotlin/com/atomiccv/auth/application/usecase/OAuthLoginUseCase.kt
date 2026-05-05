@@ -42,34 +42,57 @@ class OAuthLoginUseCase(
     }
 
     private fun resolveUser(command: OAuthLoginCommand): User {
-        // 1. 기존 소셜 계정으로 조회 (재방문)
+        // 1. 기존 소셜 계정으로 조회 (재방문 or 탈퇴 후 재가입)
         val existingSocial =
             socialAccountRepository.findByProviderAndProviderUserId(
                 command.provider,
                 command.providerUserId,
             )
         if (existingSocial != null) {
-            return userRepository.findById(existingSocial.userId)
-                ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
+            val user =
+                userRepository.findById(existingSocial.userId)
+                    ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
+            if (user.isWithinGracePeriod()) {
+                return userRepository.save(user.copy(isActive = true, deletedAt = null))
+            }
+            return user
         }
 
-        // 2. 이메일로 기존 User 조회 (타 제공자 연동) or 3. 신규 가입
-        val user =
-            userRepository.findByEmail(command.email)
-                ?: userRepository.save(
-                    User(
-                        email = command.email,
-                        name = command.name,
-                        profileImageUrl = command.profileImageUrl,
-                    ),
-                )
+        // 2. 이메일로 기존 User 조회 (타 제공자 연동 or 탈퇴 후 다른 제공자로 재가입)
+        val existingUser = userRepository.findByEmail(command.email)
+        if (existingUser != null) {
+            val activeUser =
+                if (existingUser.isWithinGracePeriod()) {
+                    userRepository.save(existingUser.copy(isActive = true, deletedAt = null))
+                } else {
+                    existingUser
+                }
+            socialAccountRepository.save(
+                SocialAccount(
+                    userId = activeUser.id,
+                    provider = command.provider,
+                    providerUserId = command.providerUserId,
+                ),
+            )
+            return activeUser
+        }
+
+        // 3. 신규 가입
+        val newUser =
+            userRepository.save(
+                User(
+                    email = command.email,
+                    name = command.name,
+                    profileImageUrl = command.profileImageUrl,
+                ),
+            )
         socialAccountRepository.save(
             SocialAccount(
-                userId = user.id,
+                userId = newUser.id,
                 provider = command.provider,
                 providerUserId = command.providerUserId,
             ),
         )
-        return user
+        return newUser
     }
 }

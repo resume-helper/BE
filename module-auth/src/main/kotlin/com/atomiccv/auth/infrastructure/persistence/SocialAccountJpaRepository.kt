@@ -10,4 +10,6 @@ interface SocialAccountJpaRepository : JpaRepository<SocialAccountJpaEntity, Lon
     ): SocialAccountJpaEntity?
 
     fun findAllByUserId(userId: Long): List<SocialAccountJpaEntity>
+
+    fun deleteByUserIdIn(userIds: Collection<Long>)
 }

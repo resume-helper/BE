@@ -2,6 +2,8 @@ package com.atomiccv.auth.interfaces.rest
 
 import com.atomiccv.auth.application.usecase.LogoutUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
+import com.atomiccv.auth.application.usecase.WithdrawCommand
+import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
@@ -18,6 +20,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,12 +28,13 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
-@Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회")
+@Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회, 회원 탈퇴")
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
     private val tokenRefreshUseCase: TokenRefreshUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
 ) {
     @Operation(
@@ -93,6 +97,50 @@ class AuthController(
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         logoutUseCase.logout(accessToken)
+
+        listOf("access_token", "refresh_token").forEach { cookieName ->
+            response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                ResponseCookie
+                    .from(cookieName, "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(Duration.ZERO)
+                    .sameSite("Lax")
+                    .build()
+                    .toString(),
+            )
+        }
+        return ResponseEntity.ok(ApiResponse.ok())
+    }
+
+    @Operation(
+        summary = "회원 탈퇴",
+        description = "즉시 계정을 비활성화하고 30일 후 영구 삭제합니다. 유예기간 내 재로그인 시 복구됩니다.",
+    )
+    @ApiResponses(
+        SwaggerApiResponse(responseCode = "200", description = "탈퇴 처리 성공"),
+        SwaggerApiResponse(
+            responseCode = "401",
+            description = "인증되지 않은 요청",
+            content = [Content(schema = Schema(hidden = true))],
+        ),
+    )
+    @DeleteMapping("/withdraw")
+    fun withdraw(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication,
+    ): ResponseEntity<ApiResponse<Nothing>> {
+        val userId =
+            authentication.name.toLongOrNull()
+                ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
+        val accessToken =
+            request.cookies?.firstOrNull { it.name == "access_token" }?.value
+                ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
+
+        withdrawUseCase.withdraw(WithdrawCommand(userId = userId, accessToken = accessToken))
 
         listOf("access_token", "refresh_token").forEach { cookieName ->
             response.addHeader(

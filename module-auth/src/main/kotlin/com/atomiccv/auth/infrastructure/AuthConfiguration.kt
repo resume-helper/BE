@@ -6,6 +6,7 @@ import com.atomiccv.auth.application.port.TokenBlacklistPort
 import com.atomiccv.auth.application.usecase.LogoutUseCase
 import com.atomiccv.auth.application.usecase.OAuthLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
+import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.repository.SocialAccountRepository
 import com.atomiccv.auth.domain.repository.UserRepository
 import org.springframework.context.annotation.Bean
@@ -49,6 +50,20 @@ class AuthConfiguration {
         refreshTokenPort: RefreshTokenPort,
     ): LogoutUseCase =
         LogoutUseCase(
+            jwtPort = jwtPort,
+            tokenBlacklistPort = tokenBlacklistPort,
+            refreshTokenPort = refreshTokenPort,
+        )
+
+    @Bean
+    fun withdrawUseCase(
+        userRepository: UserRepository,
+        jwtPort: JwtPort,
+        tokenBlacklistPort: TokenBlacklistPort,
+        refreshTokenPort: RefreshTokenPort,
+    ): WithdrawUseCase =
+        WithdrawUseCase(
+            userRepository = userRepository,
             jwtPort = jwtPort,
             tokenBlacklistPort = tokenBlacklistPort,
             refreshTokenPort = refreshTokenPort,

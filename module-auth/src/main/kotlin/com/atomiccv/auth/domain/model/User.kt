@@ -9,6 +9,10 @@ data class User(
     val profileImageUrl: String? = null,
     val role: UserRole = UserRole.USER,
     val isActive: Boolean = true,
+    val deletedAt: LocalDateTime? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-)
+) {
+    fun isWithinGracePeriod(): Boolean =
+        !isActive && deletedAt != null && deletedAt.isAfter(LocalDateTime.now().minusDays(30))
+}

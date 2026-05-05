@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -28,6 +29,8 @@ class UserJpaEntity(
     val role: UserRole = UserRole.USER,
     @Column(name = "is_active", nullable = false)
     val isActive: Boolean = true,
+    @Column(name = "deleted_at")
+    val deletedAt: LocalDateTime? = null,
 ) : BaseJpaEntity() {
     fun toDomain() =
         User(
@@ -37,6 +40,7 @@ class UserJpaEntity(
             profileImageUrl = profileImageUrl,
             role = role,
             isActive = isActive,
+            deletedAt = deletedAt,
             createdAt = createdAt,
             updatedAt = updatedAt,
         )
@@ -50,6 +54,7 @@ class UserJpaEntity(
                 profileImageUrl = user.profileImageUrl,
                 role = user.role,
                 isActive = user.isActive,
+                deletedAt = user.deletedAt,
             )
     }
 }
