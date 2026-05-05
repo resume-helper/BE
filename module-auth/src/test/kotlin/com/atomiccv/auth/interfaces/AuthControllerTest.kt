@@ -130,6 +130,7 @@ class AuthControllerTest {
             .delete("/api/auth/withdraw") {
                 with(csrf())
                 cookie(Cookie("access_token", "my-token"))
+                param("provider", "GOOGLE")
             }.andExpect {
                 status { isOk() }
                 cookie { maxAge("access_token", 0) }

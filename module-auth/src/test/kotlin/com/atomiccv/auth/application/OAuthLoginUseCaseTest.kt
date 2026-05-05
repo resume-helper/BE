@@ -97,6 +97,7 @@ class OAuthLoginUseCaseTest {
             socialAccountRepository.findByProviderAndProviderUserId(SocialProvider.KAKAO, "kakao-456")
         } returns null
         every { userRepository.findByEmail(command.email) } returns existingUser
+        every { userRepository.findById(3L) } returns existingUser
         every { socialAccountRepository.save(capture(socialSlot)) } answers { firstArg() }
         every { jwtPort.generateAccessToken(3L) } returns "access-token-3"
         every { refreshTokenPort.save(3L, any(), any()) } returns Unit
