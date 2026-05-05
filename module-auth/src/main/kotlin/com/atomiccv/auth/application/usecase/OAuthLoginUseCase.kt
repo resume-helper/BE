@@ -7,6 +7,8 @@ import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.repository.SocialAccountRepository
 import com.atomiccv.auth.domain.repository.UserRepository
+import com.atomiccv.shared.common.exception.BusinessException
+import com.atomiccv.shared.common.exception.ErrorCode
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.util.UUID
@@ -42,34 +44,56 @@ class OAuthLoginUseCase(
     }
 
     private fun resolveUser(command: OAuthLoginCommand): User {
-        // 1. 기존 소셜 계정으로 조회 (재방문)
         val existingSocial =
-            socialAccountRepository.findByProviderAndProviderUserId(
-                command.provider,
-                command.providerUserId,
-            )
-        if (existingSocial != null) {
-            return userRepository.findById(existingSocial.userId)
-                ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
-        }
+            socialAccountRepository.findByProviderAndProviderUserId(command.provider, command.providerUserId)
+        if (existingSocial != null) return resolveBySocialAccount(existingSocial)
+        return resolveByEmailOrCreate(command)
+    }
 
-        // 2. 이메일로 기존 User 조회 (타 제공자 연동) or 3. 신규 가입
+    private fun resolveBySocialAccount(existingSocial: SocialAccount): User {
         val user =
+            userRepository.findById(existingSocial.userId)
+                ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
+        if (!existingSocial.isActive) {
+            if (!existingSocial.isWithinGracePeriod()) {
+                throw BusinessException(ErrorCode.FORBIDDEN, "탈퇴 처리된 계정입니다.")
+            }
+            val restored = socialAccountRepository.save(existingSocial.copy(isActive = true, deletedAt = null))
+            return restoreUserIfInactive(restored.userId)
+        }
+        return user
+    }
+
+    private fun resolveByEmailOrCreate(command: OAuthLoginCommand): User {
+        val existingUser =
             userRepository.findByEmail(command.email)
-                ?: userRepository.save(
-                    User(
-                        email = command.email,
-                        name = command.name,
-                        profileImageUrl = command.profileImageUrl,
-                    ),
-                )
+                ?: return createNewUser(command)
+        val activeUser = restoreUserIfInactive(existingUser.id)
         socialAccountRepository.save(
-            SocialAccount(
-                userId = user.id,
-                provider = command.provider,
-                providerUserId = command.providerUserId,
-            ),
+            SocialAccount(userId = activeUser.id, provider = command.provider, providerUserId = command.providerUserId),
         )
+        return activeUser
+    }
+
+    private fun createNewUser(command: OAuthLoginCommand): User {
+        val user =
+            userRepository.save(
+                User(email = command.email, name = command.name, profileImageUrl = command.profileImageUrl),
+            )
+        socialAccountRepository.save(
+            SocialAccount(userId = user.id, provider = command.provider, providerUserId = command.providerUserId),
+        )
+        return user
+    }
+
+    private fun restoreUserIfInactive(userId: Long): User {
+        val user = userRepository.findById(userId) ?: error("User를 찾을 수 없습니다: userId=$userId")
+        if (!user.isActive) {
+            if (!user.isWithinGracePeriod()) {
+                throw BusinessException(ErrorCode.FORBIDDEN, "탈퇴 처리된 계정입니다.")
+            }
+            return userRepository.save(user.copy(isActive = true, deletedAt = null))
+        }
         return user
     }
 }

@@ -34,6 +34,10 @@ class SocialAccountJpaEntity(
     val provider: SocialProvider,
     @Column(name = "provider_user_id", nullable = false)
     val providerUserId: String,
+    @Column(name = "is_active", nullable = false)
+    val isActive: Boolean = true,
+    @Column(name = "deleted_at")
+    val deletedAt: LocalDateTime? = null,
 ) {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,6 +50,8 @@ class SocialAccountJpaEntity(
             userId = userId,
             provider = provider,
             providerUserId = providerUserId,
+            isActive = isActive,
+            deletedAt = deletedAt,
             createdAt = createdAt,
         )
 
@@ -56,6 +62,8 @@ class SocialAccountJpaEntity(
                 userId = account.userId,
                 provider = account.provider,
                 providerUserId = account.providerUserId,
+                isActive = account.isActive,
+                deletedAt = account.deletedAt,
             )
     }
 }

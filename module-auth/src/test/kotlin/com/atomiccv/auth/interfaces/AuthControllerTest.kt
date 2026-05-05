@@ -4,12 +4,15 @@ import com.atomiccv.auth.application.port.JwtPort
 import com.atomiccv.auth.application.port.TokenBlacklistPort
 import com.atomiccv.auth.application.usecase.LogoutUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
+import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.auth.interfaces.rest.AuthController
 import com.atomiccv.auth.interfaces.rest.GlobalExceptionHandler
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +23,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
@@ -36,6 +40,9 @@ class AuthControllerTest {
     lateinit var logoutUseCase: LogoutUseCase
 
     @Autowired
+    lateinit var withdrawUseCase: WithdrawUseCase
+
+    @Autowired
     lateinit var userRepository: UserRepository
 
     @TestConfiguration
@@ -45,6 +52,9 @@ class AuthControllerTest {
 
         @Bean
         fun logoutUseCase(): LogoutUseCase = mockk()
+
+        @Bean
+        fun withdrawUseCase(): WithdrawUseCase = mockk()
 
         @Bean
         fun userRepository(): UserRepository = mockk()
@@ -109,5 +119,22 @@ class AuthControllerTest {
             jsonPath("$.data.email") { value("test@example.com") }
             jsonPath("$.data.name") { value("홍길동") }
         }
+    }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `DELETE withdraw — Access Token Cookie가 있으면 탈퇴 처리하고 Cookie를 삭제한다`() {
+        every { withdrawUseCase.withdraw(any()) } just runs
+
+        mockMvc
+            .delete("/api/auth/withdraw") {
+                with(csrf())
+                cookie(Cookie("access_token", "my-token"))
+                param("provider", "GOOGLE")
+            }.andExpect {
+                status { isOk() }
+                cookie { maxAge("access_token", 0) }
+                cookie { maxAge("refresh_token", 0) }
+            }
     }
 }

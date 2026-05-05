@@ -13,6 +13,7 @@ import java.time.Duration
 @Component
 class OAuth2AuthenticationSuccessHandler(
     @Value("\${app.frontend-url}") private val frontendUrl: String,
+    @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
 ) : SimpleUrlAuthenticationSuccessHandler() {
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
@@ -39,7 +40,7 @@ class OAuth2AuthenticationSuccessHandler(
                 .secure(true)
                 .path(path)
                 .maxAge(maxAge)
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build()
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
     }

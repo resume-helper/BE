@@ -7,5 +7,10 @@ data class SocialAccount(
     val userId: Long,
     val provider: SocialProvider,
     val providerUserId: String,
+    val isActive: Boolean = true,
+    val deletedAt: LocalDateTime? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-)
+) {
+    fun isWithinGracePeriod(): Boolean =
+        !isActive && deletedAt != null && deletedAt.isAfter(LocalDateTime.now().minusDays(30))
+}

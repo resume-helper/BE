@@ -11,5 +11,12 @@ interface SocialAccountRepository {
         providerUserId: String,
     ): SocialAccount?
 
+    fun findByUserIdAndProvider(
+        userId: Long,
+        provider: SocialProvider
+    ): SocialAccount?
+
     fun findAllByUserId(userId: Long): List<SocialAccount>
+
+    fun countActiveByUserId(userId: Long): Int
 }
