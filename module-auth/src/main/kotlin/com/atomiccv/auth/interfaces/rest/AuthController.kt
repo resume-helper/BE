@@ -4,6 +4,7 @@ import com.atomiccv.auth.application.usecase.LogoutUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.WithdrawCommand
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
+import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
@@ -134,6 +136,7 @@ class AuthController(
         request: HttpServletRequest,
         response: HttpServletResponse,
         authentication: Authentication,
+        @RequestParam provider: SocialProvider,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val userId =
             authentication.name.toLongOrNull()
@@ -142,7 +145,7 @@ class AuthController(
             request.cookies?.firstOrNull { it.name == "access_token" }?.value
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
-        withdrawUseCase.withdraw(WithdrawCommand(userId = userId, accessToken = accessToken))
+        withdrawUseCase.withdraw(WithdrawCommand(userId = userId, provider = provider, accessToken = accessToken))
 
         listOf("access_token", "refresh_token").forEach { cookieName ->
             response.addHeader(

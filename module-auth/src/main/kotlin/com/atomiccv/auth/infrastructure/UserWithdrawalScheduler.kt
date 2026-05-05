@@ -10,22 +10,30 @@ import java.time.LocalDateTime
 
 @Component
 class UserWithdrawalScheduler(
-    private val userJpaRepository: UserJpaRepository,
     private val socialAccountJpaRepository: SocialAccountJpaRepository,
+    private val userJpaRepository: UserJpaRepository,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
-    fun deleteExpiredWithdrawnUsers() {
+    fun deleteExpiredWithdrawnAccounts() {
         val cutoff = LocalDateTime.now().minusDays(30)
-        val expiredUsers = userJpaRepository.findByDeletedAtBefore(cutoff)
-        if (expiredUsers.isEmpty()) return
+        val expiredAccounts = socialAccountJpaRepository.findByDeletedAtBefore(cutoff)
+        if (expiredAccounts.isEmpty()) return
 
-        val userIds = expiredUsers.map { it.id }
-        socialAccountJpaRepository.deleteByUserIdIn(userIds)
-        userJpaRepository.deleteAll(expiredUsers)
+        val affectedUserIds = expiredAccounts.map { it.userId }.toSet()
+        socialAccountJpaRepository.deleteAll(expiredAccounts)
+        log.info("만료된 소셜 계정 영구 삭제: {}건", expiredAccounts.size)
 
-        log.info("탈퇴 유저 영구 삭제 완료: {}명", expiredUsers.size)
+        val usersToDelete =
+            affectedUserIds.filter { userId ->
+                socialAccountJpaRepository.countByUserIdAndIsActiveTrue(userId) == 0 &&
+                    socialAccountJpaRepository.findAllByUserId(userId).isEmpty()
+            }
+        if (usersToDelete.isNotEmpty()) {
+            userJpaRepository.deleteAllById(usersToDelete)
+            log.info("연결된 소셜 계정 없는 유저 영구 삭제: {}명", usersToDelete.size)
+        }
     }
 }

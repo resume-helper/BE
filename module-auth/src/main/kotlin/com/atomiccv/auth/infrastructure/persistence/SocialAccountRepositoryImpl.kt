@@ -17,6 +17,13 @@ class SocialAccountRepositoryImpl(
         providerUserId: String,
     ): SocialAccount? = jpaRepository.findByProviderAndProviderUserId(provider, providerUserId)?.toDomain()
 
+    override fun findByUserIdAndProvider(
+        userId: Long,
+        provider: SocialProvider
+    ): SocialAccount? = jpaRepository.findByUserIdAndProvider(userId, provider)?.toDomain()
+
     override fun findAllByUserId(userId: Long): List<SocialAccount> =
         jpaRepository.findAllByUserId(userId).map { it.toDomain() }
+
+    override fun countActiveByUserId(userId: Long): Int = jpaRepository.countByUserIdAndIsActiveTrue(userId)
 }

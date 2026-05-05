@@ -7,6 +7,8 @@ import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.repository.SocialAccountRepository
 import com.atomiccv.auth.domain.repository.UserRepository
+import com.atomiccv.shared.common.exception.BusinessException
+import com.atomiccv.shared.common.exception.ErrorCode
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.util.UUID
@@ -52,14 +54,21 @@ class OAuthLoginUseCase(
         val user =
             userRepository.findById(existingSocial.userId)
                 ?: error("SocialAccount가 참조하는 User가 없습니다: userId=${existingSocial.userId}")
-        return restoreIfWithinGracePeriod(user)
+        if (!existingSocial.isActive) {
+            if (!existingSocial.isWithinGracePeriod()) {
+                throw BusinessException(ErrorCode.FORBIDDEN, "탈퇴 처리된 계정입니다.")
+            }
+            val restored = socialAccountRepository.save(existingSocial.copy(isActive = true, deletedAt = null))
+            return restoreUserIfInactive(restored.userId)
+        }
+        return user
     }
 
     private fun resolveByEmailOrCreate(command: OAuthLoginCommand): User {
         val existingUser =
             userRepository.findByEmail(command.email)
                 ?: return createNewUser(command)
-        val activeUser = restoreIfWithinGracePeriod(existingUser)
+        val activeUser = restoreUserIfInactive(existingUser.id)
         socialAccountRepository.save(
             SocialAccount(userId = activeUser.id, provider = command.provider, providerUserId = command.providerUserId),
         )
@@ -77,6 +86,14 @@ class OAuthLoginUseCase(
         return user
     }
 
-    private fun restoreIfWithinGracePeriod(user: User): User =
-        if (user.isWithinGracePeriod()) userRepository.save(user.copy(isActive = true, deletedAt = null)) else user
+    private fun restoreUserIfInactive(userId: Long): User {
+        val user = userRepository.findById(userId) ?: error("User를 찾을 수 없습니다: userId=$userId")
+        if (!user.isActive) {
+            if (!user.isWithinGracePeriod()) {
+                throw BusinessException(ErrorCode.FORBIDDEN, "탈퇴 처리된 계정입니다.")
+            }
+            return userRepository.save(user.copy(isActive = true, deletedAt = null))
+        }
+        return user
+    }
 }

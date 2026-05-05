@@ -58,12 +58,14 @@ class AuthConfiguration {
     @Bean
     fun withdrawUseCase(
         userRepository: UserRepository,
+        socialAccountRepository: SocialAccountRepository,
         jwtPort: JwtPort,
         tokenBlacklistPort: TokenBlacklistPort,
         refreshTokenPort: RefreshTokenPort,
     ): WithdrawUseCase =
         WithdrawUseCase(
             userRepository = userRepository,
+            socialAccountRepository = socialAccountRepository,
             jwtPort = jwtPort,
             tokenBlacklistPort = tokenBlacklistPort,
             refreshTokenPort = refreshTokenPort,
