@@ -11,6 +11,7 @@ import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -50,8 +51,14 @@ class AuthController(
         SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "refresh_token 쿠키 없음 또는 만료",
-            content = [Content(schema = Schema(hidden = true))]
+            description = "refresh_token 쿠키 없음 또는 만료 (UNAUTHORIZED / TOKEN_EXPIRED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
+                )
+            ],
         ),
     )
     @PostMapping("/refresh")
@@ -87,8 +94,14 @@ class AuthController(
         SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "access_token 쿠키 없음",
-            content = [Content(schema = Schema(hidden = true))]
+            description = "access_token 쿠키 없음 (UNAUTHORIZED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
+                )
+            ],
         ),
     )
     @PostMapping("/logout")
@@ -127,8 +140,25 @@ class AuthController(
         SwaggerApiResponse(responseCode = "200", description = "탈퇴 처리 성공"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "인증되지 않은 요청",
-            content = [Content(schema = Schema(hidden = true))],
+            description = "인증되지 않은 요청 (UNAUTHORIZED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
+                )
+            ],
+        ),
+        SwaggerApiResponse(
+            responseCode = "403",
+            description = "이미 탈퇴 처리된 계정 (FORBIDDEN)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"이미 탈퇴 처리된 소셜 계정입니다."}""")],
+                )
+            ],
         ),
     )
     @DeleteMapping("/withdraw")
@@ -176,13 +206,25 @@ class AuthController(
         ),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "인증되지 않은 요청",
-            content = [Content(schema = Schema(hidden = true))]
+            description = "인증되지 않은 요청 (UNAUTHORIZED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
+                )
+            ],
         ),
         SwaggerApiResponse(
             responseCode = "404",
-            description = "사용자를 찾을 수 없음",
-            content = [Content(schema = Schema(hidden = true))]
+            description = "사용자를 찾을 수 없음 (RESOURCE_NOT_FOUND)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"사용자를 찾을 수 없습니다."}""")],
+                )
+            ],
         ),
     )
     @GetMapping("/me")
