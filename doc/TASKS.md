@@ -1,6 +1,6 @@
 # Atomic CV — 작업 현황 트래킹
 
-> 최종 업데이트: 2026-05-04 (1-3 인증 모듈 PR 머지 완료 — [resume-helper/BE#3](https://github.com/resume-helper/BE/pull/3))
+> 최종 업데이트: 2026-05-07 (ERD 1차 확정, 팀 결정사항 반영)
 > 상태: 🔴 미시작 / 🟡 진행중 / 🟢 완료 / ⏸ 보류
 
 ---
@@ -65,7 +65,7 @@
 | 1 | 이력서 생성 / 조회 / 수정 / 삭제 | | 🔴 |
 | 2 | 이력서 목록 조회 (페이지네이션) | | 🔴 |
 | 3 | 이력서 발행 (슬러그 생성) | | 🔴 |
-| 4 | 이력서 버전 스냅샷 저장 | | 🔴 |
+| 4 | 이력서 버전 스냅샷 저장 | | ⏸ 보류 |
 | 5 | 공개 이력서 조회 (슬러그 기반) | | 🔴 |
 
 ### 2-2. 블록 (Block) 기능
@@ -74,7 +74,7 @@
 |---|------|------|------|
 | 1 | 블록 생성 / 수정 / 삭제 | | 🔴 |
 | 2 | 블록 순서 변경 | | 🔴 |
-| 3 | block_versions 이력 저장 | | 🔴 |
+| 3 | block_versions 이력 저장 | | ⏸ 보류 |
 | 4 | 블록 버전 복원 | | 🔴 |
 
 ### 2-3. 피드백 (Feedback) 기능
@@ -129,10 +129,7 @@
 
 | # | 항목 | 관련 Phase | 상태 |
 |---|------|-----------|------|
-| 1 | 블록 저장 단위 (일괄 vs 개별) | Phase 2 | ⏸ 팀 논의 필요 |
-| 2 | API 응답 포맷 (Bare vs 래퍼) | Phase 2 | ⏸ 프론트팀 협의 필요 |
-| 3 | 웹 이력서 슬러그 구조 | Phase 2 | ⏸ 팀 회의 필요 |
-| 4 | 작업 분배 확정 | 전체 | ⏸ PRD 기능 명세 완료 후 |
+| 1 | 작업 분배 확정 | 전체 | ⏸ PRD 기능 명세 완료 후 |
 
 ---
 
@@ -146,7 +143,7 @@
 | 브랜치 전략 | main + feature/fix/chore, PR Merge, AI 승인 | 2026-04-30 |
 | CLAUDE.md 범위 | 권장(B) + 실시간 업데이트 | 2026-04-30 |
 | Bounded Context | Port(조회) / Event(발행 후 처리) | 2026-04-30 |
-| 블록 버전 관리 | block_versions 테이블 + 스냅샷 JSON 병행 | 2026-04-30 |
+| 블록 버전 관리 | block_versions 미구현, 버전 스냅샷 전체 보류 (Phase 2) | 2026-05-07 |
 | Redis HA | 단일 Redis (JWT Refresh Token 전용) | 2026-04-30 |
 | 코드 컨벤션 | 초안 전체 확정 | 2026-04-30 |
 | 인프라 | EC2(Ubuntu 26.04) + Nginx + SSM Parameter Store | 2026-05-01 |
@@ -157,3 +154,11 @@
 | Swagger | prod 환경 활성화 (FE 팀 API 확인용) | 2026-05-05 |
 | Redis | ElastiCache TLS 연결 (ssl.enabled=true, Primary 엔드포인트) | 2026-05-01 |
 | RDB | AWS RDS MySQL 8.4 + dev 데이터베이스 생성 | 2026-05-01 |
+| 블록 저장 단위 | 일괄 저장 (FE가 전체 블록 상태 일괄 전송) | 2026-05-07 |
+| API 응답 포맷 | 공통 래퍼 ApiResponse<T> 사용 (상세: doc/API_RESPONSE.md) | 2026-05-01 |
+| 슬러그 구조 | 랜덤 UUID 자동 생성, 사용자 지정 미지원 (MVP 이후 검토) | 2026-05-07 |
+| notifications | MVP에서 테이블 전체 제거, Phase 2 이후 추가 | 2026-05-07 |
+| 피드백 익명화 | 완전 익명 (reviewer_name·reviewer_email 제거) | 2026-05-07 |
+| ERD DDL | erd_cloud_import.sql 작성 완료 (1차 확정) | 2026-05-07 |
+| 서비스 정책서 | doc/SERVICE_POLICY.md 작성 완료 | 2026-05-07 |
+| resumes.type | ENUM('PDF', 'WEB') 확정 | 2026-05-07 |
