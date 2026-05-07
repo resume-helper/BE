@@ -205,7 +205,7 @@ private fun deactivateUser(command: WithdrawCommand) {
 fun validate(file: MultipartFile): String? {
     if (type !in allowed) return "타입 오류"
     if (size > max) return "크기 초과"
-    return null
+    return null  // 3개
 }
 
 // ✅ when 표현식으로 단일 return
@@ -238,8 +238,8 @@ fun validate(file: MultipartFile): String? =
 throw IllegalStateException("메시지")
 
 // ✅ Kotlin 표준 shorthand 사용
-error("메시지")                        // IllegalStateException
-check(condition) { "메시지" }          // 조건 불충족 시 IllegalStateException
+error("메시지")          // IllegalStateException
+check(condition) { "메시지" }  // IllegalStateException (조건부)
 ```
 
 ### LongMethod / LongParameterList
