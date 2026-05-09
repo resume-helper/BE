@@ -27,11 +27,13 @@
 | `doc/TASKS.md` | 작업 현황 트래킹 (Phase / 상태) |
 | `doc/prd.md` | 제품 요구사항 — 기능 구현 범위 판단 기준 |
 | `doc/ERD_DRAFT.md` | DB 설계 — 엔티티 및 관계 참조 |
+| `doc/SERVICE_POLICY.md` | 서비스 정책 — 비즈니스 규칙 단일 참조 |
 | `doc/discussion.md` | 팀 확정 사항 (코드 컨벤션, 아키텍처 결정) |
 | `doc/INFRA_DESIGN.md` | 인프라 아키텍처, 환경변수 관리 |
 | `doc/API_RESPONSE.md` | API 응답 포맷, 에러코드 명세 |
 | `doc/CONVENTION.md` | Claude 작업 공용 프롬프트 패턴 |
 | `doc/MODULE_STRUCTURE.md` | 멀티모듈 구조 설계 (모듈 목록, 패키지 구조, 의존성) |
+| `doc/DETEKT_RULES.md` | Detekt / ktlint 위반 패턴 및 로컬 검사 명령어 |
 | `doc/phases/` | Phase별 세부 구현 계획 및 트러블슈팅 |
 | `module-{name}/CLAUDE.md` | 모듈 전용 설계 명세 (해당 모듈 작업 시 참조) |
 
@@ -45,7 +47,6 @@ AWS SSM Parameter Store → 앱 실행 환경변수 (경로: /atomiccv/prod/*)
   - DB_URL, DB_USERNAME, DB_PASSWORD
   - JWT_SECRET, JWT_EXPIRY
   - REDIS_HOST
-  - SMTP_USERNAME, SMTP_PASSWORD
 ```
 
 **규칙:** 환경변수는 절대 하드코딩하지 않는다. `.env` 파일과 키 파일은 커밋하지 않는다.
@@ -67,37 +68,14 @@ AWS SSM Parameter Store → 앱 실행 환경변수 (경로: /atomiccv/prod/*)
 
 ## 행동 원칙
 
-### 코딩 전 생각하기
-- 불확실하면 가정하지 말고 질문한다.
-- 여러 해석이 가능하면 선택지를 제시한다 — 임의로 선택하지 않는다.
-- 더 단순한 방법이 있으면 먼저 제안한다.
-
-### 단순함 우선
-- 요청받은 것만 구현한다. 추측성 기능을 추가하지 않는다.
-- 단일 사용 코드에 추상화를 만들지 않는다.
-- 200줄이 50줄로 가능하면 다시 작성한다.
-
-### 외과적 수정
-- 수정 요청을 받은 코드만 변경한다. 인접 코드를 "개선"하지 않는다.
-- 관련 없는 데드코드를 발견하면 삭제하지 말고 언급만 한다.
-- 기존 코드 스타일을 그대로 따른다.
-
-### 목표 기반 실행
-- 다단계 작업은 시작 전에 계획을 간략히 제시한다.
-- 완료 기준을 명확히 정의하고 검증 후 완료를 선언한다.
+- 불확실하면 가정하지 말고 질문한다. 여러 해석이 가능하면 선택지를 제시하고 임의로 선택하지 않는다.
+- 요청받은 것만 구현한다. 추측성 기능 추가·단일 사용 코드 추상화 금지. 200줄이 50줄로 가능하면 다시 작성한다.
+- 수정 요청을 받은 코드만 변경한다. 인접 코드를 "개선"하지 않으며, 데드코드 발견 시 삭제 말고 언급만 한다.
+- 다단계 작업은 시작 전 계획을 간략히 제시하고, 완료 기준을 명확히 정의한 후 검증해 완료를 선언한다.
 
 ---
 
 ## 아키텍처 규칙
-
-### 패키지 구조
-
-```
-com.atomiccv.{domain}.domain.model.*
-com.atomiccv.{domain}.application.usecase.*
-com.atomiccv.{domain}.infrastructure.persistence.*
-com.atomiccv.{domain}.interfaces.rest.*
-```
 
 ### 의존성 방향
 
@@ -110,17 +88,24 @@ infrastructure → domain
 - `interfaces`는 `application`만 참조 (`domain` 직접 참조 금지)
 - 트랜잭션 경계는 `application` 레이어 UseCase에만 선언
 
-### 클래스 Suffix 핵심
+### 클래스 Suffix
 
 | 대상 | Suffix | 예시 |
 |------|--------|------|
 | Use Case | `UseCase` | `PublishResumeUseCase` |
+| Application Command | `Command` | `PublishResumeCommand` |
+| Application Query | `Query` | `GetResumeQuery` |
 | Repository Interface | `Repository` | `ResumeRepository` |
 | Repository Impl | `RepositoryImpl` | `ResumeRepositoryImpl` |
+| Port Interface | `Port` | `BlockQueryPort` |
+| Port Adapter | `Adapter` | `BlockQueryAdapter` |
+| Event | `Event` | `ResumePublishedEvent` |
+| Event Handler | `EventHandler` | `ResumePublishedEventHandler` |
 | REST Controller | `Controller` | `ResumeController` |
 | Request/Response DTO | `Request` / `Response` | `PublishResumeRequest` |
-| Port Interface | `Port` | `BlockQueryPort` |
-| Event | `Event` | `ResumePublishedEvent` |
+| External Client | `Client` | `GoogleOAuthClient` |
+| Config 클래스 | `Config` | `SecurityConfig` |
+| Exception | `Exception` | `ResumeNotFoundException` |
 
 > 전체 컨벤션: `doc/discussion.md` [12]
 
@@ -173,89 +158,10 @@ chore: 의존성·설정 변경
 
 ---
 
-## Detekt / ktlint 자주 발생하는 위반 패턴
+## Detekt / ktlint
 
-코드 작성 시 아래 규칙을 **사전에** 준수한다. CI에서 매번 실패하는 원인이다.
-
-### ThrowsCount (함수당 throw 최대 2개)
-
-```kotlin
-// ❌ throw 3개 → Detekt 위반
-fun withdraw(command: WithdrawCommand) {
-    val social = repo.find() ?: throw ...  // 1
-    if (!social.isActive) throw ...        // 2
-    val user = repo.findById() ?: throw ... // 3 ← 위반
-}
-
-// ✅ 3번째 throw를 private 함수로 추출
-fun withdraw(command: WithdrawCommand) {
-    val social = repo.find() ?: throw ...
-    if (!social.isActive) throw ...
-    if (noActiveSocial) deactivateUser(command)  // throw는 내부로
-}
-private fun deactivateUser(command: WithdrawCommand) {
-    val user = repo.findById() ?: throw ...
-}
-```
-
-### ReturnCount (함수당 return 최대 2개)
-
-```kotlin
-// ❌ return 3개
-fun validate(file: MultipartFile): String? {
-    if (type !in allowed) return "타입 오류"
-    if (size > max) return "크기 초과"
-    return null  // 3개
-}
-
-// ✅ when 표현식으로 단일 return
-fun validate(file: MultipartFile): String? =
-    when {
-        file.contentType !in allowed -> "타입 오류"
-        file.size > max -> "크기 초과"
-        else -> null
-    }
-```
-
-### TooGenericExceptionCaught
-
-```kotlin
-// ❌
-} catch (e: Exception) { ... }
-
-// ✅ 구체적 타입 사용
-} catch (e: RestClientException) { ... }
-
-// ✅ 불가피하게 포괄 catch가 필요한 경우 (외부 포트 예외 불명확 등)
-@Suppress("TooGenericExceptionCaught")
-} catch (e: Exception) { ... }
-```
-
-### UseCheckOrError
-
-```kotlin
-// ❌
-throw IllegalStateException("메시지")
-
-// ✅ Kotlin 표준 shorthand 사용
-error("메시지")          // IllegalStateException
-check(condition) { "메시지" }  // IllegalStateException (조건부)
-```
-
-### LongMethod / LongParameterList
-
-- 함수가 25줄을 넘으면 private 함수로 분리한다.
-- 파라미터가 6개를 넘으면 data class로 묶는다.
-
-### 커밋 전 로컬 검사 (Java 21 필요)
-
-```bash
-JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew :module-{name}:detekt
-JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew :module-{name}:ktlintFormat
-```
-
-> **중요:** macOS 기본 JDK가 26이면 Gradle이 실패한다.
-> 모든 Gradle 명령 앞에 `JAVA_HOME=$(/usr/libexec/java_home -v 21)` 을 붙인다.
+코드 작성 전 위반 패턴 확인 필수 — CI 실패의 주원인.
+> 상세 패턴 및 로컬 검사 명령어: `doc/DETEKT_RULES.md`
 
 ---
 
@@ -265,14 +171,3 @@ JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew :module-{name}:ktlintFormat
 |--------|------|
 | `/ship [PR 제목]` | 테스트 실행 → 커밋 → 푸시 → PR 생성 자동화 |
 | `/meeting` | 백엔드 팀 회의 진행 (discussion.md 기반) |
-
-### /ship 동작 순서
-
-1. `git status` / `git diff` / `git log` 병렬 실행
-2. 민감 파일 제외 후 선택적 스테이징 (`.env`, `build/`, `*.pem` 등 제외)
-3. `./gradlew test --continue` 실행 → XML 리포트 파싱
-   - 빌드 오류 시 즉시 중단
-   - 테스트 실패 시 목록 보여주고 사용자 확인
-4. HEREDOC 방식으로 커밋
-5. `git push -u origin HEAD`
-6. `gh pr create --base main` — 테스트 결과 기반 Test Plan 자동 생성
