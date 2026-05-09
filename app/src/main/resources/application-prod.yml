@@ -78,3 +78,8 @@ worklog:
     org: resume-helper
   audio:
     upload-dir: /var/worklog/audio
+
+logging:
+  structured:
+    format:
+      console: ecs
