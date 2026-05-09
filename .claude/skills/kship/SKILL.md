@@ -1,10 +1,10 @@
 ---
-name: ship
-description: Use when the user wants to commit current changes, run tests, push to remote, and create a GitHub PR. Trigger with /ship or when the user says "커밋하고 푸시해", "PR 올려줘", "배포해줘".
-trigger: /ship
+name: kship
+description: Use when the user wants to commit current changes, run tests, push to remote, and create a GitHub PR. Trigger with /kship or when the user says "커밋하고 푸시해", "PR 올려줘", "배포해줘".
+trigger: /kship
 ---
 
-# /ship — 테스트 → 커밋 → 푸시 → PR
+# /kship — 테스트 → 커밋 → 푸시 → PR
 
 `$ARGUMENTS`가 있으면 PR 제목으로 사용합니다. 없으면 변경사항을 분석해 자동 생성합니다.
 

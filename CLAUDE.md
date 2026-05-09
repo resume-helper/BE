@@ -169,5 +169,16 @@ chore: 의존성·설정 변경
 
 | 커맨드 | 설명 |
 |--------|------|
-| `/ship [PR 제목]` | 테스트 실행 → 커밋 → 푸시 → PR 생성 자동화 |
+| `/kship [PR 제목]` | 테스트 실행 → 커밋 → 푸시 → PR 생성 자동화 |
 | `/meeting` | 백엔드 팀 회의 진행 (discussion.md 기반) |
+
+### /kship 동작 순서
+
+1. `git status` / `git diff` / `git log` 병렬 실행
+2. 민감 파일 제외 후 선택적 스테이징 (`.env`, `build/`, `*.pem` 등 제외)
+3. `./gradlew test --continue` 실행 → XML 리포트 파싱
+   - 빌드 오류 시 즉시 중단
+   - 테스트 실패 시 목록 보여주고 사용자 확인
+4. HEREDOC 방식으로 커밋
+5. `git push -u origin HEAD`
+6. `gh pr create --base main` — 테스트 결과 기반 Test Plan 자동 생성
