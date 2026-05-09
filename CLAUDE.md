@@ -263,10 +263,10 @@ JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew :module-{name}:ktlintFormat
 
 | 커맨드 | 설명 |
 |--------|------|
-| `/ship [PR 제목]` | 테스트 실행 → 커밋 → 푸시 → PR 생성 자동화 |
+| `/kship [PR 제목]` | 테스트 실행 → 커밋 → 푸시 → PR 생성 자동화 |
 | `/meeting` | 백엔드 팀 회의 진행 (discussion.md 기반) |
 
-### /ship 동작 순서
+### /kship 동작 순서
 
 1. `git status` / `git diff` / `git log` 병렬 실행
 2. 민감 파일 제외 후 선택적 스테이징 (`.env`, `build/`, `*.pem` 등 제외)

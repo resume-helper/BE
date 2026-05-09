@@ -3,6 +3,7 @@ package com.atomiccv.auth.infrastructure
 import com.atomiccv.auth.infrastructure.client.CustomOAuth2UserService
 import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationSuccessHandler
 import com.atomiccv.auth.interfaces.rest.JwtAuthenticationFilter
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -43,6 +44,12 @@ class SecurityConfig(
             }.oauth2Login {
                 it.userInfoEndpoint { endpoint -> endpoint.userService(customOAuth2UserService) }
                 it.successHandler(oAuth2AuthenticationSuccessHandler)
+            }.exceptionHandling {
+                it.authenticationEntryPoint { _, response, _ ->
+                    response.status = HttpServletResponse.SC_UNAUTHORIZED
+                    response.contentType = "application/json;charset=UTF-8"
+                    response.writer.write("""{"code":"UNAUTHORIZED","message":"인증이 필요합니다"}""")
+                }
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
