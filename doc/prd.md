@@ -123,15 +123,14 @@
 
 **핵심 동작**:
 - 블록 생성 / 조회 / 수정 / 삭제 (Soft Delete)
-- 블록 일괄 저장 (FE가 전체 블록 상태를 주기적으로 일괄 전송)
-- 이력서 내 블록 순서 변경 (`resume_blocks.order_index`)
+- 블록 타입별 단건 저장
+- 이력서 내 블록 순서 변경 (`resume_blocks.order_index`) — Phase 2-2에서 구현
 
 > 저장 방식 상세: `doc/SERVICE_POLICY.md` [3. 블록 정책]
 
 **수용 기준**:
-- [ ] 블록 타입별 CRUD API
-- [ ] 블록 일괄 저장 API (FE가 주기적으로 전체 블록 상태 전송)
-- [ ] 이력서 내 블록 순서 일괄 변경 API
+- [ ] 블록 타입별 CRUD API (생성 / 조회 / 수정 / 삭제)
+- [ ] 이력서 내 블록 순서 일괄 변경 API — Phase 2-2
 
 ---
 
