@@ -252,7 +252,11 @@ data class CreateBlockRequest(
     @field:NotBlank
     @field:Size(max = 200)
     val title: String,
-    @Schema(description = "블록 내용 JSON", example = """{"company":"카카오","startDate":"2024-01"}""")
+    @Schema(
+        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
+        type = "string",
+        example = "{}",
+    )
     @field:NotBlank
     val contentJson: String,
 )
@@ -263,7 +267,11 @@ data class UpdateBlockRequest(
     @field:NotBlank
     @field:Size(max = 200)
     val title: String,
-    @Schema(description = "블록 내용 JSON", example = """{"company":"카카오","startDate":"2024-01"}""")
+    @Schema(
+        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
+        type = "string",
+        example = "{}",
+    )
     @field:NotBlank
     val contentJson: String,
 )
@@ -276,7 +284,7 @@ data class BlockResponse(
     val type: BlockType,
     @Schema(description = "블록 제목", example = "카카오 백엔드 개발자")
     val title: String,
-    @Schema(description = "블록 내용 JSON", example = """{"company":"카카오","startDate":"2024-01"}""")
+    @Schema(description = "블록 내용 JSON 문자열", example = "{}")
     val contentJson: String,
     @Schema(description = "생성 일시", example = "2026-05-11T10:00:00")
     val createdAt: LocalDateTime,
