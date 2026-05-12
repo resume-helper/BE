@@ -23,7 +23,7 @@ class SwaggerConfig {
         OpenAPI()
             .info(buildInfo())
             .components(buildComponents())
-            .addSecurityItem(SecurityRequirement().addList(ACCESS_TOKEN_COOKIE))
+            .addSecurityItem(SecurityRequirement().addList(BEARER_AUTH).addList(ACCESS_TOKEN_COOKIE))
             .addTagsItem(Tag().name("OAuth2 소셜 로그인").description("소셜 로그인 시작 — 브라우저를 해당 URL로 이동"))
             .paths(buildOAuth2Paths())
 
@@ -43,6 +43,13 @@ class SwaggerConfig {
 
         return Components()
             .addSecuritySchemes(
+                BEARER_AUTH,
+                SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+                    .description("Swagger 테스트용 — 로그인 후 발급된 access_token 값을 입력"),
+            ).addSecuritySchemes(
                 ACCESS_TOKEN_COOKIE,
                 SecurityScheme()
                     .type(SecurityScheme.Type.APIKEY)
@@ -88,6 +95,7 @@ class SwaggerConfig {
     }
 
     companion object {
+        const val BEARER_AUTH = "bearerAuth"
         const val ACCESS_TOKEN_COOKIE = "access_token_cookie"
         const val REFRESH_TOKEN_COOKIE = "refresh_token_cookie"
 
