@@ -63,6 +63,7 @@ jwt:
 app:
   frontend-url: ${APP_FRONTEND_URL}
   cookie-same-site: None
+  cookie-domain: .developlife.co.kr
 
 springdoc:
   swagger-ui:
