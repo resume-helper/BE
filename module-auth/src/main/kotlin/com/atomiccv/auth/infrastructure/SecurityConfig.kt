@@ -1,5 +1,6 @@
 package com.atomiccv.auth.infrastructure
 
+import com.atomiccv.auth.infrastructure.client.CustomOAuth2AuthorizationRequestResolver
 import com.atomiccv.auth.infrastructure.client.CustomOAuth2UserService
 import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationSuccessHandler
 import com.atomiccv.auth.interfaces.rest.JwtAuthenticationFilter
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -22,8 +24,18 @@ class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val clientRegistrationRepository: ClientRegistrationRepository,
     @Value("\${app.frontend-url}") private val frontendUrl: String,
+    @Value("\${app.allowed-redirect-origins:}") private val allowedRedirectOriginsRaw: String,
 ) {
+    private val allowedOrigins: List<String> by lazy {
+        allowedRedirectOriginsRaw
+            .split(",")
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .ifEmpty { listOf(frontendUrl) }
+    }
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -43,6 +55,11 @@ class SecurityConfig(
                     ).permitAll()
                 it.anyRequest().authenticated()
             }.oauth2Login {
+                it.authorizationEndpoint { endpoint ->
+                    endpoint.authorizationRequestResolver(
+                        CustomOAuth2AuthorizationRequestResolver(clientRegistrationRepository),
+                    )
+                }
                 it.userInfoEndpoint { endpoint -> endpoint.userService(customOAuth2UserService) }
                 it.successHandler(oAuth2AuthenticationSuccessHandler)
             }.exceptionHandling {
@@ -60,7 +77,7 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config =
             CorsConfiguration().apply {
-                allowedOrigins = listOf(frontendUrl)
+                allowedOrigins = allowedOrigins
                 allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 allowedHeaders = listOf("*")
                 allowCredentials = true

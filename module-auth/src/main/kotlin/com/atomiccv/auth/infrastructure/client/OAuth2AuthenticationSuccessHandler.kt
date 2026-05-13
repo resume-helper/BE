@@ -15,7 +15,12 @@ class OAuth2AuthenticationSuccessHandler(
     @Value("\${app.frontend-url}") private val frontendUrl: String,
     @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
     @Value("\${app.cookie-domain:}") private val cookieDomain: String,
+    @Value("\${app.allowed-redirect-origins:}") private val allowedRedirectOriginsRaw: String,
 ) : SimpleUrlAuthenticationSuccessHandler() {
+    private val allowedRedirectOrigins: List<String> by lazy {
+        allowedRedirectOriginsRaw.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    }
+
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -24,7 +29,15 @@ class OAuth2AuthenticationSuccessHandler(
         val user = authentication.principal as OAuth2UserWithToken
         addCookie(response, "access_token", user.accessToken, Duration.ofHours(1))
         addCookie(response, "refresh_token", user.refreshToken, Duration.ofDays(7), "/api/auth/refresh")
-        redirectStrategy.sendRedirect(request, response, frontendUrl)
+        val redirectUri = resolveRedirectUri(request)
+        request.session?.removeAttribute(SESSION_KEY_REDIRECT_URI)
+        redirectStrategy.sendRedirect(request, response, redirectUri)
+    }
+
+    private fun resolveRedirectUri(request: HttpServletRequest): String {
+        val stored = request.session?.getAttribute(SESSION_KEY_REDIRECT_URI) as? String ?: return frontendUrl
+        val isAllowed = allowedRedirectOrigins.any { stored.startsWith(it) }
+        return if (isAllowed) stored else frontendUrl
     }
 
     private fun addCookie(
