@@ -52,4 +52,11 @@ for i in {1..10}; do
   sleep 5
 done
 
+CURRENT_NGINX_PORT=$(grep -oP '(?<=server 127.0.0.1:)\d+' /etc/nginx/conf.d/atomiccv.conf)
+if [ "$CURRENT_NGINX_PORT" != "$DEV_PORT" ]; then
+  echo "▶ Nginx upstream 전환 → $DEV_PORT"
+  sudo sed -i "s/server 127.0.0.1:$CURRENT_NGINX_PORT/server 127.0.0.1:$DEV_PORT/" /etc/nginx/conf.d/atomiccv.conf
+  sudo nginx -s reload
+fi
+
 echo "🎉 Dev 서버 배포 완료"
