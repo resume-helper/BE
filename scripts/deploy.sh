@@ -43,6 +43,7 @@ docker rm "atomiccv-$IDLE_COLOR" 2>/dev/null || true
 docker run -d \
   --name "atomiccv-$IDLE_COLOR" \
   -p "$IDLE_PORT:8080" \
+  -e SPRING_PROFILES_ACTIVE=prod \
   $ENV_ARGS \
   "$IMAGE_NAME"
 
