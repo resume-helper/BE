@@ -1,7 +1,8 @@
 name: Deploy Dev Server
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ dev ]
 
 jobs:
   deploy-dev:
