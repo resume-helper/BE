@@ -2,6 +2,7 @@ package com.atomiccv.auth.infrastructure
 
 import com.atomiccv.auth.infrastructure.client.CustomOAuth2AuthorizationRequestResolver
 import com.atomiccv.auth.infrastructure.client.CustomOAuth2UserService
+import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationFailureHandler
 import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationSuccessHandler
 import com.atomiccv.auth.interfaces.rest.JwtAuthenticationFilter
 import jakarta.servlet.http.HttpServletResponse
@@ -23,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler,
+    private val oAuth2AuthenticationFailureHandler: OAuth2AuthenticationFailureHandler,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val clientRegistrationRepository: ClientRegistrationRepository,
     @Value("\${app.frontend-url}") private val frontendUrl: String,
@@ -62,6 +64,7 @@ class SecurityConfig(
                 }
                 it.userInfoEndpoint { endpoint -> endpoint.userService(customOAuth2UserService) }
                 it.successHandler(oAuth2AuthenticationSuccessHandler)
+                it.failureHandler(oAuth2AuthenticationFailureHandler)
             }.exceptionHandling {
                 it.authenticationEntryPoint { _, response, _ ->
                     response.status = HttpServletResponse.SC_UNAUTHORIZED
