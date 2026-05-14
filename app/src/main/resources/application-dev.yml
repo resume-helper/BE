@@ -9,7 +9,7 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       ssl:
-        enabled: false
+        enabled: ${REDIS_SSL_ENABLED:false}
   jpa:
     hibernate:
       ddl-auto: update
