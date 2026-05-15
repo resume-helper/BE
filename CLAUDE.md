@@ -123,10 +123,13 @@ infrastructure → domain
 
 ```
 main ← 프로덕션 (직접 push 금지)
-  └─ feature/{기능명}
-  └─ fix/{버그명}
-  └─ chore/{작업명}
+  └─ dev ← 통합 브랜치 (직접 push 금지, main으로 PR 머지)
+       └─ feature/{기능명}
+       └─ fix/{버그명}
+       └─ chore/{작업명}
 ```
+
+작업 흐름: feature/fix/chore 브랜치 생성 → dev로 PR → 머지 후 dev → main PR
 
 PR 머지 방식: Merge | 승인: AI | 템플릿: `.github/pull_request_template.md`
 
@@ -181,4 +184,4 @@ chore: 의존성·설정 변경
    - 테스트 실패 시 목록 보여주고 사용자 확인
 4. HEREDOC 방식으로 커밋
 5. `git push -u origin HEAD`
-6. `gh pr create --base main` — 테스트 결과 기반 Test Plan 자동 생성
+6. `gh pr create --base dev` — 테스트 결과 기반 Test Plan 자동 생성

@@ -99,7 +99,7 @@ git push -u origin HEAD
 ## 6단계 — PR 생성
 
 ```bash
-gh pr create --base main --title "제목" --body "$(cat <<'EOF'
+gh pr create --base dev --title "제목" --body "$(cat <<'EOF'
 본문
 EOF
 )"
@@ -148,6 +148,6 @@ EOF
 ## 주의사항
 
 - `.env`, `*.local`, `build/`, `*.class`, `.claude/` 파일은 절대 커밋하지 않습니다
-- PR base 브랜치는 `main`입니다
+- PR base 브랜치는 `dev`입니다
 - XML 리포트가 없으면 `./gradlew test` 출력 텍스트에서 결과를 파싱합니다
-- `main` 브랜치 직접 push는 사용자 확인 후 진행합니다
+- `dev` 브랜치 직접 push는 사용자 확인 후 진행합니다

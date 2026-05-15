@@ -3,7 +3,7 @@ name: Discord PR Merge 알림
 on:
   pull_request:
     types: [closed]
-    branches: [main]
+    branches: [dev]
 
 jobs:
   notify:
