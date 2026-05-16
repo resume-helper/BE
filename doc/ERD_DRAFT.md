@@ -1,7 +1,7 @@
 # Atomic CV — ERD (Draft v0.2)
 
 > 작성일: 2026-04-30
-> 최종 업데이트: 2026-05-07
+> 최종 업데이트: 2026-05-15
 > 상태: 1차 확정 (DDL 작성 완료, 2026-05-07)
 > 기반: DDD Bounded Context 설계 / MySQL
 > DDL 파일: `doc/erd_cloud_import.sql`
@@ -100,7 +100,6 @@ erDiagram
         BIGINT resume_id FK
         BIGINT block_id FK
         INT order_index "이력서 내 블록 정렬 순서"
-        BOOLEAN is_visible "false = 이력서에서 숨김 처리"
     }
 
     %% =====================
@@ -130,10 +129,6 @@ erDiagram
         BIGINT id PK
         BIGINT resume_id FK
         VARCHAR visitor_ip "방문자 IP (중복 방문 필터링)"
-        TEXT user_agent "브라우저·기기 정보"
-        VARCHAR referrer "유입 경로 URL"
-        DATETIME started_at "열람 시작 시각"
-        DATETIME ended_at "열람 종료 시각 (nullable)"
         INT total_duration_sec "전체 체류시간 (초)"
         DATETIME created_at
     }
@@ -267,7 +262,6 @@ erDiagram
 | resume_id | BIGINT | FK → resumes.id, NOT NULL | 연결된 이력서 |
 | block_id | BIGINT | FK → blocks.id, NOT NULL | 연결된 블록 |
 | order_index | INT | NOT NULL | 이력서 내 블록 정렬 순서 |
-| is_visible | BOOLEAN | NOT NULL, DEFAULT TRUE | false = 이력서에서 숨김 처리 |
 
 **제약**
 - UNIQUE(resume_id, block_id) — 같은 이력서에 같은 블록 중복 추가 방지
@@ -318,16 +312,11 @@ erDiagram
 | id | BIGINT | PK, AUTO_INCREMENT | 세션 고유 식별자 |
 | resume_id | BIGINT | FK → resumes.id, NOT NULL | 열람된 이력서 |
 | visitor_ip | VARCHAR(45) | NOT NULL | 방문자 IP (중복 방문 카운트 필터링) |
-| user_agent | TEXT | NULL 허용 | 브라우저·OS 정보 |
-| referrer | VARCHAR(500) | NULL 허용 | 유입 경로 URL |
-| started_at | DATETIME | NOT NULL | 열람 시작 시각 |
-| ended_at | DATETIME | NULL 허용 | 열람 종료 시각. 미종료 시 NULL |
 | total_duration_sec | INT | NULL 허용 | 전체 체류시간 (초) |
 | created_at | DATETIME | NOT NULL | 레코드 생성 일시 |
 
 **인덱스**
 - `idx_view_sessions_resume_id` — 이력서별 열람 집계
-- `idx_view_sessions_resume_started` — 날짜 범위 조회
 
 ---
 
@@ -359,6 +348,8 @@ erDiagram
 | 7 | 슬러그 구조 | 랜덤 UUID 자동 생성, 사용자 지정 미지원 (MVP 이후 검토) | 2026-05-07 |
 | 8 | users·social_accounts 통합 여부 | 통합 안 함. 1:N 유지 (멀티 소셜 연동 지원) | 2026-05-07 |
 | 9 | 피드백 익명화 | 완전 익명. reviewer_name·reviewer_email 제거 | 2026-05-07 |
+| 10 | resume_blocks.is_visible 제거 | 숨김 처리 기능 MVP 제외 결정 | 2026-05-15 |
+| 11 | view_sessions 컬럼 축소 | user_agent·referrer·started_at·ended_at 제거. visitor_ip + total_duration_sec + created_at만 유지 | 2026-05-15 |
 
 ### 기존 확정된 사항
 

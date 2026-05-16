@@ -3,7 +3,9 @@
 -- Base: ERD-Cloud export (2026-05-07)
 -- DB: MySQL 8.x
 -- 변경이력: resume_versions·notifications 제거,
---           blocks 간소화, resumes 구조 변경
+--           blocks 간소화, resumes 구조 변경,
+--           resume_blocks.is_visible 제거,
+--           view_sessions user_agent·referrer·started_at·ended_at 제거 (2026-05-15)
 -- =============================================
 
 -- =====================
@@ -88,11 +90,10 @@ CREATE TABLE resumes
 
 CREATE TABLE resume_blocks
 (
-    id          BIGINT  NOT NULL AUTO_INCREMENT,
-    resume_id   BIGINT  NOT NULL,
-    block_id    BIGINT  NOT NULL,
-    order_index INT     NOT NULL,
-    is_visible  BOOLEAN NOT NULL DEFAULT TRUE,
+    id          BIGINT NOT NULL AUTO_INCREMENT,
+    resume_id   BIGINT NOT NULL,
+    block_id    BIGINT NOT NULL,
+    order_index INT    NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_resume_blocks_resume_block (resume_id, block_id),
     INDEX idx_resume_blocks_resume_id (resume_id),
@@ -134,21 +135,16 @@ CREATE TABLE feedback_tags
 -- ANALYTICS CONTEXT
 -- =====================
 
--- version_id 제거
+-- version_id 제거, user_agent·referrer·started_at·ended_at 제거
 CREATE TABLE view_sessions
 (
-    id                 BIGINT       NOT NULL AUTO_INCREMENT,
-    resume_id          BIGINT       NOT NULL,
-    visitor_ip         VARCHAR(45)  NOT NULL,
-    user_agent         TEXT         NULL,
-    referrer           VARCHAR(500) NULL,
-    started_at         DATETIME     NOT NULL,
-    ended_at           DATETIME     NULL,
-    total_duration_sec INT          NULL,
-    created_at         DATETIME     NOT NULL,
+    id                 BIGINT      NOT NULL AUTO_INCREMENT,
+    resume_id          BIGINT      NOT NULL,
+    visitor_ip         VARCHAR(45) NOT NULL,
+    total_duration_sec INT         NULL,
+    created_at         DATETIME    NOT NULL,
     PRIMARY KEY (id),
     INDEX idx_view_sessions_resume_id (resume_id),
-    INDEX idx_view_sessions_resume_started (resume_id, started_at),
     CONSTRAINT fk_view_sessions_resume FOREIGN KEY (resume_id) REFERENCES resumes (id)
 );
 
