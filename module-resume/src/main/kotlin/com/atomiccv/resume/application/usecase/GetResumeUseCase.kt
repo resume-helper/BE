@@ -1,6 +1,7 @@
 package com.atomiccv.resume.application.usecase
 
 import com.atomiccv.resume.application.port.S3Port
+import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.repository.ResumeDetail
 import com.atomiccv.resume.domain.repository.ResumeRepository
 import com.atomiccv.shared.common.exception.BusinessException
@@ -20,8 +21,15 @@ class GetResumeUseCase(
             resumeRepository.findDetailById(query.resumeId)
                 ?: throw BusinessException(ErrorCode.RESUME_NOT_FOUND)
         if (detail.resume.isDeleted()) throw BusinessException(ErrorCode.RESUME_NOT_FOUND)
-        if (!detail.resume.isOwnedBy(query.userId)) throw BusinessException(ErrorCode.FORBIDDEN)
+        verifyOwnership(detail.resume, query.userId)
         return detail
+    }
+
+    private fun verifyOwnership(
+        resume: Resume,
+        userId: Long,
+    ) {
+        if (!resume.isOwnedBy(userId)) throw BusinessException(ErrorCode.FORBIDDEN)
     }
 
     fun getPresignedDownloadUrl(pdfS3Key: String): String =

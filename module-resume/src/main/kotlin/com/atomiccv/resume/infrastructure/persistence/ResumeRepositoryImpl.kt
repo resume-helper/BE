@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Repository
 
 @Repository
+@Suppress("TooManyFunctions")
 class ResumeRepositoryImpl(
     private val jpaRepository: ResumeJpaRepository,
     private val blockJpaRepository: ResumeBlockJpaRepository,

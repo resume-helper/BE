@@ -34,7 +34,10 @@ class ResumeModuleConfiguration {
 
     @Bean
     fun getBlocksUseCase(blockRepository: BlockRepository): GetBlocksUseCase = GetBlocksUseCase(blockRepository)
+}
 
+@Configuration
+class ResumeUseCaseConfiguration {
     @Bean
     fun s3Presigner(
         @Value("\${cloud.aws.region.static}") region: String,
