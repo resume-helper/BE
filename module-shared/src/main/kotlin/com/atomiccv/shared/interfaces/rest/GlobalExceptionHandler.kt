@@ -1,4 +1,4 @@
-package com.atomiccv.auth.interfaces.rest
+package com.atomiccv.shared.interfaces.rest
 
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode

@@ -3,8 +3,11 @@ package com.atomiccv.resume.infrastructure
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
+import com.atomiccv.resume.application.usecase.ReorderBlocksUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockUseCase
 import com.atomiccv.resume.domain.repository.BlockRepository
+import com.atomiccv.resume.domain.repository.ResumeBlockRepository
+import com.atomiccv.resume.domain.repository.ResumeRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -21,4 +24,10 @@ class ResumeModuleConfiguration {
 
     @Bean
     fun getBlocksUseCase(blockRepository: BlockRepository): GetBlocksUseCase = GetBlocksUseCase(blockRepository)
+
+    @Bean
+    fun reorderBlocksUseCase(
+        resumeRepository: ResumeRepository,
+        resumeBlockRepository: ResumeBlockRepository,
+    ): ReorderBlocksUseCase = ReorderBlocksUseCase(resumeRepository, resumeBlockRepository)
 }
