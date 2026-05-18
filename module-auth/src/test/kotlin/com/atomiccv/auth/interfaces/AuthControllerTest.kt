@@ -8,7 +8,7 @@ import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.auth.interfaces.rest.AuthController
-import com.atomiccv.auth.interfaces.rest.GlobalExceptionHandler
+import com.atomiccv.shared.interfaces.rest.GlobalExceptionHandler
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
