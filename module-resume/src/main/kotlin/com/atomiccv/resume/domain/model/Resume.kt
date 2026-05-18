@@ -7,7 +7,7 @@ data class Resume(
     val userId: Long,
     val type: ResumeType? = null,
     val title: String,
-    val slug: String,
+    val slug: String? = null,
     val isPublic: Boolean = false,
     val pdfS3Key: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),

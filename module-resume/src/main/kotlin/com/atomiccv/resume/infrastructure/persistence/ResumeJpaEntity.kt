@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "resumes")
+@Suppress("LongParameterList")
 class ResumeJpaEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
@@ -25,8 +26,8 @@ class ResumeJpaEntity(
     val type: ResumeType? = null,
     @Column(nullable = false, length = 200)
     val title: String,
-    @Column(nullable = false, length = 100, unique = true)
-    val slug: String,
+    @Column(nullable = true, length = 100, unique = true)
+    val slug: String? = null,
     @Column(name = "is_public", nullable = false)
     val isPublic: Boolean = false,
     @Column(name = "pdf_s3_key", length = 500)
