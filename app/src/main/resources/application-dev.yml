@@ -85,3 +85,12 @@ worklog:
     org: resume-helper
   audio:
     upload-dir: /tmp/worklog/audio
+
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+
+resume:
+  s3:
+    bucket-name: ${RESUME_S3_BUCKET:atomiccv-resumes-dev}
