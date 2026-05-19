@@ -34,7 +34,7 @@ class ResumeRepositoryImpl(
 
     override fun findPageByUserId(
         userId: Long,
-        query: ResumeListQuery
+        query: ResumeListQuery,
     ): Page<Resume> {
         val pageable = buildPageable(query)
         return selectQuery(userId, query, pageable).map { it.toDomain() }

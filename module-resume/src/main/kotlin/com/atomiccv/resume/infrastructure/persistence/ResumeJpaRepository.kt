@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param
 interface ResumeJpaRepository : JpaRepository<ResumeJpaEntity, Long> {
     fun findAllByUserIdAndDeletedAtIsNull(
         userId: Long,
-        pageable: Pageable
+        pageable: Pageable,
     ): Page<ResumeJpaEntity>
 
     fun findAllByUserIdAndTypeAndDeletedAtIsNull(

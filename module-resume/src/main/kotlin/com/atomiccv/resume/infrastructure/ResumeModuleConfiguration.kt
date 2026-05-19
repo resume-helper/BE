@@ -4,15 +4,23 @@ import com.atomiccv.resume.application.port.S3Port
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.CreateResumeUseCase
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
+import com.atomiccv.resume.application.usecase.DeleteFeedbackUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
 import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
+import com.atomiccv.resume.application.usecase.GetAllFeedbacksUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
+import com.atomiccv.resume.application.usecase.GetFeedbackListUseCase
+import com.atomiccv.resume.application.usecase.GetFeedbackUseCase
 import com.atomiccv.resume.application.usecase.GetResumeUseCase
 import com.atomiccv.resume.application.usecase.GetResumesUseCase
+import com.atomiccv.resume.application.usecase.ReorderBlocksUseCase
+import com.atomiccv.resume.application.usecase.SubmitFeedbackUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeVisibilityUseCase
 import com.atomiccv.resume.domain.repository.BlockRepository
+import com.atomiccv.resume.domain.repository.FeedbackRepository
+import com.atomiccv.resume.domain.repository.ResumeBlockRepository
 import com.atomiccv.resume.domain.repository.ResumeRepository
 import com.atomiccv.resume.infrastructure.s3.S3Adapter
 import org.springframework.beans.factory.annotation.Value
@@ -76,4 +84,43 @@ class ResumeUseCaseConfiguration {
 
     @Bean
     fun generateUploadUrlUseCase(s3Port: S3Port): GenerateUploadUrlUseCase = GenerateUploadUrlUseCase(s3Port)
+}
+
+@Configuration
+class FeedbackUseCaseConfiguration {
+    @Bean
+    fun reorderBlocksUseCase(
+        resumeRepository: ResumeRepository,
+        resumeBlockRepository: ResumeBlockRepository,
+    ): ReorderBlocksUseCase = ReorderBlocksUseCase(resumeRepository, resumeBlockRepository)
+
+    @Bean
+    fun submitFeedbackUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): SubmitFeedbackUseCase = SubmitFeedbackUseCase(resumeRepository, feedbackRepository)
+
+    @Bean
+    fun getFeedbackListUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): GetFeedbackListUseCase = GetFeedbackListUseCase(resumeRepository, feedbackRepository)
+
+    @Bean
+    fun getFeedbackUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): GetFeedbackUseCase = GetFeedbackUseCase(resumeRepository, feedbackRepository)
+
+    @Bean
+    fun deleteFeedbackUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): DeleteFeedbackUseCase = DeleteFeedbackUseCase(resumeRepository, feedbackRepository)
+
+    @Bean
+    fun getAllFeedbacksUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): GetAllFeedbacksUseCase = GetAllFeedbacksUseCase(resumeRepository, feedbackRepository)
 }
