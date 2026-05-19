@@ -11,6 +11,7 @@ data class CreateResumeCommand(
     val userId: Long,
     val title: String,
     val type: ResumeType?,
+    val pdfS3Key: String? = null,
     val blocks: List<ResumeBlockInput>,
 )
 
@@ -34,7 +35,8 @@ class CreateResumeUseCase(
             userId = command.userId,
             title = command.title,
             type = command.type,
-            slug = UUID.randomUUID().toString().replace("-", ""),
+            slug = if (command.type == ResumeType.WEB) UUID.randomUUID().toString().replace("-", "") else null,
+            pdfS3Key = command.pdfS3Key,
         )
 
     private fun saveBlocks(

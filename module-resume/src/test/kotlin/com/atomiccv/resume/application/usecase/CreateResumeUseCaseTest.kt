@@ -1,6 +1,7 @@
 package com.atomiccv.resume.application.usecase
 
 import com.atomiccv.resume.domain.model.Resume
+import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -15,7 +16,7 @@ class CreateResumeUseCaseTest {
     private val useCase = CreateResumeUseCase(resumeRepository)
 
     @Test
-    fun `이력서 생성 시 slug가 자동 생성된다`() {
+    fun `WEB 타입 이력서 생성 시 slug가 자동 생성된다`() {
         every { resumeRepository.save(any()) } answers { firstArg<Resume>().copy(id = 1L) }
         every { resumeRepository.saveBlock(any()) } answers { firstArg() }
 
@@ -23,7 +24,7 @@ class CreateResumeUseCaseTest {
             CreateResumeCommand(
                 userId = 1L,
                 title = "테스트 이력서",
-                type = null,
+                type = ResumeType.WEB,
                 blocks = emptyList(),
             )
 
@@ -31,6 +32,28 @@ class CreateResumeUseCaseTest {
 
         assertNotNull(result.slug)
         assertFalse(result.slug!!.isBlank())
+    }
+
+    @Test
+    fun `PDF 타입 이력서 생성 시 slug가 생성되지 않고 pdfS3Key가 저장된다`() {
+        every { resumeRepository.save(any()) } answers { firstArg<Resume>().copy(id = 1L) }
+
+        val command =
+            CreateResumeCommand(
+                userId = 1L,
+                title = "PDF 이력서",
+                type = ResumeType.PDF,
+                pdfS3Key = "resumes/1/uuid/resume.pdf",
+                blocks = emptyList(),
+            )
+
+        useCase.create(command)
+
+        verify {
+            resumeRepository.save(
+                match { it.slug == null && it.pdfS3Key == "resumes/1/uuid/resume.pdf" },
+            )
+        }
     }
 
     @Test

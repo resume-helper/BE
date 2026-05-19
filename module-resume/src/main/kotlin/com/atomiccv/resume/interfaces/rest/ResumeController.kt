@@ -100,6 +100,7 @@ class ResumeController(
                     userId = userId,
                     title = request.title,
                     type = request.type,
+                    pdfS3Key = request.pdfS3Key,
                     blocks = request.blocks.map { ResumeBlockInput(blockId = it.blockId, orderIndex = it.orderIndex) },
                 ),
             )
@@ -440,8 +441,10 @@ data class CreateResumeRequest(
     @field:NotBlank
     @field:Size(max = 200)
     val title: String,
-    @Schema(description = "이력서 타입", example = "GENERAL")
+    @Schema(description = "이력서 타입", example = "PDF")
     val type: ResumeType?,
+    @Schema(description = "PDF S3 키 (PDF 타입일 때 upload-url로 발급받은 s3Key)", example = "resumes/1/uuid/resume.pdf")
+    val pdfS3Key: String? = null,
     @Schema(description = "연결할 블록 목록")
     @field:Valid
     val blocks: List<BlockInputRequest> = emptyList(),
