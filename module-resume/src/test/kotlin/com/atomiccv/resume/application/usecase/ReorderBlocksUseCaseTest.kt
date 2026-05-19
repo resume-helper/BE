@@ -69,7 +69,7 @@ class ReorderBlocksUseCaseTest {
             assertFailsWith<BusinessException> {
                 useCase.reorder(ReorderBlocksCommand(resumeId = 999L, userId = 10L, blockIds = listOf(100L)))
             }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, ex.errorCode)
+        assertEquals(ErrorCode.RESUME_NOT_FOUND, ex.errorCode)
     }
 
     @Test
@@ -80,7 +80,7 @@ class ReorderBlocksUseCaseTest {
             assertFailsWith<BusinessException> {
                 useCase.reorder(ReorderBlocksCommand(resumeId = 1L, userId = 10L, blockIds = listOf(100L)))
             }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, ex.errorCode)
+        assertEquals(ErrorCode.RESUME_NOT_FOUND, ex.errorCode)
     }
 
     @Test

@@ -21,6 +21,8 @@ dependencies {
     implementation("com.mysql:mysql-connector-j")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(platform("software.amazon.awssdk:bom:2.26.12"))
+    implementation("software.amazon.awssdk:s3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
