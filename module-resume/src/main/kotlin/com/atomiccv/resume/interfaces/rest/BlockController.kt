@@ -13,6 +13,7 @@ import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
+import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -117,7 +118,7 @@ class BlockController(
                             BlockItemCommand(
                                 type = item.type,
                                 title = item.title,
-                                contentJson = item.contentJson,
+                                contentJson = item.contentJson.toString(),
                             )
                         },
                 ),
@@ -189,7 +190,7 @@ class BlockController(
                     blockId = id,
                     userId = userId,
                     title = request.title,
-                    contentJson = request.contentJson,
+                    contentJson = request.contentJson.toString(),
                 ),
             )
         return ResponseEntity.ok(ApiResponse.ok(block.toResponse()))
@@ -266,12 +267,10 @@ data class CreateBlockItemRequest(
     @field:Size(max = 200)
     val title: String,
     @Schema(
-        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
-        type = "string",
+        description = "블록 내용 JSON 오브젝트. 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
         example = "{}",
     )
-    @field:NotBlank
-    val contentJson: String,
+    val contentJson: JsonNode,
 )
 
 @Schema(description = "블록 수정 요청")
@@ -281,12 +280,10 @@ data class UpdateBlockRequest(
     @field:Size(max = 200)
     val title: String,
     @Schema(
-        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
-        type = "string",
+        description = "블록 내용 JSON 오브젝트. 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
         example = "{}",
     )
-    @field:NotBlank
-    val contentJson: String,
+    val contentJson: JsonNode,
 )
 
 @Schema(description = "블록 응답")

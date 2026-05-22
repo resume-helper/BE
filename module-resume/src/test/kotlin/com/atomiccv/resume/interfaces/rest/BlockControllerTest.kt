@@ -117,7 +117,7 @@ class BlockControllerTest {
                                     mapOf(
                                         "type" to "CAREER",
                                         "title" to "카카오 백엔드 개발자",
-                                        "contentJson" to """{"company":"카카오"}""",
+                                        "contentJson" to mapOf("company" to "카카오"),
                                     ),
                                 ),
                         ),
@@ -142,7 +142,7 @@ class BlockControllerTest {
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     objectMapper.writeValueAsString(
-                        mapOf("title" to "수정 제목", "contentJson" to "{}"),
+                        mapOf("title" to "수정 제목", "contentJson" to emptyMap<String, Any>()),
                     )
             }.andExpect {
                 status { isOk() }
