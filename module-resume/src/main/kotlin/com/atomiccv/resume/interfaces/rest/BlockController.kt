@@ -253,7 +253,7 @@ class BlockController(
 @Schema(description = "블록 배치 생성 요청")
 data class CreateBlocksRequest(
     @field:Valid
-    @field:Size(min = 1)
+    @field:Size(min = 1, max = 100)
     val blocks: List<CreateBlockItemRequest>,
 )
 
