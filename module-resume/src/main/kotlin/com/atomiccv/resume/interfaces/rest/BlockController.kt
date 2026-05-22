@@ -74,8 +74,8 @@ class BlockController(
     }
 
     @Operation(
-        summary = "블록 생성",
-        description = "새로운 블록을 생성합니다. `contentJson`은 블록 타입에 맞는 JSON 문자열을 그대로 전달합니다.",
+        summary = "블록 배치 생성",
+        description = "블록 리스트를 한 번에 생성합니다. 단일 트랜잭션으로 처리되며 일부 실패 시 전체 롤백됩니다.",
     )
     @ApiResponses(
         SwaggerApiResponse(responseCode = "200", description = "생성 성공"),
@@ -103,26 +103,26 @@ class BlockController(
         ),
     )
     @PostMapping
-    fun createBlock(
+    fun createBlocks(
         authentication: Authentication,
-        @Valid @RequestBody request: CreateBlockRequest,
-    ): ResponseEntity<ApiResponse<BlockResponse>> {
+        @Valid @RequestBody request: CreateBlocksRequest,
+    ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
         val userId = resolveUserId(authentication)
         val blocks =
             createBlockUseCase.create(
                 CreateBlocksCommand(
                     userId = userId,
                     items =
-                        listOf(
+                        request.blocks.map { item ->
                             BlockItemCommand(
-                                type = request.type,
-                                title = request.title,
-                                contentJson = request.contentJson,
-                            ),
-                        ),
+                                type = item.type,
+                                title = item.title,
+                                contentJson = item.contentJson,
+                            )
+                        },
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(blocks.first().toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse() }))
     }
 
     @Operation(
@@ -250,8 +250,15 @@ class BlockController(
             ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 }
 
-@Schema(description = "블록 생성 요청")
-data class CreateBlockRequest(
+@Schema(description = "블록 배치 생성 요청")
+data class CreateBlocksRequest(
+    @field:Valid
+    @field:Size(min = 1)
+    val blocks: List<CreateBlockItemRequest>,
+)
+
+@Schema(description = "블록 생성 항목")
+data class CreateBlockItemRequest(
     @Schema(description = "블록 타입", example = "CAREER")
     val type: BlockType,
     @Schema(description = "블록 제목 (최대 200자)", example = "카카오 백엔드 개발자")
