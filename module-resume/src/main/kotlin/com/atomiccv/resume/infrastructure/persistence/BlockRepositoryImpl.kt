@@ -11,6 +11,9 @@ class BlockRepositoryImpl(
 ) : BlockRepository {
     override fun save(block: Block): Block = jpaRepository.save(BlockJpaEntity.fromDomain(block)).toDomain()
 
+    override fun saveAll(blocks: List<Block>): List<Block> =
+        jpaRepository.saveAll(blocks.map { BlockJpaEntity.fromDomain(it) }).map { it.toDomain() }
+
     override fun findById(id: Long): Block? = jpaRepository.findById(id).orElse(null)?.toDomain()
 
     override fun findAllActiveByUserId(userId: Long): List<Block> =
@@ -18,6 +21,6 @@ class BlockRepositoryImpl(
 
     override fun findAllActiveByUserIdAndType(
         userId: Long,
-        type: BlockType
+        type: BlockType,
     ): List<Block> = jpaRepository.findAllByUserIdAndTypeAndDeletedAtIsNull(userId, type).map { it.toDomain() }
 }
