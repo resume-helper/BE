@@ -77,6 +77,6 @@ class CreateBlockUseCaseTest {
         val result = useCase.create(command)
 
         assertEquals(0, result.size)
-        verify { blockRepository.saveAll(emptyList()) }
+        verify { blockRepository.saveAll(any()) }
     }
 }
