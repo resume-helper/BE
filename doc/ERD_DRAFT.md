@@ -70,7 +70,7 @@ erDiagram
     blocks {
         BIGINT id PK
         BIGINT user_id FK
-        ENUM type "CAREER | SKILL | PROJECT | EDUCATION | CERTIFICATE | ACTIVITY | CUSTOM"
+        ENUM type "BASIC_INFO | SUMMARY | CAREER | INTRODUCTION | PROJECT | SKILL | EDUCATION | CERTIFICATE | ACTIVITY | CUSTOM"
         VARCHAR title "블록 제목"
         JSON content_json "블록 본문 (타입별 스키마 상이)"
         DATETIME created_at
@@ -214,7 +214,7 @@ erDiagram
 |------|------|------|------|
 | id | BIGINT | PK, AUTO_INCREMENT | 블록 고유 식별자 |
 | user_id | BIGINT | FK → users.id, NOT NULL | 블록 소유자 |
-| type | ENUM('CAREER','SKILL','PROJECT','EDUCATION','CERTIFICATE','ACTIVITY','CUSTOM') | NOT NULL | 블록 타입 |
+| type | ENUM('BASIC_INFO','SUMMARY','CAREER','INTRODUCTION','PROJECT','SKILL','EDUCATION','CERTIFICATE','ACTIVITY','CUSTOM') | NOT NULL | 블록 타입 |
 | title | VARCHAR(200) | NOT NULL | 블록 제목 |
 | content_json | JSON | NOT NULL | 블록 본문 (타입별 스키마 상이) |
 | created_at | DATETIME | NOT NULL | 생성 일시 |
