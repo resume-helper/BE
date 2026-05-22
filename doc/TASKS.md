@@ -168,3 +168,5 @@
 | ERD DDL | erd_cloud_import.sql 작성 완료 (1차 확정) | 2026-05-07 |
 | 서비스 정책서 | doc/SERVICE_POLICY.md 작성 완료 | 2026-05-07 |
 | resumes.type | ENUM('PDF', 'WEB') 확정 | 2026-05-07 |
+| 블록 생성 API | 단건 → 배치(리스트, 1~100건) 방식으로 교체. CreateBlocksCommand 도입, 단일 트랜잭션 처리 | 2026-05-22 |
+| blocks.type ENUM | BASIC_INFO·SUMMARY·INTRODUCTION 추가 | 2026-05-22 |
