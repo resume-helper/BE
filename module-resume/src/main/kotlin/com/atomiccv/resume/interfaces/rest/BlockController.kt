@@ -1,7 +1,8 @@
 package com.atomiccv.resume.interfaces.rest
 
-import com.atomiccv.resume.application.usecase.CreateBlockCommand
+import com.atomiccv.resume.application.usecase.BlockItemCommand
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
+import com.atomiccv.resume.application.usecase.CreateBlocksCommand
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksQuery
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
@@ -107,16 +108,21 @@ class BlockController(
         @Valid @RequestBody request: CreateBlockRequest,
     ): ResponseEntity<ApiResponse<BlockResponse>> {
         val userId = resolveUserId(authentication)
-        val block =
+        val blocks =
             createBlockUseCase.create(
-                CreateBlockCommand(
+                CreateBlocksCommand(
                     userId = userId,
-                    type = request.type,
-                    title = request.title,
-                    contentJson = request.contentJson,
+                    items =
+                        listOf(
+                            BlockItemCommand(
+                                type = request.type,
+                                title = request.title,
+                                contentJson = request.contentJson,
+                            ),
+                        ),
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(block.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(blocks.first().toResponse()))
     }
 
     @Operation(

@@ -91,7 +91,7 @@ class BlockControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `POST api-blocks - 블록을 생성하고 반환한다`() {
-        every { createBlockUseCase.create(any()) } returns block
+        every { createBlockUseCase.create(any()) } returns listOf(block)
 
         mockMvc
             .post("/api/blocks") {
