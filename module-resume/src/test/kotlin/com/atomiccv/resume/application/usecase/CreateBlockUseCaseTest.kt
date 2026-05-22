@@ -13,45 +13,37 @@ class CreateBlockUseCaseTest {
     private val blockRepository: BlockRepository = mockk()
     private val useCase = CreateBlockUseCase(blockRepository)
 
+    private val batchCommand =
+        CreateBlocksCommand(
+            userId = 1L,
+            items =
+                listOf(
+                    BlockItemCommand(type = BlockType.BASIC_INFO, title = "기본 정보", contentJson = "{}"),
+                    BlockItemCommand(
+                        type = BlockType.CAREER,
+                        title = "카카오 백엔드 개발자",
+                        contentJson = """{"company":"카카오"}""",
+                    ),
+                ),
+        )
+
+    private val savedBlocks =
+        listOf(
+            Block(id = 1L, userId = 1L, type = BlockType.BASIC_INFO, title = "기본 정보", contentJson = "{}"),
+            Block(
+                id = 2L,
+                userId = 1L,
+                type = BlockType.CAREER,
+                title = "카카오 백엔드 개발자",
+                contentJson = """{"company":"카카오"}""",
+            ),
+        )
+
     @Test
     fun `블록 리스트 생성 시 items 수만큼 저장되고 반환된다`() {
-        val command =
-            CreateBlocksCommand(
-                userId = 1L,
-                items =
-                    listOf(
-                        BlockItemCommand(
-                            type = BlockType.BASIC_INFO,
-                            title = "기본 정보",
-                            contentJson = "{}",
-                        ),
-                        BlockItemCommand(
-                            type = BlockType.CAREER,
-                            title = "카카오 백엔드 개발자",
-                            contentJson = """{"company":"카카오"}""",
-                        ),
-                    ),
-            )
-        val saved =
-            listOf(
-                Block(
-                    id = 1L,
-                    userId = 1L,
-                    type = BlockType.BASIC_INFO,
-                    title = "기본 정보",
-                    contentJson = "{}",
-                ),
-                Block(
-                    id = 2L,
-                    userId = 1L,
-                    type = BlockType.CAREER,
-                    title = "카카오 백엔드 개발자",
-                    contentJson = """{"company":"카카오"}""",
-                ),
-            )
-        every { blockRepository.saveAll(any()) } returns saved
+        every { blockRepository.saveAll(any()) } returns savedBlocks
 
-        val result = useCase.create(command)
+        val result = useCase.create(batchCommand)
 
         assertEquals(2, result.size)
         assertEquals(BlockType.BASIC_INFO, result[0].type)
