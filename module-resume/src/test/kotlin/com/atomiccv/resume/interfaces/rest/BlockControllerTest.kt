@@ -90,8 +90,20 @@ class BlockControllerTest {
 
     @Test
     @WithMockUser(username = "1")
-    fun `POST api-blocks - 블록을 생성하고 반환한다`() {
-        every { createBlockUseCase.create(any()) } returns block
+    fun `POST api-blocks - 블록 리스트를 생성하고 반환한다`() {
+        val savedBlocks =
+            listOf(
+                Block(
+                    id = 1L,
+                    userId = 1L,
+                    type = BlockType.CAREER,
+                    title = "카카오 백엔드 개발자",
+                    contentJson = """{"company":"카카오"}""",
+                    createdAt = LocalDateTime.of(2026, 5, 11, 10, 0),
+                    updatedAt = LocalDateTime.of(2026, 5, 11, 10, 0),
+                ),
+            )
+        every { createBlockUseCase.create(any()) } returns savedBlocks
 
         mockMvc
             .post("/api/blocks") {
@@ -99,12 +111,23 @@ class BlockControllerTest {
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     objectMapper.writeValueAsString(
-                        mapOf("type" to "CAREER", "title" to "카카오 백엔드 개발자", "contentJson" to """{"company":"카카오"}"""),
+                        mapOf(
+                            "blocks" to
+                                listOf(
+                                    mapOf(
+                                        "type" to "CAREER",
+                                        "title" to "카카오 백엔드 개발자",
+                                        "contentJson" to mapOf("company" to "카카오"),
+                                    ),
+                                ),
+                        ),
                     )
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
-                jsonPath("$.data.id") { value(1) }
+                jsonPath("$.data[0].id") { value(1) }
+                jsonPath("$.data[0].type") { value("CAREER") }
+                jsonPath("$.data[0].title") { value("카카오 백엔드 개발자") }
             }
     }
 
@@ -119,7 +142,7 @@ class BlockControllerTest {
                 contentType = MediaType.APPLICATION_JSON
                 content =
                     objectMapper.writeValueAsString(
-                        mapOf("title" to "수정 제목", "contentJson" to "{}"),
+                        mapOf("title" to "수정 제목", "contentJson" to emptyMap<String, Any>()),
                     )
             }.andExpect {
                 status { isOk() }

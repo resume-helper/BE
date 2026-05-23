@@ -1,7 +1,8 @@
 package com.atomiccv.resume.interfaces.rest
 
-import com.atomiccv.resume.application.usecase.CreateBlockCommand
+import com.atomiccv.resume.application.usecase.BlockItemCommand
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
+import com.atomiccv.resume.application.usecase.CreateBlocksCommand
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksQuery
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
@@ -12,6 +13,7 @@ import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
+import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -73,8 +75,8 @@ class BlockController(
     }
 
     @Operation(
-        summary = "블록 생성",
-        description = "새로운 블록을 생성합니다. `contentJson`은 블록 타입에 맞는 JSON 문자열을 그대로 전달합니다.",
+        summary = "블록 배치 생성",
+        description = "블록 리스트를 한 번에 생성합니다. 단일 트랜잭션으로 처리되며 일부 실패 시 전체 롤백됩니다.",
     )
     @ApiResponses(
         SwaggerApiResponse(responseCode = "200", description = "생성 성공"),
@@ -102,21 +104,26 @@ class BlockController(
         ),
     )
     @PostMapping
-    fun createBlock(
+    fun createBlocks(
         authentication: Authentication,
-        @Valid @RequestBody request: CreateBlockRequest,
-    ): ResponseEntity<ApiResponse<BlockResponse>> {
+        @Valid @RequestBody request: CreateBlocksRequest,
+    ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
         val userId = resolveUserId(authentication)
-        val block =
+        val blocks =
             createBlockUseCase.create(
-                CreateBlockCommand(
+                CreateBlocksCommand(
                     userId = userId,
-                    type = request.type,
-                    title = request.title,
-                    contentJson = request.contentJson,
+                    items =
+                        request.blocks.map { item ->
+                            BlockItemCommand(
+                                type = item.type,
+                                title = item.title,
+                                contentJson = item.contentJson.toString(),
+                            )
+                        },
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(block.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse() }))
     }
 
     @Operation(
@@ -183,7 +190,7 @@ class BlockController(
                     blockId = id,
                     userId = userId,
                     title = request.title,
-                    contentJson = request.contentJson,
+                    contentJson = request.contentJson.toString(),
                 ),
             )
         return ResponseEntity.ok(ApiResponse.ok(block.toResponse()))
@@ -244,8 +251,15 @@ class BlockController(
             ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 }
 
-@Schema(description = "블록 생성 요청")
-data class CreateBlockRequest(
+@Schema(description = "블록 배치 생성 요청")
+data class CreateBlocksRequest(
+    @field:Valid
+    @field:Size(min = 1, max = 100)
+    val blocks: List<CreateBlockItemRequest>,
+)
+
+@Schema(description = "블록 생성 항목")
+data class CreateBlockItemRequest(
     @Schema(description = "블록 타입", example = "CAREER")
     val type: BlockType,
     @Schema(description = "블록 제목 (최대 200자)", example = "카카오 백엔드 개발자")
@@ -253,12 +267,10 @@ data class CreateBlockRequest(
     @field:Size(max = 200)
     val title: String,
     @Schema(
-        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
-        type = "string",
+        description = "블록 내용 JSON 오브젝트. 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
         example = "{}",
     )
-    @field:NotBlank
-    val contentJson: String,
+    val contentJson: JsonNode,
 )
 
 @Schema(description = "블록 수정 요청")
@@ -268,12 +280,10 @@ data class UpdateBlockRequest(
     @field:Size(max = 200)
     val title: String,
     @Schema(
-        description = "블록 내용을 JSON 문자열로 직렬화하여 전달 (오브젝트 아님). 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
-        type = "string",
+        description = "블록 내용 JSON 오브젝트. 예: {\"company\":\"카카오\",\"startDate\":\"2024-01\"}",
         example = "{}",
     )
-    @field:NotBlank
-    val contentJson: String,
+    val contentJson: JsonNode,
 )
 
 @Schema(description = "블록 응답")

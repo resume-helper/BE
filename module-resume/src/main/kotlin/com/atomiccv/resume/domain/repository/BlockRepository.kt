@@ -6,12 +6,14 @@ import com.atomiccv.resume.domain.model.BlockType
 interface BlockRepository {
     fun save(block: Block): Block
 
+    fun saveAll(blocks: List<Block>): List<Block>
+
     fun findById(id: Long): Block?
 
     fun findAllActiveByUserId(userId: Long): List<Block>
 
     fun findAllActiveByUserIdAndType(
         userId: Long,
-        type: BlockType
+        type: BlockType,
     ): List<Block>
 }

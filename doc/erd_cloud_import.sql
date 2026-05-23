@@ -50,7 +50,7 @@ CREATE TABLE blocks
 (
     id           BIGINT                                                                                 NOT NULL AUTO_INCREMENT,
     user_id      BIGINT                                                                                 NOT NULL,
-    type         ENUM ('CAREER', 'SKILL', 'PROJECT', 'EDUCATION', 'CERTIFICATE', 'ACTIVITY', 'CUSTOM') NOT NULL,
+    type         ENUM ('BASIC_INFO', 'SUMMARY', 'CAREER', 'INTRODUCTION', 'PROJECT', 'SKILL', 'EDUCATION', 'CERTIFICATE', 'ACTIVITY', 'CUSTOM') NOT NULL,
     title        VARCHAR(200)                                                                           NOT NULL,
     content_json JSON                                                                                   NOT NULL,
     created_at   DATETIME                                                                               NOT NULL,
