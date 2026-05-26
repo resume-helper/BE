@@ -1,13 +1,19 @@
 package com.atomiccv.resume.infrastructure
 
 import com.atomiccv.resume.application.port.S3Port
+import com.atomiccv.resume.application.usecase.CreateBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.CreateResumeUseCase
+import com.atomiccv.resume.application.usecase.DeleteAllBlockDraftsByTypeUseCase
+import com.atomiccv.resume.application.usecase.DeleteBlockDraftUseCase
+import com.atomiccv.resume.application.usecase.DeleteBlockDraftsUseCase
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.DeleteFeedbackUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
 import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
 import com.atomiccv.resume.application.usecase.GetAllFeedbacksUseCase
+import com.atomiccv.resume.application.usecase.GetBlockDraftUseCase
+import com.atomiccv.resume.application.usecase.GetBlockDraftsUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
 import com.atomiccv.resume.application.usecase.GetFeedbackListUseCase
 import com.atomiccv.resume.application.usecase.GetFeedbackUseCase
@@ -15,9 +21,11 @@ import com.atomiccv.resume.application.usecase.GetResumeUseCase
 import com.atomiccv.resume.application.usecase.GetResumesUseCase
 import com.atomiccv.resume.application.usecase.ReorderBlocksUseCase
 import com.atomiccv.resume.application.usecase.SubmitFeedbackUseCase
+import com.atomiccv.resume.application.usecase.UpdateBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeVisibilityUseCase
+import com.atomiccv.resume.domain.repository.BlockDraftRepository
 import com.atomiccv.resume.domain.repository.BlockRepository
 import com.atomiccv.resume.domain.repository.FeedbackRepository
 import com.atomiccv.resume.domain.repository.ResumeBlockRepository
@@ -42,6 +50,35 @@ class ResumeModuleConfiguration {
 
     @Bean
     fun getBlocksUseCase(blockRepository: BlockRepository): GetBlocksUseCase = GetBlocksUseCase(blockRepository)
+
+    @Bean
+    fun createBlockDraftUseCase(blockDraftRepository: BlockDraftRepository): CreateBlockDraftUseCase =
+        CreateBlockDraftUseCase(blockDraftRepository)
+
+    @Bean
+    fun updateBlockDraftUseCase(blockDraftRepository: BlockDraftRepository): UpdateBlockDraftUseCase =
+        UpdateBlockDraftUseCase(blockDraftRepository)
+
+    @Bean
+    fun getBlockDraftsUseCase(blockDraftRepository: BlockDraftRepository): GetBlockDraftsUseCase =
+        GetBlockDraftsUseCase(blockDraftRepository)
+
+    @Bean
+    fun getBlockDraftUseCase(blockDraftRepository: BlockDraftRepository): GetBlockDraftUseCase =
+        GetBlockDraftUseCase(blockDraftRepository)
+
+    @Bean
+    fun deleteBlockDraftUseCase(blockDraftRepository: BlockDraftRepository): DeleteBlockDraftUseCase =
+        DeleteBlockDraftUseCase(blockDraftRepository)
+
+    @Bean
+    fun deleteBlockDraftsUseCase(blockDraftRepository: BlockDraftRepository): DeleteBlockDraftsUseCase =
+        DeleteBlockDraftsUseCase(blockDraftRepository)
+
+    @Bean
+    fun deleteAllBlockDraftsByTypeUseCase(
+        blockDraftRepository: BlockDraftRepository
+    ): DeleteAllBlockDraftsByTypeUseCase = DeleteAllBlockDraftsByTypeUseCase(blockDraftRepository)
 }
 
 @Configuration
