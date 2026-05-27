@@ -17,8 +17,15 @@ class GetBlockDraftUseCase(
         val draft =
             blockDraftRepository.findById(query.draftId)
                 ?: throw BusinessException(ErrorCode.BLOCK_DRAFT_NOT_FOUND)
-        if (draft.isExpired()) throw BusinessException(ErrorCode.BLOCK_DRAFT_NOT_FOUND)
-        if (!draft.isOwnedBy(query.userId)) throw BusinessException(ErrorCode.BLOCK_DRAFT_FORBIDDEN)
+        validateDraft(draft, query.userId)
         return draft
+    }
+
+    private fun validateDraft(
+        draft: BlockDraft,
+        userId: Long
+    ) {
+        if (draft.isExpired()) throw BusinessException(ErrorCode.BLOCK_DRAFT_NOT_FOUND)
+        if (!draft.isOwnedBy(userId)) throw BusinessException(ErrorCode.BLOCK_DRAFT_FORBIDDEN)
     }
 }
