@@ -38,7 +38,7 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 
 @Configuration
-class ResumeModuleConfiguration {
+class BlockUseCaseConfiguration {
     @Bean
     fun createBlockUseCase(blockRepository: BlockRepository): CreateBlockUseCase = CreateBlockUseCase(blockRepository)
 
@@ -50,7 +50,10 @@ class ResumeModuleConfiguration {
 
     @Bean
     fun getBlocksUseCase(blockRepository: BlockRepository): GetBlocksUseCase = GetBlocksUseCase(blockRepository)
+}
 
+@Configuration
+class BlockDraftUseCaseConfiguration {
     @Bean
     fun createBlockDraftUseCase(blockDraftRepository: BlockDraftRepository): CreateBlockDraftUseCase =
         CreateBlockDraftUseCase(blockDraftRepository)

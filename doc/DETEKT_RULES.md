@@ -77,6 +77,38 @@ check(condition) { "메시지" }  // IllegalStateException (조건부)
 
 ---
 
+## TooManyFunctions (클래스당 함수 최대 11개 미만)
+
+임계값이 `11`이므로 함수 11개부터 위반. `@Configuration` 빈 등록 클래스에서 자주 발생한다.
+
+```kotlin
+// ❌ @Bean 11개 → Detekt 위반
+@Configuration
+class ResumeModuleConfiguration {
+    @Bean fun createBlockUseCase(...) = ...
+    @Bean fun updateBlockUseCase(...) = ...
+    // ... 총 11개
+}
+
+// ✅ 도메인 단위로 Configuration 클래스 분리
+@Configuration
+class BlockUseCaseConfiguration {
+    @Bean fun createBlockUseCase(...) = ...
+    @Bean fun updateBlockUseCase(...) = ...
+    // ... 4개 이하
+}
+
+@Configuration
+class BlockDraftUseCaseConfiguration {
+    @Bean fun createBlockDraftUseCase(...) = ...
+    // ... 7개 이하
+}
+```
+
+> **규칙**: Configuration 클래스는 도메인 단위(Block / BlockDraft / Resume / Feedback 등)로 분리한다. 하나의 클래스에 10개 이하의 함수만 허용한다.
+
+---
+
 ## LongMethod / LongParameterList
 
 - 함수가 25줄을 넘으면 private 함수로 분리한다.
