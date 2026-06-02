@@ -109,6 +109,7 @@ class BlockController(
         @Valid @RequestBody request: CreateBlocksRequest,
     ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
         val userId = resolveUserId(authentication)
+        request.blocks.forEach { item -> BlockContentValidator.validate(item.type, item.contentJson) }
         val blocks =
             createBlockUseCase.create(
                 CreateBlocksCommand(
@@ -184,6 +185,7 @@ class BlockController(
         @Valid @RequestBody request: UpdateBlockRequest,
     ): ResponseEntity<ApiResponse<BlockResponse>> {
         val userId = resolveUserId(authentication)
+        BlockContentValidator.validate(request.blockType, request.contentJson)
         val block =
             updateBlockUseCase.update(
                 UpdateBlockCommand(
@@ -275,6 +277,8 @@ data class CreateBlockItemRequest(
 
 @Schema(description = "블록 수정 요청")
 data class UpdateBlockRequest(
+    @Schema(description = "블록 타입 (contentJson 검증에 사용)", example = "CAREER")
+    val blockType: BlockType,
     @Schema(description = "블록 제목 (최대 200자)", example = "수정된 제목")
     @field:NotBlank
     @field:Size(max = 200)

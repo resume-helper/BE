@@ -90,6 +90,7 @@ class BlockDraftController(
         @Valid @RequestBody request: CreateBlockDraftRequest,
     ): ResponseEntity<ApiResponse<BlockDraftResponse>> {
         val userId = resolveUserId(authentication)
+        BlockContentValidator.validate(request.blockType, request.contentJson)
         val draft =
             createBlockDraftUseCase.create(
                 CreateBlockDraftCommand(
@@ -242,6 +243,7 @@ class BlockDraftController(
         @Valid @RequestBody request: UpdateBlockDraftRequest,
     ): ResponseEntity<ApiResponse<BlockDraftResponse>> {
         val userId = resolveUserId(authentication)
+        BlockContentValidator.validate(request.blockType, request.contentJson)
         val draft =
             updateBlockDraftUseCase.update(
                 UpdateBlockDraftCommand(
@@ -392,6 +394,8 @@ data class CreateBlockDraftRequest(
 
 @Schema(description = "임시저장 덮어쓰기 요청")
 data class UpdateBlockDraftRequest(
+    @Schema(description = "블록 타입 (contentJson 검증에 사용)", example = "CAREER")
+    val blockType: BlockType,
     @Schema(description = "임시저장 제목 (최대 200자)", example = "수정된 제목")
     val title: String,
     @Schema(description = "블록 내용 JSON", example = """{"company":"네이버","period":"2024.01~"}""")

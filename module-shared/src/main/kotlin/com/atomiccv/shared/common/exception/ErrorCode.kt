@@ -19,4 +19,5 @@ enum class ErrorCode(
     BLOCK_DRAFT_TITLE_REQUIRED(400, "BLOCK_DRAFT_TITLE_REQUIRED", "제목을 입력해주세요"),
     BLOCK_DRAFT_NOT_FOUND(404, "BLOCK_DRAFT_NOT_FOUND", "임시저장을 찾을 수 없습니다"),
     BLOCK_DRAFT_FORBIDDEN(403, "BLOCK_DRAFT_FORBIDDEN", "임시저장에 접근 권한이 없습니다"),
+    INVALID_BLOCK_CONTENT(400, "INVALID_BLOCK_CONTENT", "블록 내용이 올바르지 않습니다"),
 }
