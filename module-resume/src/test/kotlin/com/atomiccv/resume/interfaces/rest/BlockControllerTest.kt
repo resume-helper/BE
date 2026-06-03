@@ -48,6 +48,18 @@ class BlockControllerTest {
     @Autowired
     lateinit var getBlocksUseCase: GetBlocksUseCase
 
+    private val careerContentJson =
+        mapOf(
+            "companyName" to "카카오",
+            "department" to "서버개발팀",
+            "jobTitle" to "백엔드 개발자",
+            "position" to "사원",
+            "employmentType" to "FULL_TIME",
+            "startDate" to "2024.03",
+            "endDate" to "2026.01",
+            "achievements" to "서비스 안정성 개선",
+        )
+
     private val block =
         Block(
             id = 1L,
@@ -91,37 +103,15 @@ class BlockControllerTest {
     @Test
     @WithMockUser(username = "1")
     fun `POST api-blocks - 블록 리스트를 생성하고 반환한다`() {
-        val savedBlocks =
-            listOf(
-                Block(
-                    id = 1L,
-                    userId = 1L,
-                    type = BlockType.CAREER,
-                    title = "카카오 백엔드 개발자",
-                    contentJson = """{"company":"카카오"}""",
-                    createdAt = LocalDateTime.of(2026, 5, 11, 10, 0),
-                    updatedAt = LocalDateTime.of(2026, 5, 11, 10, 0),
-                ),
-            )
-        every { createBlockUseCase.create(any()) } returns savedBlocks
+        every { createBlockUseCase.create(any()) } returns listOf(block)
+        val blockItem = mapOf("type" to "CAREER", "title" to "카카오 백엔드 개발자", "contentJson" to careerContentJson)
+        val requestBody = mapOf("blocks" to listOf(blockItem))
 
         mockMvc
             .post("/api/blocks") {
                 with(csrf())
                 contentType = MediaType.APPLICATION_JSON
-                content =
-                    objectMapper.writeValueAsString(
-                        mapOf(
-                            "blocks" to
-                                listOf(
-                                    mapOf(
-                                        "type" to "CAREER",
-                                        "title" to "카카오 백엔드 개발자",
-                                        "contentJson" to mapOf("company" to "카카오"),
-                                    ),
-                                ),
-                        ),
-                    )
+                content = objectMapper.writeValueAsString(requestBody)
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
@@ -135,15 +125,13 @@ class BlockControllerTest {
     @WithMockUser(username = "1")
     fun `PUT api-blocks-id - 블록을 수정하고 반환한다`() {
         every { updateBlockUseCase.update(any()) } returns block
+        val requestBody = mapOf("blockType" to "CAREER", "title" to "수정 제목", "contentJson" to careerContentJson)
 
         mockMvc
             .put("/api/blocks/1") {
                 with(csrf())
                 contentType = MediaType.APPLICATION_JSON
-                content =
-                    objectMapper.writeValueAsString(
-                        mapOf("title" to "수정 제목", "contentJson" to emptyMap<String, Any>()),
-                    )
+                content = objectMapper.writeValueAsString(requestBody)
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }

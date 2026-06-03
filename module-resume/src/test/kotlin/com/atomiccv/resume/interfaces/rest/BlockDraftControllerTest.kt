@@ -69,6 +69,18 @@ class BlockDraftControllerTest {
         @Bean fun deleteAllBlockDraftsByTypeUseCase(): DeleteAllBlockDraftsByTypeUseCase = mockk()
     }
 
+    private val careerContentJson =
+        mapOf(
+            "companyName" to "카카오",
+            "department" to "서버개발팀",
+            "jobTitle" to "백엔드 개발자",
+            "position" to "사원",
+            "employmentType" to "FULL_TIME",
+            "startDate" to "2024.03",
+            "endDate" to "2026.01",
+            "achievements" to "서비스 안정성 개선",
+        )
+
     private val draft =
         BlockDraft(
             id = 1L,
@@ -86,18 +98,13 @@ class BlockDraftControllerTest {
     fun `POST api-block-drafts - 임시저장을 생성하고 반환한다`() {
         every { createBlockDraftUseCase.create(any()) } returns draft
 
+        val requestBody = mapOf("blockType" to "CAREER", "title" to "카카오 백엔드 개발자", "contentJson" to careerContentJson)
+
         mockMvc
             .post("/api/block-drafts") {
                 with(csrf())
                 contentType = MediaType.APPLICATION_JSON
-                content =
-                    objectMapper.writeValueAsString(
-                        mapOf(
-                            "blockType" to "CAREER",
-                            "title" to "카카오 백엔드 개발자",
-                            "contentJson" to mapOf("company" to "카카오"),
-                        ),
-                    )
+                content = objectMapper.writeValueAsString(requestBody)
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
@@ -145,14 +152,13 @@ class BlockDraftControllerTest {
     fun `PUT api-block-drafts-id - 드래프트를 덮어쓰고 반환한다`() {
         every { updateBlockDraftUseCase.update(any()) } returns draft
 
+        val requestBody = mapOf("blockType" to "CAREER", "title" to "수정 제목", "contentJson" to careerContentJson)
+
         mockMvc
             .put("/api/block-drafts/1") {
                 with(csrf())
                 contentType = MediaType.APPLICATION_JSON
-                content =
-                    objectMapper.writeValueAsString(
-                        mapOf("title" to "수정 제목", "contentJson" to emptyMap<String, Any>()),
-                    )
+                content = objectMapper.writeValueAsString(requestBody)
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
