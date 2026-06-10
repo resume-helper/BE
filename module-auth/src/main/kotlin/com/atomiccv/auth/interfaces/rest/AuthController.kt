@@ -1,9 +1,11 @@
 package com.atomiccv.auth.interfaces.rest
 
 import com.atomiccv.auth.application.usecase.LogoutUseCase
+import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.WithdrawCommand
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
+import com.atomiccv.auth.interfaces.rest.dto.SocialLoginRequest
 import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.shared.common.exception.BusinessException
@@ -26,6 +28,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -40,7 +43,9 @@ class AuthController(
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
+    private val socialLoginUseCase: SocialLoginUseCase,
     @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
+    @Value("\${app.cookie-domain:}") private val cookieDomain: String,
 ) {
     @Operation(
         summary = "Access Token 갱신",
@@ -236,6 +241,66 @@ class AuthController(
             userRepository.findById(userId)
                 ?: throw BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다.")
         return ResponseEntity.ok(ApiResponse.ok(UserResponse(user.id, user.email, user.name, user.profileImageUrl)))
+    }
+
+    @Operation(
+        summary = "소셜 로그인",
+        description = "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT 쿠키를 발급한다.",
+    )
+    @ApiResponses(
+        SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 쿠키 발급"),
+        SwaggerApiResponse(
+            responseCode = "400",
+            description = "입력값 검증 실패 (VALIDATION_FAILED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"지원하지 않는 provider입니다"}""")],
+                )
+            ],
+        ),
+        SwaggerApiResponse(
+            responseCode = "403",
+            description = "탈퇴 처리된 계정 (FORBIDDEN)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"탈퇴 처리된 계정입니다."}""")],
+                )
+            ],
+        ),
+    )
+    @PostMapping("/social-login")
+    fun socialLogin(
+        @RequestBody request: SocialLoginRequest,
+        response: HttpServletResponse,
+    ): ResponseEntity<ApiResponse<Nothing>> {
+        val tokenResult = socialLoginUseCase.login(request.toCommand())
+        addAuthCookie(response, "access_token", tokenResult.accessToken, "/", Duration.ofHours(1))
+        addAuthCookie(response, "refresh_token", tokenResult.refreshToken, "/api/auth/refresh", Duration.ofDays(7))
+        return ResponseEntity.ok(ApiResponse.ok())
+    }
+
+    private fun addAuthCookie(
+        response: HttpServletResponse,
+        name: String,
+        value: String,
+        path: String,
+        maxAge: Duration,
+    ) {
+        val cookie =
+            ResponseCookie
+                .from(name, value)
+                .httpOnly(true)
+                .secure(true)
+                .path(path)
+                .maxAge(maxAge)
+                .sameSite(cookieSameSite)
+                .apply { if (cookieDomain.isNotBlank()) domain(cookieDomain) }
+                .build()
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
     }
 }
 

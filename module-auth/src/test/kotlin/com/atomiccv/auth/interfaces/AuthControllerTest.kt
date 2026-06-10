@@ -45,6 +45,9 @@ class AuthControllerTest {
     @Autowired
     lateinit var userRepository: UserRepository
 
+    @Autowired
+    lateinit var socialLoginUseCase: com.atomiccv.auth.application.usecase.SocialLoginUseCase
+
     @TestConfiguration
     class MockConfig {
         @Bean
@@ -64,6 +67,9 @@ class AuthControllerTest {
 
         @Bean
         fun tokenBlacklistPort(): TokenBlacklistPort = mockk(relaxed = true)
+
+        @Bean
+        fun socialLoginUseCase(): com.atomiccv.auth.application.usecase.SocialLoginUseCase = mockk()
     }
 
     @Test
@@ -135,6 +141,82 @@ class AuthControllerTest {
                 status { isOk() }
                 cookie { maxAge("access_token", 0) }
                 cookie { maxAge("refresh_token", 0) }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `POST social-login — 정상 요청 시 access_token과 refresh_token 쿠키를 발급한다`() {
+        every {
+            socialLoginUseCase.login(any())
+        } returns com.atomiccv.auth.application.usecase.TokenResult("at-1", "rt-1")
+
+        mockMvc
+            .post("/api/auth/social-login") {
+                with(csrf())
+                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                content = """{"provider":"GOOGLE","providerUserId":"g-1","email":"a@b.c","name":"홍길동"}"""
+            }.andExpect {
+                status { isOk() }
+                cookie { exists("access_token") }
+                cookie { exists("refresh_token") }
+                cookie { httpOnly("access_token", true) }
+                cookie { path("access_token", "/") }
+                cookie { path("refresh_token", "/api/auth/refresh") }
+                jsonPath("$.success") { value(true) }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `POST social-login — body가 누락되면 400을 반환한다`() {
+        mockMvc
+            .post("/api/auth/social-login") {
+                with(csrf())
+                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                content = "{}"
+            }.andExpect {
+                status { is4xxClientError() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `POST social-login — UseCase가 VALIDATION_FAILED를 던지면 400을 반환한다`() {
+        every {
+            socialLoginUseCase.login(any())
+        } throws com.atomiccv.shared.common.exception.BusinessException(
+            com.atomiccv.shared.common.exception.ErrorCode.VALIDATION_FAILED,
+            "지원하지 않는 provider입니다: XYZ",
+        )
+
+        mockMvc
+            .post("/api/auth/social-login") {
+                with(csrf())
+                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                content = """{"provider":"XYZ","providerUserId":"x","email":"a@b.c","name":"n"}"""
+            }.andExpect {
+                status { isBadRequest() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `POST social-login — UseCase가 FORBIDDEN을 던지면 403을 반환한다`() {
+        every {
+            socialLoginUseCase.login(any())
+        } throws com.atomiccv.shared.common.exception.BusinessException(
+            com.atomiccv.shared.common.exception.ErrorCode.FORBIDDEN,
+            "탈퇴 처리된 계정입니다.",
+        )
+
+        mockMvc
+            .post("/api/auth/social-login") {
+                with(csrf())
+                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                content = """{"provider":"GOOGLE","providerUserId":"g-1","email":"a@b.c","name":"n"}"""
+            }.andExpect {
+                status { isForbidden() }
             }
     }
 }
