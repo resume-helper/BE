@@ -5,6 +5,7 @@ import com.atomiccv.auth.application.port.RefreshTokenPort
 import com.atomiccv.auth.application.port.TokenBlacklistPort
 import com.atomiccv.auth.application.usecase.LogoutUseCase
 import com.atomiccv.auth.application.usecase.OAuthLoginUseCase
+import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.repository.SocialAccountRepository
@@ -32,6 +33,10 @@ class AuthConfiguration {
             jwtPort = jwtPort,
             refreshTokenPort = refreshTokenPort,
         )
+
+    @Bean
+    fun socialLoginUseCase(oAuthLoginUseCase: OAuthLoginUseCase): SocialLoginUseCase =
+        SocialLoginUseCase(oAuthLoginUseCase = oAuthLoginUseCase)
 
     @Bean
     fun tokenRefreshUseCase(
