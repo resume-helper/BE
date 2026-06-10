@@ -8,6 +8,7 @@ import org.springframework.http.ResponseCookie
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 import java.time.Duration
 
 @Component
@@ -29,7 +30,13 @@ class OAuth2AuthenticationSuccessHandler(
         val user = authentication.principal as OAuth2UserWithToken
         addCookie(response, "access_token", user.accessToken, Duration.ofHours(1))
         addCookie(response, "refresh_token", user.refreshToken, Duration.ofDays(7), "/api/auth/refresh")
-        val redirectUri = resolveRedirectUri(request)
+        val baseRedirectUri = resolveRedirectUri(request)
+        val redirectUri =
+            UriComponentsBuilder
+                .fromUriString(baseRedirectUri)
+                .queryParam("oauth", "success")
+                .build()
+                .toUriString()
         request.session?.removeAttribute(SESSION_KEY_REDIRECT_URI)
         redirectStrategy.sendRedirect(request, response, redirectUri)
     }
