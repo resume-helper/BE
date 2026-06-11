@@ -48,14 +48,14 @@ class AuthController(
 ) {
     @Operation(
         summary = "Access Token 갱신",
-        description = "refresh_token 쿠키를 사용해 새로운 access_token 쿠키를 발급합니다.",
-        security = [SecurityRequirement(name = "refresh_token_cookie")],
+        description = "refresh_token 요청 헤더로 새 access_token 응답 헤더를 발급한다. BFF(Next.js)가 헤더를 통해 토큰을 주고받는다.",
+        security = [SecurityRequirement(name = "refresh_token_header")],
     )
     @ApiResponses(
-        SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+        SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공 — access_token 응답 헤더 발급"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "refresh_token 쿠키 없음 또는 만료 (UNAUTHORIZED / TOKEN_EXPIRED)",
+            description = "refresh_token 헤더 없음 또는 만료 (UNAUTHORIZED / TOKEN_EXPIRED)",
             content = [
                 Content(
                     mediaType = "application/json",
@@ -71,22 +71,11 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val refreshToken =
-            request.cookies?.firstOrNull { it.name == "refresh_token" }?.value
+            request.getHeader("refresh_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         val newAccessToken = tokenRefreshUseCase.refresh(refreshToken)
-        response.addHeader(
-            HttpHeaders.SET_COOKIE,
-            ResponseCookie
-                .from("access_token", newAccessToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .sameSite(cookieSameSite)
-                .build()
-                .toString(),
-        )
+        response.setHeader("access_token", newAccessToken)
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
@@ -244,10 +233,12 @@ class AuthController(
 
     @Operation(
         summary = "소셜 로그인",
-        description = "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT 쿠키를 발급한다.",
+        description =
+            "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT를 발급한다. " +
+                "access_token, refresh_token 응답 헤더로 내려보내며, BFF(Next.js)가 받아 자신의 쿠키로 다시 굽는다.",
     )
     @ApiResponses(
-        SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 쿠키 발급"),
+        SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 응답 헤더 발급"),
         SwaggerApiResponse(
             responseCode = "400",
             description = "입력값 검증 실패 (VALIDATION_FAILED)",
@@ -277,8 +268,8 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val tokenResult = socialLoginUseCase.login(request.toCommand())
-        response.addHeader(HttpHeaders.SET_COOKIE, "access_token=${tokenResult.accessToken}; Path=/")
-        response.addHeader(HttpHeaders.SET_COOKIE, "refresh_token=${tokenResult.refreshToken}; Path=/")
+        response.setHeader("access_token", tokenResult.accessToken)
+        response.setHeader("refresh_token", tokenResult.refreshToken)
         return ResponseEntity.ok(ApiResponse.ok())
     }
 }

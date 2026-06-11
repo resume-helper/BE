@@ -51,6 +51,7 @@ class SecurityConfig(
                         "/oauth2/**",
                         "/login/**",
                         "/api/auth/social-login",
+                        "/api/auth/refresh",
                         "/actuator/health",
                         "/actuator/prometheus",
                         "/swagger-ui/**",
