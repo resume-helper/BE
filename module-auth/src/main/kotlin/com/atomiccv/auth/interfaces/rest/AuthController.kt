@@ -5,9 +5,9 @@ import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.WithdrawCommand
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
-import com.atomiccv.auth.interfaces.rest.dto.SocialLoginRequest
 import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.repository.UserRepository
+import com.atomiccv.auth.interfaces.rest.dto.SocialLoginRequest
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
