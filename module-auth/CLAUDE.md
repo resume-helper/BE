@@ -7,7 +7,7 @@
 
 ## 모듈 역할
 
-소셜 로그인(OAuth2) 기반 인증, JWT 토큰 발급/검증, Redis Blacklist 관리를 담당한다.
+NextAuth.js 기반 소셜 로그인의 백엔드 토큰 발급, JWT 검증, Redis Blacklist 관리, 회원 탈퇴를 담당한다.
 
 ---
 
@@ -15,7 +15,8 @@
 
 | 항목 | 결정 |
 |------|------|
-| 로그인 방식 | OAuth2 소셜 로그인 (Google / Kakao / Naver) |
+| 로그인 방식 | NextAuth.js (FE) → `POST /api/auth/social-login` (BE) |
+| OAuth2 서버 흐름 | 미사용 (Spring Security OAuth2 Client 제거) |
 | 일반 로그인 | 미사용 |
 | 이메일 인증 | 미사용 |
 | 토큰 전달 방식 | HttpOnly Cookie + SameSite=Lax (XSS + CSRF 방어) |
@@ -47,7 +48,7 @@ SocialAccount
 ```
 
 **계정 연동 규칙**
-- 소셜 로그인 시 이메일로 기존 User 조회
+- social-login 요청 시 이메일로 기존 User 조회
 - 존재하면 → 해당 User에 SocialAccount 추가 (기존 계정 연동)
 - 없으면 → User + SocialAccount 신규 생성
 
@@ -71,9 +72,11 @@ domain/repository/
 ### Application
 ```
 application/usecase/
-  OAuthLoginUseCase.kt       # 신규 가입 or 기존 연동 처리 → 토큰 발급
+  SocialLoginUseCase.kt      # social-login Command → OAuthLoginCommand 변환 → 위임
+  OAuthLoginUseCase.kt       # 신규 가입/계정 연동/탈퇴 유예 복구 → 토큰 발급 (비즈니스 코어)
   TokenRefreshUseCase.kt     # Refresh Token 검증 → Access Token 재발급
   LogoutUseCase.kt           # Access Token Blacklist 등록 + Refresh Token 삭제
+  WithdrawUseCase.kt         # 계정 비활성화 + 30일 후 영구 삭제 (유예기간 내 재로그인 시 복구)
 
 application/port/
   JwtPort.kt                 # generateAccessToken, validateToken, extractUserId
@@ -90,29 +93,20 @@ infrastructure/persistence/
 # 공통 베이스 (module-shared)
 shared/infrastructure/persistence/
   BaseJpaEntity.kt    # @MappedSuperclass — createdAt + updatedAt JPA Auditing 자동 관리
-                      # UserJpaEntity 등 createdAt/updatedAt이 모두 필요한 엔티티가 상속
-                      # createdAt만 필요한 엔티티(SocialAccountJpaEntity)는 @CreatedDate 직접 선언
 
 infrastructure/client/
   JwtProvider.kt                        # JwtPort 구현
   RefreshTokenRedisAdapter.kt           # RefreshTokenPort 구현
   TokenBlacklistRedisAdapter.kt         # TokenBlacklistPort 구현
 
-  OAuth2UserInfo.kt                     # interface
-  GoogleOAuth2UserInfo.kt
-  KakaoOAuth2UserInfo.kt
-  NaverOAuth2UserInfo.kt
-  OAuth2UserInfoFactory.kt              # provider → OAuth2UserInfo 반환
-
-  CustomOAuth2UserService.kt
-  OAuth2AuthenticationSuccessHandler.kt
-  SecurityConfig.kt
+infrastructure/
+  SecurityConfig.kt                     # JwtAuthenticationFilter + permitAll 매처
 ```
 
 ### Interfaces
 ```
 interfaces/rest/
-  AuthController.kt          # /api/auth/refresh, /api/auth/logout, /api/auth/me
+  AuthController.kt          # /api/auth/{social-login,refresh,logout,withdraw,me}
   JwtAuthenticationFilter.kt
   GlobalExceptionHandler.kt
 ```
@@ -123,10 +117,10 @@ interfaces/rest/
 
 | Method | Path | 설명 | 인증 |
 |--------|------|------|------|
-| `GET` | `/oauth2/authorization/{provider}` | 소셜 로그인 시작 | 없음 |
-| `GET` | `/login/oauth2/code/{provider}` | OAuth2 콜백 | 없음 |
+| `POST` | `/api/auth/social-login` | NextAuth 전달 정보로 토큰 발급 | 없음 |
 | `POST` | `/api/auth/refresh` | Access Token 재발급 | Refresh Cookie |
 | `POST` | `/api/auth/logout` | 로그아웃 | Access Token |
+| `DELETE` | `/api/auth/withdraw` | 회원 탈퇴 (30일 유예) | Access Token |
 | `GET` | `/api/auth/me` | 현재 유저 정보 | Access Token |
 
 ---
@@ -135,12 +129,14 @@ interfaces/rest/
 
 ```
 [로그인]
-OAuth2AuthenticationSuccessHandler
-  → OAuthLoginUseCase.login()
-      → 신규: User + SocialAccount 생성
-      → 재방문: SocialAccount 연동 확인 (없으면 추가)
-      → Set-Cookie: access_token (1h); HttpOnly; Secure; SameSite=Lax
-      → Set-Cookie: refresh_token (7d); HttpOnly; Secure; SameSite=Lax; Path=/api/auth/refresh
+프론트엔드 NextAuth.js
+  → Google/Kakao/Naver OAuth 처리 (FE)
+  → POST /api/auth/social-login { provider, providerUserId, email, name, profileImageUrl }
+SocialLoginUseCase
+  → 신규: User + SocialAccount 생성
+  → 재방문: SocialAccount 연동 확인 (없으면 추가)
+  → Set-Cookie: access_token (1h); HttpOnly; Secure; SameSite=Lax; Path=/
+  → Set-Cookie: refresh_token (7d); HttpOnly; Secure; SameSite=Lax; Path=/api/auth/refresh
 
 [토큰 갱신]
 TokenRefreshUseCase → 새 Access Token Cookie 설정 (SameSite=Lax)
@@ -159,11 +155,11 @@ LogoutUseCase
 
 | 상황 | 에러코드 | HTTP |
 |------|----------|------|
-| OAuth2 제공자 응답 오류 | `OAUTH2_PROVIDER_ERROR` | 502 |
+| 지원하지 않는 provider / 입력값 누락 | `VALIDATION_FAILED` | 400 |
 | Access Token 만료 | `TOKEN_EXPIRED` | 401 |
 | 토큰 위변조 / 형식 오류 | `INVALID_TOKEN` | 401 |
 | Blacklist 토큰 재사용 | `UNAUTHORIZED` | 401 |
-| 비활성 유저 접근 | `FORBIDDEN` | 403 |
+| 탈퇴 처리된 계정 | `FORBIDDEN` | 403 |
 
 ---
 
@@ -172,10 +168,10 @@ LogoutUseCase
 | 레이어 | 대상 | 방식 |
 |--------|------|------|
 | Domain | User / SocialAccount 생성 및 상태 검증 | 단위 테스트 |
-| Application | OAuthLoginUseCase (신규/재방문/연동) | MockK (Port mock) |
-| Application | TokenRefreshUseCase, LogoutUseCase | MockK |
+| Application | SocialLoginUseCase (신규/재방문/연동) | MockK (Port mock) |
+| Application | TokenRefreshUseCase, LogoutUseCase, WithdrawUseCase | MockK |
 | Infrastructure | JwtProvider 발급/검증/만료 | 단위 테스트 |
-| Interfaces | AuthController 3개 엔드포인트 | `@WebMvcTest` + MockK |
+| Interfaces | AuthController 엔드포인트 전체 | `@WebMvcTest` + MockK |
 
 ---
 

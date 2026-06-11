@@ -37,7 +37,6 @@
 | 409 | `DUPLICATE_EMAIL` | 이메일 중복 |
 | 429 | `RATE_LIMIT_EXCEEDED` | Rate Limit 초과 |
 | 500 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
-| 502 | `OAUTH2_PROVIDER_ERROR` | 소셜 로그인 제공자 응답 오류 |
 
 ## Kotlin 구현 참조
 

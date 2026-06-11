@@ -2,19 +2,13 @@ package com.atomiccv
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.Operation
-import io.swagger.v3.oas.models.PathItem
-import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
-import io.swagger.v3.oas.models.tags.Tag
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import io.swagger.v3.oas.models.responses.ApiResponse as OasApiResponse
-import io.swagger.v3.oas.models.responses.ApiResponses as OasApiResponses
 
 @Configuration
 class SwaggerConfig {
@@ -24,8 +18,6 @@ class SwaggerConfig {
             .info(buildInfo())
             .components(buildComponents())
             .addSecurityItem(SecurityRequirement().addList(BEARER_AUTH).addList(ACCESS_TOKEN_COOKIE))
-            .addTagsItem(Tag().name("OAuth2 소셜 로그인").description("소셜 로그인 시작 — 브라우저를 해당 URL로 이동"))
-            .paths(buildOAuth2Paths())
 
     private fun buildInfo() =
         Info()
@@ -66,34 +58,6 @@ class SwaggerConfig {
             ).addSchemas("ErrorResponse", errorResponseSchema)
     }
 
-    private fun buildOAuth2Paths(): Paths {
-        val paths = Paths()
-        listOf("google" to "Google", "kakao" to "Kakao", "naver" to "Naver").forEach { (id, name) ->
-            paths.addPathItem(
-                "/oauth2/authorization/$id",
-                PathItem().get(
-                    Operation()
-                        .summary("$name 소셜 로그인")
-                        .description(
-                            "브라우저를 이 URL로 이동시킵니다 (`window.location.href = ...`).\n\n" +
-                                "로그인 성공 후 프론트엔드 URL로 리다이렉트되며 " +
-                                "`access_token`(1h), `refresh_token`(7d) 쿠키가 자동 설정됩니다.",
-                        ).addTagsItem("OAuth2 소셜 로그인")
-                        .security(emptyList())
-                        .responses(
-                            OasApiResponses()
-                                .addApiResponse("302", OasApiResponse().description("$name 인증 서버로 리다이렉트"))
-                                .addApiResponse(
-                                    "502",
-                                    OasApiResponse().description("OAUTH2_PROVIDER_ERROR — 소셜 로그인 제공자 오류"),
-                                ),
-                        ),
-                ),
-            )
-        }
-        return paths
-    }
-
     companion object {
         const val BEARER_AUTH = "bearerAuth"
         const val ACCESS_TOKEN_COOKIE = "access_token_cookie"
@@ -119,13 +83,27 @@ class SwaggerConfig {
             fetch(url, { credentials: 'include' })
             ```
 
-            ### 소셜 로그인 흐름
+            ### 소셜 로그인 흐름 (NextAuth.js 기반)
 
             ```
-            1. window.location.href = '/oauth2/authorization/{google|kakao|naver}'
-            2. OAuth2 제공자 로그인/동의
-            3. 백엔드 → 프론트엔드 URL로 리다이렉트 (쿠키 자동 설정)
-            4. GET /api/auth/me 로 유저 정보 확인
+            1. 프론트엔드(NextAuth.js)가 Google/Kakao/Naver OAuth 처리
+            2. NextAuth callback에서 사용자 정보 획득
+               → provider, providerUserId, email, name, profileImageUrl
+            3. POST /api/auth/social-login 으로 전달
+            4. 백엔드 응답: access_token / refresh_token 쿠키 발급
+            5. GET /api/auth/me 로 유저 정보 확인
+            ```
+
+            요청 예시:
+            ```json
+            POST /api/auth/social-login
+            {
+              "provider": "GOOGLE",
+              "providerUserId": "1234567890",
+              "email": "user@example.com",
+              "name": "홍길동",
+              "profileImageUrl": "https://example.com/profile.jpg"
+            }
             ```
 
             ### 401 처리 흐름
@@ -154,7 +132,7 @@ class SwaggerConfig {
 
             | HTTP | code | 설명 |
             |------|------|------|
-            | 400 | `VALIDATION_FAILED` | 입력값 유효성 검증 실패 |
+            | 400 | `VALIDATION_FAILED` | 입력값 유효성 검증 실패 (지원하지 않는 provider 포함) |
             | 401 | `UNAUTHORIZED` | 인증 필요 (쿠키 없음) |
             | 401 | `TOKEN_EXPIRED` | Access Token 만료 → `/api/auth/refresh` 호출 |
             | 401 | `INVALID_TOKEN` | 토큰 위변조 또는 형식 오류 |
@@ -163,7 +141,6 @@ class SwaggerConfig {
             | 409 | `DUPLICATE_EMAIL` | 이미 사용 중인 이메일 |
             | 429 | `RATE_LIMIT_EXCEEDED` | 요청 횟수 초과 |
             | 500 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
-            | 502 | `OAUTH2_PROVIDER_ERROR` | 소셜 로그인 제공자 오류 |
             | 400 | `BLOCK_DRAFT_TITLE_REQUIRED` | 임시저장 제목 누락 |
             | 403 | `BLOCK_DRAFT_FORBIDDEN` | 임시저장 접근 권한 없음 |
             | 404 | `BLOCK_DRAFT_NOT_FOUND` | 임시저장 없음 또는 만료 |
