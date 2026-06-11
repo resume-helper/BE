@@ -179,9 +179,12 @@ chore: 의존성·설정 변경
 
 1. `git status` / `git diff` / `git log` 병렬 실행
 2. 민감 파일 제외 후 선택적 스테이징 (`.env`, `build/`, `*.pem` 등 제외)
-3. `./gradlew test --continue` 실행 → XML 리포트 파싱
+3. `./gradlew ktlintCheck detekt` 실행 → CI 실패 사전 차단
+   - ktlint 위반은 `./gradlew ktlintFormat`으로 자동 수정 후 재검사
+   - 자동 수정 불가 또는 detekt 위반 시 **즉시 중단**
+4. `./gradlew test --continue` 실행 → XML 리포트 파싱
    - 빌드 오류 시 즉시 중단
    - 테스트 실패 시 목록 보여주고 사용자 확인
-4. HEREDOC 방식으로 커밋
-5. `git push -u origin HEAD`
-6. `gh pr create --base dev` — 테스트 결과 기반 Test Plan 자동 생성
+5. HEREDOC 방식으로 커밋
+6. `git push -u origin HEAD`
+7. `gh pr create --base dev` — 테스트 결과 기반 Test Plan 자동 생성
