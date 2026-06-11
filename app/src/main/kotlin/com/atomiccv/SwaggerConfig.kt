@@ -2,19 +2,13 @@ package com.atomiccv
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.Operation
-import io.swagger.v3.oas.models.PathItem
-import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
-import io.swagger.v3.oas.models.tags.Tag
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import io.swagger.v3.oas.models.responses.ApiResponse as OasApiResponse
-import io.swagger.v3.oas.models.responses.ApiResponses as OasApiResponses
 
 @Configuration
 class SwaggerConfig {
@@ -24,8 +18,6 @@ class SwaggerConfig {
             .info(buildInfo())
             .components(buildComponents())
             .addSecurityItem(SecurityRequirement().addList(ACCESS_TOKEN_HEADER))
-            .addTagsItem(Tag().name("OAuth2 소셜 로그인").description("소셜 로그인 시작 — 브라우저를 해당 URL로 이동"))
-            .paths(buildOAuth2Paths())
 
     private fun buildInfo() =
         Info()
@@ -57,34 +49,6 @@ class SwaggerConfig {
                     .name("refresh_token")
                     .description("JWT Refresh Token — 요청 헤더 refresh_token (유효기간 7일, /api/auth/refresh 전용)"),
             ).addSchemas("ErrorResponse", errorResponseSchema)
-    }
-
-    private fun buildOAuth2Paths(): Paths {
-        val paths = Paths()
-        listOf("google" to "Google", "kakao" to "Kakao", "naver" to "Naver").forEach { (id, name) ->
-            paths.addPathItem(
-                "/oauth2/authorization/$id",
-                PathItem().get(
-                    Operation()
-                        .summary("$name 소셜 로그인")
-                        .description(
-                            "브라우저를 이 URL로 이동시킵니다 (`window.location.href = ...`).\n\n" +
-                                "로그인 성공 후 프론트엔드 URL로 리다이렉트되며 " +
-                                "`access_token`(1h), `refresh_token`(7d) 쿠키가 자동 설정됩니다.",
-                        ).addTagsItem("OAuth2 소셜 로그인")
-                        .security(emptyList())
-                        .responses(
-                            OasApiResponses()
-                                .addApiResponse("302", OasApiResponse().description("$name 인증 서버로 리다이렉트"))
-                                .addApiResponse(
-                                    "502",
-                                    OasApiResponse().description("OAUTH2_PROVIDER_ERROR — 소셜 로그인 제공자 오류"),
-                                ),
-                        ),
-                ),
-            )
-        }
-        return paths
     }
 
     companion object {
