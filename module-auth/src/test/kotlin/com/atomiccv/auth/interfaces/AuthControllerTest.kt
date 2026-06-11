@@ -3,11 +3,15 @@ package com.atomiccv.auth.interfaces
 import com.atomiccv.auth.application.port.JwtPort
 import com.atomiccv.auth.application.port.TokenBlacklistPort
 import com.atomiccv.auth.application.usecase.LogoutUseCase
+import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
+import com.atomiccv.auth.application.usecase.TokenResult
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
 import com.atomiccv.auth.domain.model.User
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.auth.interfaces.rest.AuthController
+import com.atomiccv.shared.common.exception.BusinessException
+import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.interfaces.rest.GlobalExceptionHandler
 import io.mockk.every
 import io.mockk.just
@@ -20,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
@@ -46,7 +51,7 @@ class AuthControllerTest {
     lateinit var userRepository: UserRepository
 
     @Autowired
-    lateinit var socialLoginUseCase: com.atomiccv.auth.application.usecase.SocialLoginUseCase
+    lateinit var socialLoginUseCase: SocialLoginUseCase
 
     @TestConfiguration
     class MockConfig {
@@ -69,7 +74,7 @@ class AuthControllerTest {
         fun tokenBlacklistPort(): TokenBlacklistPort = mockk(relaxed = true)
 
         @Bean
-        fun socialLoginUseCase(): com.atomiccv.auth.application.usecase.SocialLoginUseCase = mockk()
+        fun socialLoginUseCase(): SocialLoginUseCase = mockk()
     }
 
     @Test
@@ -147,14 +152,12 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     fun `POST social-login — 정상 요청 시 access_token과 refresh_token 쿠키를 발급한다`() {
-        every {
-            socialLoginUseCase.login(any())
-        } returns com.atomiccv.auth.application.usecase.TokenResult("at-1", "rt-1")
+        every { socialLoginUseCase.login(any()) } returns TokenResult("at-1", "rt-1")
 
         mockMvc
             .post("/api/auth/social-login") {
                 with(csrf())
-                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                contentType = MediaType.APPLICATION_JSON
                 content = """{"provider":"GOOGLE","providerUserId":"g-1","email":"a@b.c","name":"홍길동"}"""
             }.andExpect {
                 status { isOk() }
@@ -173,7 +176,7 @@ class AuthControllerTest {
         mockMvc
             .post("/api/auth/social-login") {
                 with(csrf())
-                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                contentType = MediaType.APPLICATION_JSON
                 content = "{}"
             }.andExpect {
                 status { is4xxClientError() }
@@ -183,17 +186,13 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     fun `POST social-login — UseCase가 VALIDATION_FAILED를 던지면 400을 반환한다`() {
-        every {
-            socialLoginUseCase.login(any())
-        } throws com.atomiccv.shared.common.exception.BusinessException(
-            com.atomiccv.shared.common.exception.ErrorCode.VALIDATION_FAILED,
-            "지원하지 않는 provider입니다: XYZ",
-        )
+        val exception = BusinessException(ErrorCode.VALIDATION_FAILED, "지원하지 않는 provider입니다: XYZ")
+        every { socialLoginUseCase.login(any()) } throws exception
 
         mockMvc
             .post("/api/auth/social-login") {
                 with(csrf())
-                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                contentType = MediaType.APPLICATION_JSON
                 content = """{"provider":"XYZ","providerUserId":"x","email":"a@b.c","name":"n"}"""
             }.andExpect {
                 status { isBadRequest() }
@@ -203,17 +202,13 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     fun `POST social-login — UseCase가 FORBIDDEN을 던지면 403을 반환한다`() {
-        every {
-            socialLoginUseCase.login(any())
-        } throws com.atomiccv.shared.common.exception.BusinessException(
-            com.atomiccv.shared.common.exception.ErrorCode.FORBIDDEN,
-            "탈퇴 처리된 계정입니다.",
-        )
+        val exception = BusinessException(ErrorCode.FORBIDDEN, "탈퇴 처리된 계정입니다.")
+        every { socialLoginUseCase.login(any()) } throws exception
 
         mockMvc
             .post("/api/auth/social-login") {
                 with(csrf())
-                contentType = org.springframework.http.MediaType.APPLICATION_JSON
+                contentType = MediaType.APPLICATION_JSON
                 content = """{"provider":"GOOGLE","providerUserId":"g-1","email":"a@b.c","name":"n"}"""
             }.andExpect {
                 status { isForbidden() }

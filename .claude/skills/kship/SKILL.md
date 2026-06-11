@@ -35,7 +35,35 @@ git log --oneline -5
 
 ---
 
-## 3단계 — 테스트 실행 (커밋 전 필수)
+## 3단계 — Lint 검사 (커밋 전 필수, CI 실패 방지)
+
+```bash
+./gradlew ktlintCheck detekt 2>&1
+```
+
+`./gradlew`가 없으면 `gradle ktlintCheck detekt`로 대체합니다.
+
+### 위반 발견 시 처리 흐름
+
+1. **자동 수정 시도** — `./gradlew ktlintFormat` 실행 (ktlint 위반의 대부분은 자동 수정 가능)
+2. **재검사** — `./gradlew ktlintCheck detekt` 다시 실행
+3. **여전히 실패 시** — 위반 목록을 사용자에게 보고하고 **중단**. 사용자가 수동 수정해야 함
+4. **통과 시** — 4단계로 진행
+
+### 결과에 따른 처리 규칙
+
+| 상황 | 처리 |
+|------|------|
+| ktlint 위반 (자동 수정 가능) | `ktlintFormat` 실행 후 재검사, 통과 시 진행 |
+| ktlint 위반 (자동 수정 불가) | 위반 목록 보고 후 **즉시 중단** |
+| detekt 위반 | 위반 목록 보고 후 **즉시 중단** — 자동 수정 없음 |
+| 전체 통과 | 4단계로 진행 |
+
+> **이 단계가 핵심.** CI에서 ktlint/detekt 실패가 가장 흔하므로 로컬에서 먼저 차단한다.
+
+---
+
+## 4단계 — 테스트 실행 (커밋 전 필수)
 
 ```bash
 ./gradlew test --continue 2>&1
@@ -61,11 +89,11 @@ find . -path "*/build/test-results/test/*.xml" -not -path "*/.gradle/*"
 | 빌드 오류 (컴파일 실패) | **즉시 중단** — 오류 내용 보고, 커밋하지 않음 |
 | 테스트 케이스 실패 | 실패 목록을 보여주고 **사용자에게 계속 진행 여부 확인** |
 | 테스트 없음 | 경고 출력 후 계속 진행 |
-| 전체 통과 | 4단계로 진행 |
+| 전체 통과 | 5단계로 진행 |
 
 ---
 
-## 4단계 — 커밋
+## 5단계 — 커밋
 
 `CLAUDE.md`의 커밋 컨벤션에 맞게 HEREDOC 방식으로 커밋합니다:
 
@@ -82,7 +110,7 @@ EOF
 
 ---
 
-## 5단계 — Push
+## 6단계 — Push
 
 ```bash
 # 현재 브랜치 확인
@@ -96,7 +124,7 @@ git push -u origin HEAD
 
 ---
 
-## 6단계 — PR 생성
+## 7단계 — PR 생성
 
 ```bash
 gh pr create --base dev --title "제목" --body "$(cat <<'EOF'
