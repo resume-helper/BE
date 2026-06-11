@@ -20,9 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -32,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 @Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회, 회원 탈퇴")
@@ -44,18 +40,17 @@ class AuthController(
     private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
     private val socialLoginUseCase: SocialLoginUseCase,
-    @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
 ) {
     @Operation(
         summary = "Access Token 갱신",
-        description = "refresh_token 쿠키를 사용해 새로운 access_token 쿠키를 발급합니다.",
-        security = [SecurityRequirement(name = "refresh_token_cookie")],
+        description = "refresh_token 요청 헤더로 새 access_token 응답 헤더를 발급한다. BFF(Next.js)가 헤더를 통해 토큰을 주고받는다.",
+        security = [SecurityRequirement(name = "refresh_token_header")],
     )
     @ApiResponses(
-        SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+        SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공 — access_token 응답 헤더 발급"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "refresh_token 쿠키 없음 또는 만료 (UNAUTHORIZED / TOKEN_EXPIRED)",
+            description = "refresh_token 헤더 없음 또는 만료 (UNAUTHORIZED / TOKEN_EXPIRED)",
             content = [
                 Content(
                     mediaType = "application/json",
@@ -71,34 +66,23 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val refreshToken =
-            request.cookies?.firstOrNull { it.name == "refresh_token" }?.value
+            request.getHeader("refresh_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         val newAccessToken = tokenRefreshUseCase.refresh(refreshToken)
-        response.addHeader(
-            HttpHeaders.SET_COOKIE,
-            ResponseCookie
-                .from("access_token", newAccessToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .sameSite(cookieSameSite)
-                .build()
-                .toString(),
-        )
+        response.setHeader("access_token", newAccessToken)
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
     @Operation(
         summary = "로그아웃",
-        description = "access_token을 Redis Blacklist에 등록하고 Refresh Token을 삭제합니다. 쿠키를 만료시킵니다.",
+        description = "access_token 헤더를 Redis Blacklist에 등록하고 Refresh Token을 삭제한다.",
     )
     @ApiResponses(
         SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "access_token 쿠키 없음 (UNAUTHORIZED)",
+            description = "access_token 헤더 없음 (UNAUTHORIZED)",
             content = [
                 Content(
                     mediaType = "application/json",
@@ -109,30 +93,12 @@ class AuthController(
         ),
     )
     @PostMapping("/logout")
-    fun logout(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    fun logout(request: HttpServletRequest): ResponseEntity<ApiResponse<Nothing>> {
         val accessToken =
-            request.cookies?.firstOrNull { it.name == "access_token" }?.value
+            request.getHeader("access_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         logoutUseCase.logout(accessToken)
-
-        listOf("access_token", "refresh_token").forEach { cookieName ->
-            response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                ResponseCookie
-                    .from(cookieName, "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(Duration.ZERO)
-                    .sameSite(cookieSameSite)
-                    .build()
-                    .toString(),
-            )
-        }
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
@@ -168,7 +134,6 @@ class AuthController(
     @DeleteMapping("/withdraw")
     fun withdraw(
         request: HttpServletRequest,
-        response: HttpServletResponse,
         authentication: Authentication,
         @RequestParam provider: SocialProvider,
     ): ResponseEntity<ApiResponse<Nothing>> {
@@ -176,31 +141,16 @@ class AuthController(
             authentication.name.toLongOrNull()
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
         val accessToken =
-            request.cookies?.firstOrNull { it.name == "access_token" }?.value
+            request.getHeader("access_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         withdrawUseCase.withdraw(WithdrawCommand(userId = userId, provider = provider, accessToken = accessToken))
-
-        listOf("access_token", "refresh_token").forEach { cookieName ->
-            response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                ResponseCookie
-                    .from(cookieName, "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(Duration.ZERO)
-                    .sameSite(cookieSameSite)
-                    .build()
-                    .toString(),
-            )
-        }
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
     @Operation(
         summary = "내 정보 조회",
-        description = "access_token 쿠키를 기반으로 현재 로그인한 사용자 정보를 반환합니다.",
+        description = "access_token 헤더 기반으로 현재 로그인한 사용자 정보를 반환한다.",
     )
     @ApiResponses(
         SwaggerApiResponse(
@@ -244,10 +194,12 @@ class AuthController(
 
     @Operation(
         summary = "소셜 로그인",
-        description = "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT 쿠키를 발급한다.",
+        description =
+            "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT를 발급한다. " +
+                "access_token, refresh_token 응답 헤더로 내려보내며, BFF(Next.js)가 받아 자신의 쿠키로 다시 굽는다.",
     )
     @ApiResponses(
-        SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 쿠키 발급"),
+        SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 응답 헤더 발급"),
         SwaggerApiResponse(
             responseCode = "400",
             description = "입력값 검증 실패 (VALIDATION_FAILED)",
@@ -277,8 +229,8 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val tokenResult = socialLoginUseCase.login(request.toCommand())
-        response.addHeader(HttpHeaders.SET_COOKIE, "access_token=${tokenResult.accessToken}; Path=/")
-        response.addHeader(HttpHeaders.SET_COOKIE, "refresh_token=${tokenResult.refreshToken}; Path=/")
+        response.setHeader("access_token", tokenResult.accessToken)
+        response.setHeader("refresh_token", tokenResult.refreshToken)
         return ResponseEntity.ok(ApiResponse.ok())
     }
 }

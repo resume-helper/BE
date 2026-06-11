@@ -40,6 +40,7 @@ class SecurityConfig(
                 it
                     .requestMatchers(
                         "/api/auth/social-login",
+                        "/api/auth/refresh",
                         "/actuator/health",
                         "/actuator/prometheus",
                         "/swagger-ui/**",
