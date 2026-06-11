@@ -196,7 +196,7 @@ class AuthController(
         summary = "소셜 로그인",
         description =
             "NextAuth.js로부터 받은 소셜 사용자 정보로 JWT를 발급한다. " +
-                "access_token, refresh_token 응답 헤더로 내려보내며, BFF(Next.js)가 받아 자신의 쿠키로 다시 굽는다.",
+                "access_token, refresh_token 응답 헤더로 내려보내며, BFF(Next.js)가 받아 자신의 HttpOnly 쿠키로 다시 굽는다.",
     )
     @ApiResponses(
         SwaggerApiResponse(responseCode = "200", description = "로그인 성공 — access_token, refresh_token 응답 헤더 발급"),
