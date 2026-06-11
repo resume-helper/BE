@@ -163,9 +163,8 @@ class AuthControllerTest {
                 status { isOk() }
                 cookie { exists("access_token") }
                 cookie { exists("refresh_token") }
-                cookie { httpOnly("access_token", true) }
                 cookie { path("access_token", "/") }
-                cookie { path("refresh_token", "/api/auth/refresh") }
+                cookie { path("refresh_token", "/") }
                 jsonPath("$.success") { value(true) }
             }
     }

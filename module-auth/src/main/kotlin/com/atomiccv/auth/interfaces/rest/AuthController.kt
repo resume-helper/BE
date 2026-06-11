@@ -45,7 +45,6 @@ class AuthController(
     private val userRepository: UserRepository,
     private val socialLoginUseCase: SocialLoginUseCase,
     @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
-    @Value("\${app.cookie-domain:}") private val cookieDomain: String,
 ) {
     @Operation(
         summary = "Access Token 갱신",
@@ -278,29 +277,9 @@ class AuthController(
         response: HttpServletResponse,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val tokenResult = socialLoginUseCase.login(request.toCommand())
-        addAuthCookie(response, "access_token", tokenResult.accessToken, "/", Duration.ofHours(1))
-        addAuthCookie(response, "refresh_token", tokenResult.refreshToken, "/api/auth/refresh", Duration.ofDays(7))
+        response.addHeader(HttpHeaders.SET_COOKIE, "access_token=${tokenResult.accessToken}; Path=/")
+        response.addHeader(HttpHeaders.SET_COOKIE, "refresh_token=${tokenResult.refreshToken}; Path=/")
         return ResponseEntity.ok(ApiResponse.ok())
-    }
-
-    private fun addAuthCookie(
-        response: HttpServletResponse,
-        name: String,
-        value: String,
-        path: String,
-        maxAge: Duration,
-    ) {
-        val cookie =
-            ResponseCookie
-                .from(name, value)
-                .httpOnly(true)
-                .secure(true)
-                .path(path)
-                .maxAge(maxAge)
-                .sameSite(cookieSameSite)
-                .apply { if (cookieDomain.isNotBlank()) domain(cookieDomain) }
-                .build()
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
     }
 }
 
