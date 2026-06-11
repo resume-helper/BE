@@ -17,7 +17,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -105,17 +104,15 @@ class AuthControllerTest {
 
     @Test
     @WithMockUser
-    fun `POST logout — Access Token Cookie가 있으면 로그아웃하고 Cookie를 삭제한다`() {
+    fun `POST logout — access_token 헤더가 있으면 로그아웃에 성공한다`() {
         every { logoutUseCase.logout("my-token") } returns Unit
 
         mockMvc
             .post("/api/auth/logout") {
                 with(csrf())
-                cookie(Cookie("access_token", "my-token"))
+                header("access_token", "my-token")
             }.andExpect {
                 status { isOk() }
-                cookie { maxAge("access_token", 0) }
-                cookie { maxAge("refresh_token", 0) }
             }
     }
 
@@ -134,18 +131,16 @@ class AuthControllerTest {
 
     @Test
     @WithMockUser(username = "1")
-    fun `DELETE withdraw — Access Token Cookie가 있으면 탈퇴 처리하고 Cookie를 삭제한다`() {
+    fun `DELETE withdraw — access_token 헤더가 있으면 탈퇴 처리에 성공한다`() {
         every { withdrawUseCase.withdraw(any()) } just runs
 
         mockMvc
             .delete("/api/auth/withdraw") {
                 with(csrf())
-                cookie(Cookie("access_token", "my-token"))
+                header("access_token", "my-token")
                 param("provider", "GOOGLE")
             }.andExpect {
                 status { isOk() }
-                cookie { maxAge("access_token", 0) }
-                cookie { maxAge("refresh_token", 0) }
             }
     }
 

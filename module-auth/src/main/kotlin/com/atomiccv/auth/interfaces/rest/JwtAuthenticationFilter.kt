@@ -35,8 +35,5 @@ class JwtAuthenticationFilter(
         filterChain.doFilter(request, response)
     }
 
-    private fun extractToken(request: HttpServletRequest): String? =
-        request.cookies?.firstOrNull { it.name == "access_token" }?.value
-            // 로컬 임시 테스트용 파싱 구문
-            ?: request.getHeader("Authorization")?.takeIf { it.startsWith("Bearer ") }?.substring(7)
+    private fun extractToken(request: HttpServletRequest): String? = request.getHeader("access_token")
 }

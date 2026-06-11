@@ -20,9 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -32,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 @Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회, 회원 탈퇴")
@@ -44,7 +40,6 @@ class AuthController(
     private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
     private val socialLoginUseCase: SocialLoginUseCase,
-    @Value("\${app.cookie-same-site:Lax}") private val cookieSameSite: String,
 ) {
     @Operation(
         summary = "Access Token 갱신",
@@ -81,13 +76,13 @@ class AuthController(
 
     @Operation(
         summary = "로그아웃",
-        description = "access_token을 Redis Blacklist에 등록하고 Refresh Token을 삭제합니다. 쿠키를 만료시킵니다.",
+        description = "access_token 헤더를 Redis Blacklist에 등록하고 Refresh Token을 삭제한다.",
     )
     @ApiResponses(
         SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
         SwaggerApiResponse(
             responseCode = "401",
-            description = "access_token 쿠키 없음 (UNAUTHORIZED)",
+            description = "access_token 헤더 없음 (UNAUTHORIZED)",
             content = [
                 Content(
                     mediaType = "application/json",
@@ -98,30 +93,12 @@ class AuthController(
         ),
     )
     @PostMapping("/logout")
-    fun logout(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    fun logout(request: HttpServletRequest): ResponseEntity<ApiResponse<Nothing>> {
         val accessToken =
-            request.cookies?.firstOrNull { it.name == "access_token" }?.value
+            request.getHeader("access_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         logoutUseCase.logout(accessToken)
-
-        listOf("access_token", "refresh_token").forEach { cookieName ->
-            response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                ResponseCookie
-                    .from(cookieName, "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(Duration.ZERO)
-                    .sameSite(cookieSameSite)
-                    .build()
-                    .toString(),
-            )
-        }
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
@@ -157,7 +134,6 @@ class AuthController(
     @DeleteMapping("/withdraw")
     fun withdraw(
         request: HttpServletRequest,
-        response: HttpServletResponse,
         authentication: Authentication,
         @RequestParam provider: SocialProvider,
     ): ResponseEntity<ApiResponse<Nothing>> {
@@ -165,31 +141,16 @@ class AuthController(
             authentication.name.toLongOrNull()
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
         val accessToken =
-            request.cookies?.firstOrNull { it.name == "access_token" }?.value
+            request.getHeader("access_token")
                 ?: throw BusinessException(ErrorCode.UNAUTHORIZED)
 
         withdrawUseCase.withdraw(WithdrawCommand(userId = userId, provider = provider, accessToken = accessToken))
-
-        listOf("access_token", "refresh_token").forEach { cookieName ->
-            response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                ResponseCookie
-                    .from(cookieName, "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(Duration.ZERO)
-                    .sameSite(cookieSameSite)
-                    .build()
-                    .toString(),
-            )
-        }
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
     @Operation(
         summary = "내 정보 조회",
-        description = "access_token 쿠키를 기반으로 현재 로그인한 사용자 정보를 반환합니다.",
+        description = "access_token 헤더 기반으로 현재 로그인한 사용자 정보를 반환한다.",
     )
     @ApiResponses(
         SwaggerApiResponse(
