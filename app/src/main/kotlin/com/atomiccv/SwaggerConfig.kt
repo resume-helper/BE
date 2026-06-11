@@ -17,7 +17,7 @@ class SwaggerConfig {
         OpenAPI()
             .info(buildInfo())
             .components(buildComponents())
-            .addSecurityItem(SecurityRequirement().addList(BEARER_AUTH).addList(ACCESS_TOKEN_COOKIE))
+            .addSecurityItem(SecurityRequirement().addList(ACCESS_TOKEN_HEADER))
 
     private fun buildInfo() =
         Info()
@@ -35,90 +35,71 @@ class SwaggerConfig {
 
         return Components()
             .addSecuritySchemes(
-                BEARER_AUTH,
-                SecurityScheme()
-                    .type(SecurityScheme.Type.HTTP)
-                    .scheme("bearer")
-                    .bearerFormat("JWT")
-                    .description("Swagger 테스트용 — 로그인 후 발급된 access_token 값을 입력"),
-            ).addSecuritySchemes(
-                ACCESS_TOKEN_COOKIE,
+                ACCESS_TOKEN_HEADER,
                 SecurityScheme()
                     .type(SecurityScheme.Type.APIKEY)
-                    .`in`(SecurityScheme.In.COOKIE)
+                    .`in`(SecurityScheme.In.HEADER)
                     .name("access_token")
-                    .description("JWT Access Token (HttpOnly Cookie, 유효기간 1시간)"),
+                    .description("JWT Access Token — 요청 헤더 access_token (유효기간 1시간)"),
             ).addSecuritySchemes(
-                REFRESH_TOKEN_COOKIE,
+                REFRESH_TOKEN_HEADER,
                 SecurityScheme()
                     .type(SecurityScheme.Type.APIKEY)
-                    .`in`(SecurityScheme.In.COOKIE)
+                    .`in`(SecurityScheme.In.HEADER)
                     .name("refresh_token")
-                    .description("JWT Refresh Token (HttpOnly Cookie, 유효기간 7일, Path=/api/auth/refresh)"),
+                    .description("JWT Refresh Token — 요청 헤더 refresh_token (유효기간 7일, /api/auth/refresh 전용)"),
             ).addSchemas("ErrorResponse", errorResponseSchema)
     }
 
     companion object {
-        const val BEARER_AUTH = "bearerAuth"
-        const val ACCESS_TOKEN_COOKIE = "access_token_cookie"
-        const val REFRESH_TOKEN_COOKIE = "refresh_token_cookie"
+        const val ACCESS_TOKEN_HEADER = "access_token_header"
+        const val REFRESH_TOKEN_HEADER = "refresh_token_header"
 
         private val FE_GUIDE =
             """
             ## FE 연동 가이드
 
-            ### 인증 방식 — HttpOnly Cookie
+            ### 인증 방식 — 커스텀 헤더
 
-            | 쿠키명 | 유효기간 | 전송 Path | 비고 |
-            |--------|----------|-----------|------|
-            | `access_token` | **1시간** | 전체 (`/`) | 모든 API 인증 |
-            | `refresh_token` | **7일** | `/api/auth/refresh` 전용 | 자동 갱신용 |
+            | 헤더명 | 유효기간 | 사용 위치 |
+            |--------|----------|-----------|
+            | `access_token` | **1시간** | 모든 보호 API 요청 |
+            | `refresh_token` | **7일** | `POST /api/auth/refresh` 호출 시 |
 
-            두 쿠키 모두 `HttpOnly` — JS에서 `document.cookie` 접근 불가.
+            토큰은 BE 응답 헤더로 내려가며, BFF(Next.js) 가 받아 자신의 HttpOnly 쿠키로 다시 굽는다.
+            브라우저는 BE 도메인 쿠키를 직접 보유하지 않는다.
 
-            **모든 API 요청에 필수 설정:**
-            ```js
-            axios.defaults.withCredentials = true;
-            // 또는
-            fetch(url, { credentials: 'include' })
-            ```
-
-            ### 소셜 로그인 흐름 (NextAuth.js 기반)
+            ### 인증 흐름
 
             ```
-            1. 프론트엔드(NextAuth.js)가 Google/Kakao/Naver OAuth 처리
-            2. NextAuth callback에서 사용자 정보 획득
-               → provider, providerUserId, email, name, profileImageUrl
-            3. POST /api/auth/social-login 으로 전달
-            4. 백엔드 응답: access_token / refresh_token 쿠키 발급
-            5. GET /api/auth/me 로 유저 정보 확인
-            ```
-
-            요청 예시:
-            ```json
+            [로그인]
             POST /api/auth/social-login
-            {
-              "provider": "GOOGLE",
-              "providerUserId": "1234567890",
-              "email": "user@example.com",
-              "name": "홍길동",
-              "profileImageUrl": "https://example.com/profile.jpg"
-            }
+              → 응답 헤더: access_token, refresh_token
+              → BFF 가 자기 쿠키로 다시 굽기
+
+            [보호 API 호출]
+            요청 헤더: access_token: <JWT>
+
+            [Access Token 만료 시 (401)]
+            POST /api/auth/refresh
+              요청 헤더: refresh_token: <JWT>
+              → 응답 헤더: access_token (새 JWT)
+              → 원래 요청 재시도
             ```
 
             ### 401 처리 흐름
 
             ```
             API 응답 401
-             └─ POST /api/auth/refresh
-                  ├─ 성공 → access_token 쿠키 갱신 → 원래 요청 재시도
+             └─ POST /api/auth/refresh (refresh_token 헤더)
+                  ├─ 성공 → 새 access_token 헤더 수신 → 원 요청 재시도
                   └─ 실패 → 로그인 페이지 이동
             ```
 
             ### CORS
 
-            - 허용 Origin: 배포 환경별 FE 도메인 (백엔드 환경변수로 관리)
-            - `allowCredentials = true` 설정되어 있음
+            - 허용 Origin: 배포 환경별 BFF 도메인 (백엔드 환경변수로 관리)
+            - 커스텀 헤더(`access_token`, `refresh_token`)는 `Access-Control-Expose-Headers` 에 노출
 
             ---
 
@@ -132,8 +113,8 @@ class SwaggerConfig {
 
             | HTTP | code | 설명 |
             |------|------|------|
-            | 400 | `VALIDATION_FAILED` | 입력값 유효성 검증 실패 (지원하지 않는 provider 포함) |
-            | 401 | `UNAUTHORIZED` | 인증 필요 (쿠키 없음) |
+            | 400 | `VALIDATION_FAILED` | 입력값 유효성 검증 실패 |
+            | 401 | `UNAUTHORIZED` | 인증 필요 (헤더 없음) |
             | 401 | `TOKEN_EXPIRED` | Access Token 만료 → `/api/auth/refresh` 호출 |
             | 401 | `INVALID_TOKEN` | 토큰 위변조 또는 형식 오류 |
             | 403 | `FORBIDDEN` | 접근 권한 없음 (탈퇴·정지 계정 포함) |
