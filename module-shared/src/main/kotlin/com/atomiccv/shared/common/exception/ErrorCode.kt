@@ -15,7 +15,6 @@ enum class ErrorCode(
     DUPLICATE_EMAIL(409, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다"),
     RATE_LIMIT_EXCEEDED(429, "RATE_LIMIT_EXCEEDED", "요청 횟수를 초과했습니다"),
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다"),
-    OAUTH2_PROVIDER_ERROR(502, "OAUTH2_PROVIDER_ERROR", "소셜 로그인 제공자 오류가 발생했습니다"),
     BLOCK_DRAFT_TITLE_REQUIRED(400, "BLOCK_DRAFT_TITLE_REQUIRED", "제목을 입력해주세요"),
     BLOCK_DRAFT_NOT_FOUND(404, "BLOCK_DRAFT_NOT_FOUND", "임시저장을 찾을 수 없습니다"),
     BLOCK_DRAFT_FORBIDDEN(403, "BLOCK_DRAFT_FORBIDDEN", "임시저장에 접근 권한이 없습니다"),

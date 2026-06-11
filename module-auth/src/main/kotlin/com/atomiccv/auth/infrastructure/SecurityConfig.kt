@@ -1,9 +1,5 @@
 package com.atomiccv.auth.infrastructure
 
-import com.atomiccv.auth.infrastructure.client.CustomOAuth2AuthorizationRequestResolver
-import com.atomiccv.auth.infrastructure.client.CustomOAuth2UserService
-import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationFailureHandler
-import com.atomiccv.auth.infrastructure.client.OAuth2AuthenticationSuccessHandler
 import com.atomiccv.auth.interfaces.rest.JwtAuthenticationFilter
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
@@ -13,7 +9,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -23,11 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val customOAuth2UserService: CustomOAuth2UserService,
-    private val oAuth2AuthenticationSuccessHandler: OAuth2AuthenticationSuccessHandler,
-    private val oAuth2AuthenticationFailureHandler: OAuth2AuthenticationFailureHandler,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
-    private val clientRegistrationRepository: ClientRegistrationRepository,
     @Value("\${app.frontend-url}") private val frontendUrl: String,
     @Value("\${app.allowed-redirect-origins:}") private val allowedRedirectOriginsRaw: String,
 ) {
@@ -48,8 +39,6 @@ class SecurityConfig(
             .authorizeHttpRequests {
                 it
                     .requestMatchers(
-                        "/oauth2/**",
-                        "/login/**",
                         "/api/auth/social-login",
                         "/api/auth/refresh",
                         "/actuator/health",
@@ -60,15 +49,6 @@ class SecurityConfig(
                     ).permitAll()
                 it.requestMatchers(HttpMethod.POST, "/api/resumes/*/feedbacks").permitAll()
                 it.anyRequest().authenticated()
-            }.oauth2Login {
-                it.authorizationEndpoint { endpoint ->
-                    endpoint.authorizationRequestResolver(
-                        CustomOAuth2AuthorizationRequestResolver(clientRegistrationRepository),
-                    )
-                }
-                it.userInfoEndpoint { endpoint -> endpoint.userService(customOAuth2UserService) }
-                it.successHandler(oAuth2AuthenticationSuccessHandler)
-                it.failureHandler(oAuth2AuthenticationFailureHandler)
             }.exceptionHandling {
                 it.authenticationEntryPoint { _, response, _ ->
                     response.status = HttpServletResponse.SC_UNAUTHORIZED

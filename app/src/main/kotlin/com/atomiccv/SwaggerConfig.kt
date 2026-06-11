@@ -122,7 +122,6 @@ class SwaggerConfig {
             | 409 | `DUPLICATE_EMAIL` | 이미 사용 중인 이메일 |
             | 429 | `RATE_LIMIT_EXCEEDED` | 요청 횟수 초과 |
             | 500 | `INTERNAL_SERVER_ERROR` | 서버 내부 오류 |
-            | 502 | `OAUTH2_PROVIDER_ERROR` | 소셜 로그인 제공자 오류 |
             | 400 | `BLOCK_DRAFT_TITLE_REQUIRED` | 임시저장 제목 누락 |
             | 403 | `BLOCK_DRAFT_FORBIDDEN` | 임시저장 접근 권한 없음 |
             | 404 | `BLOCK_DRAFT_NOT_FOUND` | 임시저장 없음 또는 만료 |
