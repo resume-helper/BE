@@ -4,6 +4,7 @@ import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
@@ -22,6 +23,18 @@ class GlobalExceptionHandler {
                 timestamp = LocalDateTime.now(),
             ),
         )
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(e: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
+        log.warn("Request body 파싱 실패: {}", e.message)
+        return ResponseEntity.status(400).body(
+            ErrorResponse(
+                code = ErrorCode.VALIDATION_FAILED.code,
+                message = "요청 본문을 읽을 수 없습니다.",
+                timestamp = LocalDateTime.now(),
+            ),
+        )
+    }
 
     @ExceptionHandler(NoResourceFoundException::class)
     fun handleNoResourceFound(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {

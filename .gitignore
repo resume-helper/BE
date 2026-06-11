@@ -47,4 +47,8 @@ resume-dev.pem
 
 ### Claude local settings (팀원별 로컬 설정 — 공유 불필요) ###
 .claude/settings.local.json
+.claude/.deploy-token-*
 .worktrees/
+
+### Deploy precheck reports (로컬 산출물 — 공유 불필요) ###
+docs/reports/deploy/

@@ -50,6 +50,7 @@ class SecurityConfig(
                     .requestMatchers(
                         "/oauth2/**",
                         "/login/**",
+                        "/api/auth/social-login",
                         "/actuator/health",
                         "/actuator/prometheus",
                         "/swagger-ui/**",
