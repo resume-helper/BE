@@ -64,6 +64,9 @@ class SocialAccountJpaEntity(
                 providerUserId = account.providerUserId,
                 isActive = account.isActive,
                 deletedAt = account.deletedAt,
-            )
+            ).apply {
+                // UPDATE(예: 탈퇴) 경로에서 lateinit 미초기화 방지. INSERT 시에는 @CreatedDate 가 덮어씀.
+                createdAt = account.createdAt
+            }
     }
 }
