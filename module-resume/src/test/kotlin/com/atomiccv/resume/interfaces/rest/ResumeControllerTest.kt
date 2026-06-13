@@ -2,17 +2,17 @@ package com.atomiccv.resume.interfaces.rest
 
 import com.atomiccv.resume.application.usecase.CreateResumeUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
-import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
 import com.atomiccv.resume.application.usecase.GetResumeUseCase
 import com.atomiccv.resume.application.usecase.GetResumesUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeUseCase
 import com.atomiccv.resume.application.usecase.UpdateResumeVisibilityUseCase
-import com.atomiccv.resume.application.usecase.UploadUrlResult
 import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeBlockDetail
 import com.atomiccv.resume.domain.repository.ResumeDetail
+import com.atomiccv.shared.application.usecase.GenerateUploadUrlUseCase
+import com.atomiccv.shared.application.usecase.UploadUrlResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.just

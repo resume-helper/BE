@@ -1,4 +1,4 @@
-package com.atomiccv.resume.application.port
+package com.atomiccv.shared.application.port
 
 interface S3Port {
     fun generateUploadPresignedUrl(

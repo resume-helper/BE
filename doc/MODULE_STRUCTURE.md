@@ -72,8 +72,13 @@ module-{domain}/
 | `common.response` | `ApiResponse<T>` 공통 래퍼 |
 | `common.exception` | `BusinessException` base, 에러코드 enum |
 | `common.util` | 공통 유틸리티 |
+| `application.port` | `S3Port` — 파일 업로드/다운로드 presigned URL 인터페이스 |
+| `application.usecase` | `GenerateUploadUrlUseCase` — S3 presigned upload URL 발급 (도메인 무관) |
+| `infrastructure.storage` | `S3Adapter`, `SharedStorageConfiguration` — AWS S3 SDK 어댑터·Bean |
+| `infrastructure.persistence` | `BaseJpaEntity` — JPA Auditing 베이스 |
+| `interfaces.rest` | `GlobalExceptionHandler` — 공통 예외 응답 |
 
-> 다른 모듈이 공통으로 의존하는 라이브러리만 포함. 비즈니스 로직 포함 금지.
+> 다른 모듈이 공통으로 의존하는 라이브러리만 포함. **도메인 로직 포함 금지** — 도메인 무관한 공용 인프라/UseCase 는 허용.
 
 ### :module-auth
 

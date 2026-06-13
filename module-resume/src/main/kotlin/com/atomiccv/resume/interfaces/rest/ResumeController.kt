@@ -3,8 +3,6 @@ package com.atomiccv.resume.interfaces.rest
 import com.atomiccv.resume.application.usecase.CreateResumeCommand
 import com.atomiccv.resume.application.usecase.CreateResumeUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
-import com.atomiccv.resume.application.usecase.GenerateUploadUrlCommand
-import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
 import com.atomiccv.resume.application.usecase.GetResumeQuery
 import com.atomiccv.resume.application.usecase.GetResumeUseCase
 import com.atomiccv.resume.application.usecase.GetResumesQuery
@@ -20,6 +18,8 @@ import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeBlockDetail
 import com.atomiccv.resume.domain.repository.ResumeDetail
 import com.atomiccv.resume.domain.repository.SortDirection
+import com.atomiccv.shared.application.usecase.GenerateUploadUrlCommand
+import com.atomiccv.shared.application.usecase.GenerateUploadUrlUseCase
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
