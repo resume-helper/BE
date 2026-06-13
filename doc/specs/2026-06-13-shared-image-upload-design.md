@@ -107,6 +107,21 @@ class SharedStorageConfiguration(
 
 ---
 
+## 6.5 동기화할 기존 문서 (이번 PR 포함)
+
+| 문서 | 변경 내용 |
+|------|-----------|
+| `doc/MODULE_STRUCTURE.md` | `:module-shared` 섹션에 `infrastructure.storage` (S3Port/Adapter/Config), `application.usecase` (GenerateUploadUrlUseCase) 항목 추가. "비즈니스 로직 포함 금지" 문구를 "도메인 로직 포함 금지 — 도메인 무관한 공용 인프라/UseCase 는 허용" 으로 완화. 의존성 다이어그램은 변경 없음 (module-resume → module-shared 그대로) |
+| `doc/MODULE_STRUCTURE.md` | `:module-resume` 섹션에서 S3 업로드 책임 제거 (현재 명시는 없으나 향후 혼동 방지 목적의 주석 추가 검토) |
+
+다음 문서들은 **변경 없음** 으로 확인:
+- `doc/SERVICE_POLICY.md` — 파일 업로드 정책 자체 변경 없음 (용량·확장자 정책 유지)
+- `doc/prd.md` — 기능 요구사항 변경 없음
+- `doc/ERD_DRAFT.md` — DB 스키마 변경 없음
+- `doc/INFRA_DESIGN.md` — 인프라 구성 변경 없음 (S3 버킷·환경변수 동일)
+- `doc/auth-api.md` — 인증 API 무관
+- `doc/CONVENTION.md`, `doc/DETEKT_RULES.md` — 컨벤션 변경 없음
+
 ## 7. 후속 작업 (이번 PR 미포함)
 
 - `BlockController` 에 자기 `upload-url` 엔드포인트 추가 (공유 `GenerateUploadUrlUseCase` 주입).
@@ -130,3 +145,4 @@ class SharedStorageConfiguration(
 - `module-shared:test` 와 `module-resume:test` 모두 통과한다.
 - 기존 `POST /api/resumes/upload-url` 의 응답 동작·DTO·경로가 변경 전과 동일하다.
 - 전체 ktlint + detekt 통과.
+- `doc/MODULE_STRUCTURE.md` 의 `:module-shared` 항목이 storage / GenerateUploadUrlUseCase 를 반영하도록 갱신된다.
