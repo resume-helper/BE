@@ -11,8 +11,6 @@ import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeBlockDetail
 import com.atomiccv.resume.domain.repository.ResumeDetail
-import com.atomiccv.shared.application.usecase.GenerateUploadUrlUseCase
-import com.atomiccv.shared.application.usecase.UploadUrlResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.just
@@ -64,9 +62,6 @@ class ResumeControllerTest {
     @Autowired
     lateinit var updateResumeVisibilityUseCase: UpdateResumeVisibilityUseCase
 
-    @Autowired
-    lateinit var generateUploadUrlUseCase: GenerateUploadUrlUseCase
-
     @TestConfiguration
     class MockConfig {
         @Bean
@@ -86,9 +81,6 @@ class ResumeControllerTest {
 
         @Bean
         fun updateResumeVisibilityUseCase(): UpdateResumeVisibilityUseCase = mockk()
-
-        @Bean
-        fun generateUploadUrlUseCase(): GenerateUploadUrlUseCase = mockk()
     }
 
     private fun resumeFixture() =
@@ -235,31 +227,6 @@ class ResumeControllerTest {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
                 jsonPath("$.data.id") { value(1) }
-            }
-    }
-
-    @Test
-    @WithMockUser(username = "1")
-    fun `POST api-resumes-upload-url - S3 presigned URL을 발급하고 반환한다`() {
-        every { generateUploadUrlUseCase.generate(any()) } returns
-            UploadUrlResult(
-                presignedUrl = "https://upload.url",
-                s3Key = "resumes/1/uuid/file.pdf",
-            )
-
-        mockMvc
-            .post("/api/resumes/upload-url") {
-                with(csrf())
-                contentType = MediaType.APPLICATION_JSON
-                content =
-                    objectMapper.writeValueAsString(
-                        mapOf("fileName" to "resume.pdf"),
-                    )
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.success") { value(true) }
-                jsonPath("$.data.presignedUrl") { value("https://upload.url") }
-                jsonPath("$.data.s3Key") { value("resumes/1/uuid/file.pdf") }
             }
     }
 

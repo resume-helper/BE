@@ -4,7 +4,9 @@
 
 **Goal:** S3 presigned URL 업로드 기능을 `module-resume` 에서 `module-shared` 로 이동, 다른 도메인 모듈이 재사용 가능하게 한다.
 
-**Architecture:** 위치 이동(리팩토링) 만 수행. 기존 엔드포인트(`POST /api/resumes/upload-url`), DTO, key prefix 그대로. 새 비즈니스 로직·새 엔드포인트 없음. AWS S3 SDK 의존성은 `module-shared` 로 이전.
+**Architecture:** 위치 이동(리팩토링) + endpoint 경로 일반화. endpoint 는 `POST /api/upload-url` 로 module-shared `UploadUrlController` 가 노출, resume·block·block-draft 가 공유. DTO·key prefix·새 비즈니스 로직은 변경 없음. AWS S3 SDK 의존성은 `module-shared` 로 이전.
+
+> **Addendum 2026-06-15:** 본 Plan 으로 1차 작업 완료(`/api/resumes/upload-url` 위치만 module-shared 로 이전) 후, 코드 리뷰에서 path 모호성 지적을 받아 endpoint 를 `/api/upload-url` 로 분리하는 추가 커밋이 본 PR 에 포함된다. 이하 Task 본문은 1차 작업 시점 그대로 보존하고, 추가 변경은 spec 문서(`doc/specs/2026-06-13-shared-image-upload-design.md`)에 반영한다.
 
 **Tech Stack:** Kotlin, Spring Boot 3.5, Gradle (multi-module), AWS SDK v2 (`software.amazon.awssdk:s3`), JUnit 5, MockK.
 

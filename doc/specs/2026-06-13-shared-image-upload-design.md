@@ -9,7 +9,7 @@
 
 현재 S3 presigned URL 기반 이미지/파일 업로드 기능은 `module-resume` 안에 묶여 있어 Block·Profile 등 다른 도메인에서 재사용할 수 없다. 향후 Block 콘텐츠 안 이미지 첨부, Profile 이미지 업로드 등 다도메인 사용 요구가 예상되므로, **공동 모듈 `module-shared` 로 추출하여 재사용 가능하게** 만든다.
 
-이번 범위는 **위치 이동(리팩토링) 만** 이다. 새 엔드포인트, 새 비즈니스 로직, key prefix 일반화 같은 확장은 후속 작업으로 분리한다.
+이번 범위는 **위치 이동(리팩토링) + endpoint 경로 일반화** 이다. 새 비즈니스 로직, key prefix 일반화 같은 확장은 후속 작업으로 분리한다.
 
 ---
 
@@ -19,7 +19,7 @@
 |------|------|------|
 | 추상화 레벨 | **재사용만** — 현재 UseCase 를 그대로 끌어올림 | 가장 작은 변경. 도메인별 정책 분리 같은 추상화는 실제 요구 발생 시 도입 (YAGNI) |
 | 공동 모듈 위치 | `module-shared` 안 sub-package | 새 모듈 생성 없이 단순화. S3 SDK 가 module-auth/worklog 클래스패스에도 들어가는 오염은 수용 |
-| 엔드포인트 노출 | 현 `POST /api/resumes/upload-url` 유지. **새 endpoint 추가 안 함** | Block/Profile 사용은 별도 작업. 이번에는 이동만 |
+| 엔드포인트 노출 | `POST /api/upload-url` 로 변경 — module-shared 의 `UploadUrlController` 가 노출 | resume·block·block-draft 가 동일 endpoint 공유. `/api/resumes/...` 아래 두면 도메인 모호 |
 | key prefix | `resumes/{userId}/{UUID}/{fileName}` 그대로 | 일반화는 Block 사용 endpoint 추가 시점에 별도 처리 |
 
 ---
@@ -39,18 +39,12 @@
 
 ---
 
-## 4. ResumeController 변경
+## 4. Controller 분리
 
-import 경로만 갱신.
+- `ResumeController` 의 `POST /upload-url` 메서드, `GenerateUploadUrlRequest`, `UploadUrlResponse`, `GenerateUploadUrlUseCase` 주입 제거.
+- module-shared 에 `UploadUrlController` (`@RequestMapping("/api")` + `@PostMapping("/upload-url")`) 신규. Request/Response DTO 도 함께 이동.
 
-```diff
-- import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
-+ import com.atomiccv.shared.application.usecase.GenerateUploadUrlUseCase
-```
-
-엔드포인트(`POST /api/resumes/upload-url`), Request/Response DTO, 동작 모두 그대로. 생성자 주입은 Spring DI 가 자동 해석.
-
-`GetResumeUseCase.getPresignedDownloadUrl(pdfS3Key)` 도 동일하게 `S3Port` import 경로만 갱신.
+`GetResumeUseCase.getPresignedDownloadUrl(pdfS3Key)` 는 `S3Port` import 경로만 갱신.
 
 ---
 
@@ -58,12 +52,18 @@ import 경로만 갱신.
 
 ### 5.1 module-shared/build.gradle.kts
 
-AWS SDK 의존성 추가.
+AWS SDK + 컨트롤러 노출용 의존성 추가.
 
 ```kotlin
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
     implementation(platform("software.amazon.awssdk:bom:2.26.12"))
     implementation("software.amazon.awssdk:s3")
+
+    testImplementation("org.springframework.security:spring-security-test")
 }
 ```
 
@@ -100,10 +100,11 @@ class SharedStorageConfiguration(
 ## 6. 테스트 전략
 
 - `GenerateUploadUrlUseCaseTest` 를 module-shared 의 동일 패키지로 이동. 내용 변경 없음.
+- module-shared 에 `UploadUrlControllerTest` 신규 (WebMvcTest 기반, 정상/401 케이스).
+- module-resume `ResumeControllerTest` 의 upload-url 케이스 + 관련 mock bean 제거.
 - 검증 명령:
   - `./gradlew :module-shared:ktlintCheck :module-shared:detekt :module-shared:test`
   - `./gradlew :module-resume:ktlintCheck :module-resume:detekt :module-resume:test`
-  - 회귀 확인: 기존 `module-resume` 의 ResumeControllerTest 의 upload-url 케이스가 그대로 통과해야 한다.
 
 ---
 
@@ -124,9 +125,9 @@ class SharedStorageConfiguration(
 
 ## 7. 후속 작업 (이번 PR 미포함)
 
-- `BlockController` 에 자기 `upload-url` 엔드포인트 추가 (공유 `GenerateUploadUrlUseCase` 주입).
+- block / block-draft 클라이언트가 공통 `POST /api/upload-url` 호출하도록 FE 연결.
 - `GenerateUploadUrlCommand` 에 `prefix` 또는 `context` 파라미터 추가 → 도메인별 key prefix 분리.
-- Profile 이미지 업로드 endpoint (필요 시).
+- Profile 이미지 업로드 (도메인별 정책 차이 발생 시).
 - `resume.s3.bucket-name` 프로퍼티 키 일반화 (`storage.s3.bucket-name` 등).
 
 ---
@@ -143,6 +144,6 @@ class SharedStorageConfiguration(
 
 - `module-resume` 안에 S3 관련 코드·의존성이 남아있지 않다.
 - `module-shared:test` 와 `module-resume:test` 모두 통과한다.
-- 기존 `POST /api/resumes/upload-url` 의 응답 동작·DTO·경로가 변경 전과 동일하다.
+- 신규 endpoint `POST /api/upload-url` 의 응답 동작·DTO 가 기존 `/api/resumes/upload-url` 와 동등하다.
 - 전체 ktlint + detekt 통과.
-- `doc/MODULE_STRUCTURE.md` 의 `:module-shared` 항목이 storage / GenerateUploadUrlUseCase 를 반영하도록 갱신된다.
+- `doc/MODULE_STRUCTURE.md` 의 `:module-shared` 항목이 storage / interfaces.rest (UploadUrlController) / GenerateUploadUrlUseCase 를 반영하도록 갱신된다.
