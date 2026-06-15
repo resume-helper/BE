@@ -1,6 +1,6 @@
-package com.atomiccv.resume.application.usecase
+package com.atomiccv.shared.application.usecase
 
-import com.atomiccv.resume.application.port.S3Port
+import com.atomiccv.shared.application.port.S3Port
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test

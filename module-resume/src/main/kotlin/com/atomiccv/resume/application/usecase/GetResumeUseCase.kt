@@ -1,9 +1,9 @@
 package com.atomiccv.resume.application.usecase
 
-import com.atomiccv.resume.application.port.S3Port
 import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.repository.ResumeDetail
 import com.atomiccv.resume.domain.repository.ResumeRepository
+import com.atomiccv.shared.application.port.S3Port
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 

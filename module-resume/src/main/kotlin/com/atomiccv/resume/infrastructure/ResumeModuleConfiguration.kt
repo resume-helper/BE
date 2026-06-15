@@ -1,6 +1,5 @@
 package com.atomiccv.resume.infrastructure
 
-import com.atomiccv.resume.application.port.S3Port
 import com.atomiccv.resume.application.usecase.CreateBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.CreateResumeUseCase
@@ -10,7 +9,6 @@ import com.atomiccv.resume.application.usecase.DeleteBlockDraftsUseCase
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.DeleteFeedbackUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
-import com.atomiccv.resume.application.usecase.GenerateUploadUrlUseCase
 import com.atomiccv.resume.application.usecase.GetAllFeedbacksUseCase
 import com.atomiccv.resume.application.usecase.GetBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.GetBlockDraftsUseCase
@@ -30,12 +28,9 @@ import com.atomiccv.resume.domain.repository.BlockRepository
 import com.atomiccv.resume.domain.repository.FeedbackRepository
 import com.atomiccv.resume.domain.repository.ResumeBlockRepository
 import com.atomiccv.resume.domain.repository.ResumeRepository
-import com.atomiccv.resume.infrastructure.s3.S3Adapter
-import org.springframework.beans.factory.annotation.Value
+import com.atomiccv.shared.application.port.S3Port
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.presigner.S3Presigner
 
 @Configuration
 class BlockUseCaseConfiguration {
@@ -87,17 +82,6 @@ class BlockDraftUseCaseConfiguration {
 @Configuration
 class ResumeUseCaseConfiguration {
     @Bean
-    fun s3Presigner(
-        @Value("\${cloud.aws.region.static}") region: String,
-    ): S3Presigner = S3Presigner.builder().region(Region.of(region)).build()
-
-    @Bean
-    fun s3Port(
-        presigner: S3Presigner,
-        @Value("\${resume.s3.bucket-name}") bucketName: String,
-    ): S3Port = S3Adapter(presigner, bucketName)
-
-    @Bean
     fun createResumeUseCase(resumeRepository: ResumeRepository): CreateResumeUseCase =
         CreateResumeUseCase(resumeRepository)
 
@@ -121,9 +105,6 @@ class ResumeUseCaseConfiguration {
     @Bean
     fun updateResumeVisibilityUseCase(resumeRepository: ResumeRepository): UpdateResumeVisibilityUseCase =
         UpdateResumeVisibilityUseCase(resumeRepository)
-
-    @Bean
-    fun generateUploadUrlUseCase(s3Port: S3Port): GenerateUploadUrlUseCase = GenerateUploadUrlUseCase(s3Port)
 }
 
 @Configuration
