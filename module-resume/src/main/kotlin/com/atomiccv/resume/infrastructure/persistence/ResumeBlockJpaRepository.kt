@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 interface ResumeBlockJpaRepository : JpaRepository<ResumeBlockJpaEntity, Long> {
     fun findAllByResumeId(resumeId: Long): List<ResumeBlockJpaEntity>
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM ResumeBlockJpaEntity r WHERE r.resumeId = :resumeId")
     fun deleteAllByResumeId(resumeId: Long)
 }
