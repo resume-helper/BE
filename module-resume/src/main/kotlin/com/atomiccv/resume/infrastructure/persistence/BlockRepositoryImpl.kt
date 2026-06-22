@@ -17,10 +17,13 @@ class BlockRepositoryImpl(
     override fun findById(id: Long): Block? = jpaRepository.findById(id).orElse(null)?.toDomain()
 
     override fun findAllActiveByUserId(userId: Long): List<Block> =
-        jpaRepository.findAllByUserIdAndDeletedAtIsNull(userId).map { it.toDomain() }
+        jpaRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId).map { it.toDomain() }
 
     override fun findAllActiveByUserIdAndType(
         userId: Long,
         type: BlockType,
-    ): List<Block> = jpaRepository.findAllByUserIdAndTypeAndDeletedAtIsNull(userId, type).map { it.toDomain() }
+    ): List<Block> =
+        jpaRepository
+            .findAllByUserIdAndTypeAndDeletedAtIsNullOrderByCreatedAtDesc(userId, type)
+            .map { it.toDomain() }
 }
