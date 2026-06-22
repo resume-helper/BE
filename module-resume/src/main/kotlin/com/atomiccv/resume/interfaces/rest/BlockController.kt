@@ -14,6 +14,7 @@ import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -45,6 +46,7 @@ class BlockController(
     private val updateBlockUseCase: UpdateBlockUseCase,
     private val deleteBlockUseCase: DeleteBlockUseCase,
     private val getBlocksUseCase: GetBlocksUseCase,
+    private val objectMapper: ObjectMapper,
 ) {
     @Operation(
         summary = "블록 목록 조회",
@@ -71,7 +73,7 @@ class BlockController(
     ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
         val userId = resolveUserId(authentication)
         val blocks = getBlocksUseCase.getBlocks(GetBlocksQuery(userId = userId, type = type))
-        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse() }))
+        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse(objectMapper) }))
     }
 
     @Operation(
@@ -109,7 +111,7 @@ class BlockController(
         @Valid @RequestBody request: CreateBlocksRequest,
     ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
         val userId = resolveUserId(authentication)
-        request.blocks.forEach { item -> BlockContentValidator.validate(item.type, item.contentJson) }
+        request.blocks.forEach { item -> BlockContentValidator.validate(item.blockType, item.contentJson) }
         val blocks =
             createBlockUseCase.create(
                 CreateBlocksCommand(
@@ -117,14 +119,14 @@ class BlockController(
                     items =
                         request.blocks.map { item ->
                             BlockItemCommand(
-                                type = item.type,
+                                type = item.blockType,
                                 title = item.title,
                                 contentJson = item.contentJson.toString(),
                             )
                         },
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse() }))
+        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse(objectMapper) }))
     }
 
     @Operation(
@@ -195,7 +197,7 @@ class BlockController(
                     contentJson = request.contentJson.toString(),
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(block.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(block.toResponse(objectMapper)))
     }
 
     @Operation(
@@ -263,7 +265,7 @@ data class CreateBlocksRequest(
 @Schema(description = "블록 생성 항목")
 data class CreateBlockItemRequest(
     @Schema(description = "블록 타입", example = "CAREER")
-    val type: BlockType,
+    val blockType: BlockType,
     @Schema(description = "블록 제목 (최대 200자)", example = "카카오 백엔드 개발자")
     @field:NotBlank
     @field:Size(max = 200)
@@ -298,20 +300,20 @@ data class BlockResponse(
     val type: BlockType,
     @Schema(description = "블록 제목", example = "카카오 백엔드 개발자")
     val title: String,
-    @Schema(description = "블록 내용 JSON 문자열", example = "{}")
-    val contentJson: String,
+    @Schema(description = "블록 내용 JSON 오브젝트", example = "{}")
+    val contentJson: JsonNode,
     @Schema(description = "생성 일시", example = "2026-05-11T10:00:00")
     val createdAt: LocalDateTime,
     @Schema(description = "수정 일시", example = "2026-05-11T10:00:00")
     val updatedAt: LocalDateTime,
 )
 
-fun Block.toResponse() =
+fun Block.toResponse(objectMapper: ObjectMapper) =
     BlockResponse(
         id = id,
         type = type,
         title = title,
-        contentJson = contentJson,
+        contentJson = objectMapper.readTree(contentJson),
         createdAt = createdAt,
         updatedAt = updatedAt,
     )

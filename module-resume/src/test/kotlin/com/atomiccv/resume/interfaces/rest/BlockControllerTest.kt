@@ -104,7 +104,7 @@ class BlockControllerTest {
     @WithMockUser(username = "1")
     fun `POST api-blocks - 블록 리스트를 생성하고 반환한다`() {
         every { createBlockUseCase.create(any()) } returns listOf(block)
-        val blockItem = mapOf("type" to "CAREER", "title" to "카카오 백엔드 개발자", "contentJson" to careerContentJson)
+        val blockItem = mapOf("blockType" to "CAREER", "title" to "카카오 백엔드 개발자", "contentJson" to careerContentJson)
         val requestBody = mapOf("blocks" to listOf(blockItem))
 
         mockMvc

@@ -21,6 +21,7 @@ import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -46,6 +47,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 @Tag(name = "BlockDraft", description = "블록 임시저장 API — 생성·조회·수정·삭제·만료 관리")
 @RestController
 @RequestMapping("/api/block-drafts")
+@Suppress("LongParameterList")
 class BlockDraftController(
     private val createBlockDraftUseCase: CreateBlockDraftUseCase,
     private val updateBlockDraftUseCase: UpdateBlockDraftUseCase,
@@ -54,6 +56,7 @@ class BlockDraftController(
     private val deleteBlockDraftUseCase: DeleteBlockDraftUseCase,
     private val deleteBlockDraftsUseCase: DeleteBlockDraftsUseCase,
     private val deleteAllBlockDraftsByTypeUseCase: DeleteAllBlockDraftsByTypeUseCase,
+    private val objectMapper: ObjectMapper,
 ) {
     @Operation(
         summary = "임시저장 생성",
@@ -100,7 +103,7 @@ class BlockDraftController(
                     contentJson = request.contentJson.toString(),
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse(objectMapper)))
     }
 
     @Operation(
@@ -182,7 +185,7 @@ class BlockDraftController(
     ): ResponseEntity<ApiResponse<BlockDraftResponse>> {
         val userId = resolveUserId(authentication)
         val draft = getBlockDraftUseCase.getDraft(GetBlockDraftQuery(draftId = id, userId = userId))
-        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse(objectMapper)))
     }
 
     @Operation(
@@ -253,7 +256,7 @@ class BlockDraftController(
                     contentJson = request.contentJson.toString(),
                 ),
             )
-        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse()))
+        return ResponseEntity.ok(ApiResponse.ok(draft.toResponse(objectMapper)))
     }
 
     @Operation(
@@ -417,8 +420,8 @@ data class BlockDraftResponse(
     val blockType: BlockType,
     @Schema(description = "임시저장 제목", example = "카카오 백엔드 개발자")
     val title: String,
-    @Schema(description = "블록 내용 JSON 문자열", example = """{"company":"카카오"}""")
-    val contentJson: String,
+    @Schema(description = "블록 내용 JSON 오브젝트", example = """{"company":"카카오"}""")
+    val contentJson: JsonNode,
     @Schema(description = "만료 일시 (생성/수정 기준 14일 후)", example = "2026-06-05T14:30:00")
     val expiresAt: LocalDateTime,
     @Schema(description = "생성 일시", example = "2026-05-22T14:30:00")
@@ -439,12 +442,12 @@ data class BlockDraftSummaryResponse(
     val isActive: Boolean,
 )
 
-fun BlockDraft.toResponse() =
+fun BlockDraft.toResponse(objectMapper: ObjectMapper) =
     BlockDraftResponse(
         id = id,
         blockType = blockType,
         title = title,
-        contentJson = contentJson,
+        contentJson = objectMapper.readTree(contentJson),
         expiresAt = expiresAt,
         createdAt = createdAt,
         updatedAt = updatedAt,
