@@ -13,6 +13,7 @@ import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
 import com.atomiccv.shared.common.response.ApiResponse
+import com.atomiccv.shared.common.response.PageResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
@@ -70,10 +71,12 @@ class BlockController(
     fun getBlocks(
         authentication: Authentication,
         @RequestParam(required = false) type: BlockType?,
-    ): ResponseEntity<ApiResponse<List<BlockResponse>>> {
+        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "20") size: Int,
+    ): ResponseEntity<ApiResponse<PageResponse<BlockResponse>>> {
         val userId = resolveUserId(authentication)
-        val blocks = getBlocksUseCase.getBlocks(GetBlocksQuery(userId = userId, type = type))
-        return ResponseEntity.ok(ApiResponse.ok(blocks.map { it.toResponse(objectMapper) }))
+        val result = getBlocksUseCase.getBlocks(GetBlocksQuery(userId = userId, type = type, page = page, size = size))
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(result) { it.toResponse(objectMapper) }))
     }
 
     @Operation(
