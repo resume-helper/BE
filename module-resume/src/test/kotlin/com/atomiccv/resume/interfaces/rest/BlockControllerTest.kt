@@ -17,6 +17,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -88,15 +90,18 @@ class BlockControllerTest {
 
     @Test
     @WithMockUser(username = "1")
-    fun `GET api-blocks - 블록 목록을 반환한다`() {
-        every { getBlocksUseCase.getBlocks(any()) } returns listOf(block)
+    fun `GET api-blocks - 블록 목록을 페이지로 반환한다`() {
+        val pageResult = PageImpl(listOf(block), PageRequest.of(0, 20), 1)
+        every { getBlocksUseCase.getBlocks(any()) } returns pageResult
 
         mockMvc.get("/api/blocks").andExpect {
             status { isOk() }
             jsonPath("$.success") { value(true) }
-            jsonPath("$.data[0].id") { value(1) }
-            jsonPath("$.data[0].type") { value("CAREER") }
-            jsonPath("$.data[0].title") { value("카카오 백엔드 개발자") }
+            jsonPath("$.data.content[0].id") { value(1) }
+            jsonPath("$.data.content[0].type") { value("CAREER") }
+            jsonPath("$.data.content[0].title") { value("카카오 백엔드 개발자") }
+            jsonPath("$.data.totalElements") { value(1) }
+            jsonPath("$.data.hasNext") { value(false) }
         }
     }
 

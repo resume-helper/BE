@@ -3,6 +3,9 @@ package com.atomiccv.resume.infrastructure.persistence
 import com.atomiccv.resume.domain.model.Block
 import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.resume.domain.repository.BlockRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -16,14 +19,22 @@ class BlockRepositoryImpl(
 
     override fun findById(id: Long): Block? = jpaRepository.findById(id).orElse(null)?.toDomain()
 
-    override fun findAllActiveByUserId(userId: Long): List<Block> =
-        jpaRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId).map { it.toDomain() }
+    override fun findPageByUserId(
+        userId: Long,
+        page: Int,
+        size: Int,
+    ): Page<Block> {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return jpaRepository.findAllByUserIdAndDeletedAtIsNull(userId, pageable).map { it.toDomain() }
+    }
 
-    override fun findAllActiveByUserIdAndType(
+    override fun findPageByUserIdAndType(
         userId: Long,
         type: BlockType,
-    ): List<Block> =
-        jpaRepository
-            .findAllByUserIdAndTypeAndDeletedAtIsNullOrderByCreatedAtDesc(userId, type)
-            .map { it.toDomain() }
+        page: Int,
+        size: Int,
+    ): Page<Block> {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return jpaRepository.findAllByUserIdAndTypeAndDeletedAtIsNull(userId, type, pageable).map { it.toDomain() }
+    }
 }
