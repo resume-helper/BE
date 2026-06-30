@@ -9,7 +9,7 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       ssl:
-        enabled: true
+        enabled: ${REDIS_SSL_ENABLED:false}
   jpa:
     hibernate:
       ddl-auto: update
@@ -53,3 +53,12 @@ logging:
   structured:
     format:
       console: ecs
+
+cloud:
+  aws:
+    region:
+      static: ${CLOUD_AWS_REGION_STATIC:ap-northeast-2}
+
+resume:
+  s3:
+    bucket-name: ${RESUME_S3_BUCKET_NAME:resumes-dev-1}
