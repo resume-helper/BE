@@ -1,6 +1,9 @@
 package com.atomiccv.auth.infrastructure
 
 import com.atomiccv.auth.interfaces.rest.JwtAuthenticationFilter
+import com.atomiccv.shared.common.exception.ErrorCode
+import com.atomiccv.shared.common.response.ApiResponse
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -19,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val objectMapper: ObjectMapper,
     @Value("\${app.frontend-url}") private val frontendUrl: String,
     @Value("\${app.allowed-redirect-origins:}") private val allowedRedirectOriginsRaw: String,
 ) {
@@ -53,7 +57,14 @@ class SecurityConfig(
                 it.authenticationEntryPoint { _, response, _ ->
                     response.status = HttpServletResponse.SC_UNAUTHORIZED
                     response.contentType = "application/json;charset=UTF-8"
-                    response.writer.write("""{"code":"UNAUTHORIZED","message":"인증이 필요합니다"}""")
+                    response.writer.write(
+                        objectMapper.writeValueAsString(
+                            ApiResponse.error(
+                                code = ErrorCode.UNAUTHORIZED.code,
+                                message = ErrorCode.UNAUTHORIZED.defaultMessage,
+                            ),
+                        ),
+                    )
                 }
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 

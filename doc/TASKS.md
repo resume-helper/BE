@@ -162,6 +162,7 @@
 | RDB | AWS RDS MySQL 8.4 + dev 데이터베이스 생성 | 2026-05-01 |
 | 블록 저장 단위 | 일괄 저장 (FE가 전체 블록 상태 일괄 전송) | 2026-05-07 |
 | API 응답 포맷 | 공통 래퍼 ApiResponse<T> 사용 (상세: doc/API_RESPONSE.md) | 2026-05-01 |
+| API 응답 포맷 통일 | 에러 응답도 ApiResponse<T>로 통일 (success:false, code, message, data). ErrorResponse 제거. MethodArgumentNotValidException 핸들러 추가. SecurityConfig authenticationEntryPoint도 동일 포맷 적용 | 2026-06-30 |
 | 슬러그 구조 | 랜덤 UUID 자동 생성, 사용자 지정 미지원 (MVP 이후 검토) | 2026-05-07 |
 | notifications | MVP에서 테이블 전체 제거, Phase 2 이후 추가 | 2026-05-07 |
 | 피드백 익명화 | 완전 익명 (reviewer_name·reviewer_email 제거) | 2026-05-07 |

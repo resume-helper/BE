@@ -39,7 +39,7 @@ class ResumeBlockController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [
                         ExampleObject(
                             value = """{"success":false,"message":"블록 목록이 이력서의 블록 목록과 일치하지 않습니다."}""",
@@ -54,7 +54,7 @@ class ResumeBlockController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"접근 권한이 없습니다"}""")],
                 ),
             ],
@@ -65,7 +65,7 @@ class ResumeBlockController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이력서를 찾을 수 없습니다."}""")],
                 ),
             ],

@@ -68,7 +68,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"입력값이 올바르지 않습니다"}""")],
                 ),
             ],
@@ -79,7 +79,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -116,7 +116,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -154,7 +154,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -165,7 +165,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"접근 권한이 없습니다"}""")],
                 ),
             ],
@@ -176,7 +176,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이력서를 찾을 수 없습니다"}""")],
                 ),
             ],
@@ -205,7 +205,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"입력값이 올바르지 않습니다"}""")],
                 ),
             ],
@@ -216,7 +216,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -227,7 +227,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"접근 권한이 없습니다"}""")],
                 ),
             ],
@@ -238,7 +238,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이력서를 찾을 수 없습니다"}""")],
                 ),
             ],
@@ -275,7 +275,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -286,7 +286,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"접근 권한이 없습니다"}""")],
                 ),
             ],
@@ -297,7 +297,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이력서를 찾을 수 없습니다"}""")],
                 ),
             ],
@@ -325,7 +325,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],
@@ -336,7 +336,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"접근 권한이 없습니다"}""")],
                 ),
             ],
@@ -347,7 +347,7 @@ class ResumeController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이력서를 찾을 수 없습니다"}""")],
                 ),
             ],

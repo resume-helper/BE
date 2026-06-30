@@ -33,7 +33,7 @@ class AllFeedbackController(
             responseCode = "401",
             description = "인증 필요 (UNAUTHORIZED)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
     )

@@ -56,21 +56,21 @@ class FeedbackController(
             responseCode = "400",
             description = "입력값 유효성 검증 실패 (VALIDATION_FAILED)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
         SwaggerApiResponse(
             responseCode = "403",
             description = "이력서 소유자는 피드백 제출 불가 (FORBIDDEN)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
         SwaggerApiResponse(
             responseCode = "404",
             description = "이력서를 찾을 수 없음 (RESOURCE_NOT_FOUND)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
     )
@@ -105,14 +105,14 @@ class FeedbackController(
             responseCode = "403",
             description = "이력서 소유자가 아닌 경우 (FORBIDDEN)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
         SwaggerApiResponse(
             responseCode = "404",
             description = "이력서를 찾을 수 없음 (RESOURCE_NOT_FOUND)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
     )
@@ -146,14 +146,14 @@ class FeedbackController(
             responseCode = "403",
             description = "이력서 소유자가 아닌 경우 (FORBIDDEN)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
         SwaggerApiResponse(
             responseCode = "404",
             description = "피드백을 찾을 수 없음 (RESOURCE_NOT_FOUND)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
     )
@@ -185,14 +185,14 @@ class FeedbackController(
             responseCode = "403",
             description = "이력서 소유자가 아닌 경우 (FORBIDDEN)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
         SwaggerApiResponse(
             responseCode = "404",
             description = "피드백을 찾을 수 없음 (RESOURCE_NOT_FOUND)",
             content = [
-                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ErrorResponse")),
+                Content(mediaType = "application/json", schema = Schema(ref = "#/components/schemas/ApiResponse")),
             ],
         ),
     )
