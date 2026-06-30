@@ -70,7 +70,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"제목을 입력해주세요"}""")],
                 )
             ],
@@ -81,7 +81,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -118,7 +118,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -150,7 +150,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -161,7 +161,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장에 접근 권한이 없습니다"}""")],
                 )
             ],
@@ -172,7 +172,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장을 찾을 수 없습니다"}""")],
                 )
             ],
@@ -200,7 +200,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"제목을 입력해주세요"}""")],
                 )
             ],
@@ -211,7 +211,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -222,7 +222,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장에 접근 권한이 없습니다"}""")],
                 )
             ],
@@ -233,7 +233,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장을 찾을 수 없습니다"}""")],
                 )
             ],
@@ -271,7 +271,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -282,7 +282,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장에 접근 권한이 없습니다"}""")],
                 )
             ],
@@ -293,7 +293,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장을 찾을 수 없습니다"}""")],
                 )
             ],
@@ -321,7 +321,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -332,7 +332,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"임시저장에 접근 권한이 없습니다"}""")],
                 )
             ],
@@ -362,7 +362,7 @@ class BlockDraftController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],

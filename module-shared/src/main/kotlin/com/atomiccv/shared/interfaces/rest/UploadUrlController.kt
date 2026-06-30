@@ -39,7 +39,7 @@ class UploadUrlController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"입력값이 올바르지 않습니다"}""")],
                 ),
             ],
@@ -50,7 +50,7 @@ class UploadUrlController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 ),
             ],

@@ -11,7 +11,7 @@
 |---|------|----------|--------|
 | 1 | 이메일 인증 | 미사용 (소셜 로그인 전용) | 2026-05-02 |
 | 2 | ERD 설계 | DDL 확정 (`doc/erd_cloud_import.sql`), 세부 결정: 이력[2] 참조 | 2026-05-07 |
-| 3 | API 응답 포맷 | 공통 래퍼 `ApiResponse<T>` 사용, 상세: `doc/API_RESPONSE.md` | 2026-05-01 |
+| 3 | API 응답 포맷 | 성공·에러 모두 `ApiResponse<T>` 단일 래퍼로 통일. 에러 시 `success:false, code, message`. 상세: `doc/API_RESPONSE.md` | 2026-06-30 |
 | 4 | Spring Boot 버전 | 3.x 유지 (Kotlin Boot 4.x 미호환) | 2026-04-30 |
 | 5 | 로컬 개발 환경 | DB: AWS RDB 연결 / Redis: 로컬 구동 | 2026-04-30 |
 | 6 | 브랜치 전략 | main + feature/fix/chore, PR: Merge / AI 승인 | 2026-04-30 |

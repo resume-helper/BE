@@ -4,7 +4,6 @@ import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springframework.context.annotation.Bean
@@ -26,14 +25,8 @@ class SwaggerConfig {
             .contact(Contact().name("Atomic CV Team"))
             .description(FE_GUIDE)
 
-    private fun buildComponents(): Components {
-        val errorResponseSchema =
-            Schema<Any>()
-                .type("object")
-                .addProperty("success", Schema<Boolean>().type("boolean").example(false))
-                .addProperty("message", Schema<String>().type("string").example("에러 메시지"))
-
-        return Components()
+    private fun buildComponents(): Components =
+        Components()
             .addSecuritySchemes(
                 ACCESS_TOKEN_HEADER,
                 SecurityScheme()
@@ -48,8 +41,7 @@ class SwaggerConfig {
                     .`in`(SecurityScheme.In.HEADER)
                     .name("refresh_token")
                     .description("JWT Refresh Token — 요청 헤더 refresh_token (유효기간 7일, /api/auth/refresh 전용)"),
-            ).addSchemas("ErrorResponse", errorResponseSchema)
-    }
+            )
 
     companion object {
         const val ACCESS_TOKEN_HEADER = "access_token_header"
@@ -106,7 +98,7 @@ class SwaggerConfig {
             ## 에러 응답 포맷
 
             ```json
-            { "success": false, "message": "에러 메시지" }
+            { "success": false, "code": "에러 코드", "message": "에러 메시지", "data": null }
             ```
 
             ## 에러 코드 목록

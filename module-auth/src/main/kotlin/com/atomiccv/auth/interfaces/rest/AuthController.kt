@@ -54,7 +54,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -86,7 +86,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -114,7 +114,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -125,7 +125,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"이미 탈퇴 처리된 소셜 계정입니다."}""")],
                 )
             ],
@@ -164,7 +164,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
                 )
             ],
@@ -175,7 +175,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"사용자를 찾을 수 없습니다."}""")],
                 )
             ],
@@ -206,7 +206,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"지원하지 않는 provider입니다"}""")],
                 )
             ],
@@ -217,7 +217,7 @@ class AuthController(
             content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(ref = "#/components/schemas/ErrorResponse"),
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
                     examples = [ExampleObject(value = """{"success":false,"message":"탈퇴 처리된 계정입니다."}""")],
                 )
             ],
