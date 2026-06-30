@@ -198,12 +198,17 @@ class ResumeControllerTest {
 
     @Test
     @WithMockUser(username = "1")
-    fun `DELETE api-resumes-id - 이력서를 삭제하고 success를 반환한다`() {
-        every { deleteResumeUseCase.delete(any(), any()) } just runs
+    fun `DELETE api-resumes - 이력서를 일괄 삭제하고 success를 반환한다`() {
+        every { deleteResumeUseCase.deleteAll(any(), any()) } just runs
 
         mockMvc
-            .delete("/api/resumes/1") {
+            .delete("/api/resumes") {
                 with(csrf())
+                contentType = MediaType.APPLICATION_JSON
+                content =
+                    objectMapper.writeValueAsString(
+                        mapOf("ids" to listOf(1L, 2L)),
+                    )
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }

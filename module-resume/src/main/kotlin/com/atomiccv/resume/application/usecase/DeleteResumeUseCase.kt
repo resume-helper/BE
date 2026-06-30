@@ -11,13 +11,15 @@ import java.time.LocalDateTime
 class DeleteResumeUseCase(
     private val resumeRepository: ResumeRepository,
 ) {
-    fun delete(
-        resumeId: Long,
+    fun deleteAll(
+        resumeIds: List<Long>,
         userId: Long
     ) {
-        val resume = findActiveResume(resumeId)
-        verifyOwnership(resume, userId)
-        resumeRepository.save(resume.copy(deletedAt = LocalDateTime.now()))
+        resumeIds.forEach { resumeId ->
+            val resume = findActiveResume(resumeId)
+            verifyOwnership(resume, userId)
+            resumeRepository.save(resume.copy(deletedAt = LocalDateTime.now()))
+        }
     }
 
     private fun findActiveResume(id: Long): Resume {

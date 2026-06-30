@@ -264,7 +264,7 @@ class ResumeController(
     }
 
     @Operation(
-        summary = "이력서 삭제",
+        summary = "이력서 일괄 삭제",
         description = "이력서를 소프트 삭제합니다. 본인 소유 이력서만 삭제 가능합니다.",
     )
     @ApiResponses(
@@ -303,13 +303,13 @@ class ResumeController(
             ],
         ),
     )
-    @DeleteMapping("/{id}")
-    fun deleteResume(
+    @DeleteMapping
+    fun deleteResumes(
         authentication: Authentication,
-        @PathVariable id: Long,
+        @RequestBody request: DeleteResumesRequest,
     ): ResponseEntity<ApiResponse<Nothing>> {
         val userId = resolveUserId(authentication)
-        deleteResumeUseCase.delete(resumeId = id, userId = userId)
+        deleteResumeUseCase.deleteAll(resumeIds = request.ids, userId = userId)
         return ResponseEntity.ok(ApiResponse.ok())
     }
 
@@ -426,6 +426,12 @@ data class BlockInputRequest(
 data class UpdateVisibilityRequest(
     @Schema(description = "공개 여부", example = "true")
     val isPublic: Boolean,
+)
+
+@Schema(description = "이력서 일괄 삭제 요청")
+data class DeleteResumesRequest(
+    @Schema(description = "삭제할 이력서 ID 목록", example = "[1, 2, 3]")
+    val ids: List<Long>,
 )
 
 // ── Responses ─────────────────────────────────────────────────────────────────

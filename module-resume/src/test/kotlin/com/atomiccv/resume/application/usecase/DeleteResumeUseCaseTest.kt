@@ -32,7 +32,7 @@ class DeleteResumeUseCaseTest {
         every { resumeRepository.findById(1L) } returns resumeFixture()
         every { resumeRepository.save(any()) } answers { firstArg() }
 
-        useCase.delete(resumeId = 1L, userId = 1L)
+        useCase.deleteAll(resumeIds = listOf(1L), userId = 1L)
 
         verify { resumeRepository.save(match { it.deletedAt != null }) }
     }
@@ -41,7 +41,7 @@ class DeleteResumeUseCaseTest {
     fun `존재하지 않는 이력서 삭제 시 RESUME_NOT_FOUND 예외가 발생한다`() {
         every { resumeRepository.findById(999L) } returns null
 
-        val ex = assertFailsWith<BusinessException> { useCase.delete(resumeId = 999L, userId = 1L) }
+        val ex = assertFailsWith<BusinessException> { useCase.deleteAll(resumeIds = listOf(999L), userId = 1L) }
         assertEquals(ErrorCode.RESUME_NOT_FOUND, ex.errorCode)
     }
 
@@ -49,7 +49,7 @@ class DeleteResumeUseCaseTest {
     fun `이미 삭제된 이력서 삭제 시 RESUME_NOT_FOUND 예외가 발생한다`() {
         every { resumeRepository.findById(1L) } returns resumeFixture(deleted = true)
 
-        val ex = assertFailsWith<BusinessException> { useCase.delete(resumeId = 1L, userId = 1L) }
+        val ex = assertFailsWith<BusinessException> { useCase.deleteAll(resumeIds = listOf(1L), userId = 1L) }
         assertEquals(ErrorCode.RESUME_NOT_FOUND, ex.errorCode)
     }
 
@@ -57,7 +57,7 @@ class DeleteResumeUseCaseTest {
     fun `타인의 이력서 삭제 시 FORBIDDEN 예외가 발생한다`() {
         every { resumeRepository.findById(1L) } returns resumeFixture(userId = 1L)
 
-        val ex = assertFailsWith<BusinessException> { useCase.delete(resumeId = 1L, userId = 99L) }
+        val ex = assertFailsWith<BusinessException> { useCase.deleteAll(resumeIds = listOf(1L), userId = 99L) }
         assertEquals(ErrorCode.FORBIDDEN, ex.errorCode)
     }
 }
