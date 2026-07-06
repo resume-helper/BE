@@ -1,7 +1,10 @@
 package com.atomiccv.resume.interfaces.rest
 
+import com.atomiccv.resume.application.usecase.BlockCounts
+import com.atomiccv.resume.application.usecase.BlockTypeCount
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
+import com.atomiccv.resume.application.usecase.GetBlockCountsUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockUseCase
 import com.atomiccv.resume.domain.model.Block
@@ -50,6 +53,9 @@ class BlockControllerTest {
     @Autowired
     lateinit var getBlocksUseCase: GetBlocksUseCase
 
+    @Autowired
+    lateinit var getBlockCountsUseCase: GetBlockCountsUseCase
+
     private val careerContentJson =
         mapOf(
             "companyName" to "카카오",
@@ -86,6 +92,9 @@ class BlockControllerTest {
 
         @Bean
         fun getBlocksUseCase(): GetBlocksUseCase = mockk()
+
+        @Bean
+        fun getBlockCountsUseCase(): GetBlockCountsUseCase = mockk()
     }
 
     @Test
@@ -156,5 +165,37 @@ class BlockControllerTest {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
             }
+    }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `GET api-blocks-counts - 타입별 블록 개수를 반환한다`() {
+        val counts =
+            BlockCounts(
+                totalCount = 3L,
+                counts =
+                    listOf(
+                        BlockTypeCount(BlockType.BASIC_INFO, 0L),
+                        BlockTypeCount(BlockType.CAREER, 3L),
+                    ),
+            )
+        every { getBlockCountsUseCase.getCounts(1L) } returns counts
+
+        mockMvc.get("/api/blocks/counts").andExpect {
+            status { isOk() }
+            jsonPath("$.success") { value(true) }
+            jsonPath("$.data.totalCount") { value(3) }
+            jsonPath("$.data.counts[0].type") { value("BASIC_INFO") }
+            jsonPath("$.data.counts[0].count") { value(0) }
+            jsonPath("$.data.counts[1].type") { value("CAREER") }
+            jsonPath("$.data.counts[1].count") { value(3) }
+        }
+    }
+
+    @Test
+    fun `GET api-blocks-counts - 미인증 요청 시 401을 반환한다`() {
+        mockMvc.get("/api/blocks/counts").andExpect {
+            status { isUnauthorized() }
+        }
     }
 }
