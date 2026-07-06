@@ -47,7 +47,7 @@ GET /api/blocks/counts
 | 레이어 | 변경 내용 |
 |---|---|
 | `domain/repository/BlockRepository.kt` | `fun countByUserId(userId: Long): Map<BlockType, Long>` 추가 (0건 타입은 맵에서 생략 — 채우는 책임은 UseCase) |
-| `infrastructure/persistence/BlockJpaRepository.kt` | `@Query`로 `WHERE userId = :userId AND deletedAt IS NULL GROUP BY type` 집계, 인터페이스 프로젝션(`BlockTypeCountView`)으로 반환 |
+| `infrastructure/persistence/BlockJpaRepository.kt` | `@Query`로 `WHERE userId = :userId AND deletedAt IS NULL GROUP BY type` 집계, 인터페이스 프로젝션(`BlockTypeCountProjection`)으로 반환 |
 | `infrastructure/persistence/BlockRepositoryImpl.kt` | 프로젝션 결과 리스트 → `Map<BlockType, Long>` 변환 (`associate`) |
 | `application/usecase/GetBlockCountsUseCase.kt` (신규) | `BlockType.entries` 전체를 순회하며 맵에 없는 타입은 0으로 채움, `totalCount` 계산. 읽기 전용 쿼리이므로 `GetBlocksUseCase`와 동일하게 `@Transactional` 미부착 |
 | `interfaces/rest/BlockController.kt` | `GET /counts` 액션 + `BlockCountsResponse`/`BlockTypeCountResponse` DTO 추가 |
