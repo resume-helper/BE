@@ -10,6 +10,7 @@ import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
 import com.atomiccv.resume.application.usecase.DeleteFeedbackUseCase
 import com.atomiccv.resume.application.usecase.DeleteResumeUseCase
 import com.atomiccv.resume.application.usecase.GetAllFeedbacksUseCase
+import com.atomiccv.resume.application.usecase.GetBlockCountsUseCase
 import com.atomiccv.resume.application.usecase.GetBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.GetBlockDraftsUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
@@ -45,6 +46,10 @@ class BlockUseCaseConfiguration {
 
     @Bean
     fun getBlocksUseCase(blockRepository: BlockRepository): GetBlocksUseCase = GetBlocksUseCase(blockRepository)
+
+    @Bean
+    fun getBlockCountsUseCase(blockRepository: BlockRepository): GetBlockCountsUseCase =
+        GetBlockCountsUseCase(blockRepository)
 }
 
 @Configuration
