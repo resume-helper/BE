@@ -37,4 +37,7 @@ class BlockRepositoryImpl(
         val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
         return jpaRepository.findAllByUserIdAndTypeAndDeletedAtIsNull(userId, type, pageable).map { it.toDomain() }
     }
+
+    override fun countByUserId(userId: Long): Map<BlockType, Long> =
+        jpaRepository.countByUserIdGroupedByType(userId).associate { it.type to it.count }
 }
