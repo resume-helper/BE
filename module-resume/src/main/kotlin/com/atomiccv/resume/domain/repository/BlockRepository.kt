@@ -23,4 +23,6 @@ interface BlockRepository {
         page: Int,
         size: Int,
     ): Page<Block>
+
+    fun countByUserId(userId: Long): Map<BlockType, Long>
 }
