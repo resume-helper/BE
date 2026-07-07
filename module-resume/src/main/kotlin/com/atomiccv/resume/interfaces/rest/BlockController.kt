@@ -1,9 +1,11 @@
 package com.atomiccv.resume.interfaces.rest
 
+import com.atomiccv.resume.application.usecase.BlockCounts
 import com.atomiccv.resume.application.usecase.BlockItemCommand
 import com.atomiccv.resume.application.usecase.CreateBlockUseCase
 import com.atomiccv.resume.application.usecase.CreateBlocksCommand
 import com.atomiccv.resume.application.usecase.DeleteBlockUseCase
+import com.atomiccv.resume.application.usecase.GetBlockCountsUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksQuery
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockCommand
@@ -47,6 +49,7 @@ class BlockController(
     private val updateBlockUseCase: UpdateBlockUseCase,
     private val deleteBlockUseCase: DeleteBlockUseCase,
     private val getBlocksUseCase: GetBlocksUseCase,
+    private val getBlockCountsUseCase: GetBlockCountsUseCase,
     private val objectMapper: ObjectMapper,
 ) {
     @Operation(
@@ -77,6 +80,31 @@ class BlockController(
         val userId = resolveUserId(authentication)
         val result = getBlocksUseCase.getBlocks(GetBlocksQuery(userId = userId, type = type, page = page, size = size))
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(result) { it.toResponse(objectMapper) }))
+    }
+
+    @Operation(
+        summary = "블록 타입별 개수 조회",
+        description = "로그인한 사용자의 블록을 타입별로 그룹핑한 개수를 반환합니다. 데이터가 없는 타입도 0건으로 포함됩니다.",
+    )
+    @ApiResponses(
+        SwaggerApiResponse(responseCode = "200", description = "조회 성공"),
+        SwaggerApiResponse(
+            responseCode = "401",
+            description = "인증되지 않은 요청 (UNAUTHORIZED)",
+            content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(ref = "#/components/schemas/ApiResponse"),
+                    examples = [ExampleObject(value = """{"success":false,"message":"인증이 필요합니다"}""")],
+                ),
+            ],
+        ),
+    )
+    @GetMapping("/counts")
+    fun getBlockCounts(authentication: Authentication): ResponseEntity<ApiResponse<BlockCountsResponse>> {
+        val userId = resolveUserId(authentication)
+        val result = getBlockCountsUseCase.getCounts(userId)
+        return ResponseEntity.ok(ApiResponse.ok(result.toResponse()))
     }
 
     @Operation(
@@ -319,4 +347,26 @@ fun Block.toResponse(objectMapper: ObjectMapper) =
         contentJson = objectMapper.readTree(contentJson),
         createdAt = createdAt,
         updatedAt = updatedAt,
+    )
+
+@Schema(description = "블록 타입별 개수 응답")
+data class BlockCountsResponse(
+    @Schema(description = "전체 블록 개수", example = "12")
+    val totalCount: Long,
+    @Schema(description = "타입별 블록 개수 목록")
+    val counts: List<BlockTypeCountResponse>,
+)
+
+@Schema(description = "블록 타입별 개수")
+data class BlockTypeCountResponse(
+    @Schema(description = "블록 타입", example = "CAREER")
+    val type: BlockType,
+    @Schema(description = "개수", example = "3")
+    val count: Long,
+)
+
+fun BlockCounts.toResponse() =
+    BlockCountsResponse(
+        totalCount = totalCount,
+        counts = counts.map { BlockTypeCountResponse(type = it.type, count = it.count) },
     )
