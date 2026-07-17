@@ -21,7 +21,7 @@ class GetFeedbackUseCaseTest {
     private val resume = Resume(id = 1L, userId = 10L, type = ResumeType.WEB, title = "내 이력서", isPublic = true)
 
     private val feedback =
-        Feedback(id = 5L, resumeId = 1L, rating = 4, comment = "좋습니다", reviewerIp = "1.2.3.4", tags = listOf("성과중심"))
+        Feedback(id = 5L, resumeId = 1L, rating = 4.0, comment = "좋습니다", reviewerIp = "1.2.3.4", tags = listOf("성과중심"))
 
     @Test
     fun `소유자가 피드백을 단건 조회하면 피드백을 반환한다`() {
@@ -31,7 +31,7 @@ class GetFeedbackUseCaseTest {
         val result = useCase.get(GetFeedbackQuery(resumeId = 1L, feedbackId = 5L, requestUserId = 10L))
 
         assertEquals(5L, result.id)
-        assertEquals(4, result.rating)
+        assertEquals(4.0, result.rating)
     }
 
     @Test

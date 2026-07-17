@@ -15,10 +15,15 @@ import com.atomiccv.resume.application.usecase.GetBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.GetBlockDraftsUseCase
 import com.atomiccv.resume.application.usecase.GetBlocksUseCase
 import com.atomiccv.resume.application.usecase.GetFeedbackListUseCase
+import com.atomiccv.resume.application.usecase.GetFeedbackStatsUseCase
 import com.atomiccv.resume.application.usecase.GetFeedbackUseCase
+import com.atomiccv.resume.application.usecase.GetPublicResumeUseCase
+import com.atomiccv.resume.application.usecase.GetResumeAnalyticsUseCase
 import com.atomiccv.resume.application.usecase.GetResumeUseCase
 import com.atomiccv.resume.application.usecase.GetResumesUseCase
+import com.atomiccv.resume.application.usecase.RecordViewDurationUseCase
 import com.atomiccv.resume.application.usecase.ReorderBlocksUseCase
+import com.atomiccv.resume.application.usecase.StartViewSessionUseCase
 import com.atomiccv.resume.application.usecase.SubmitFeedbackUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockDraftUseCase
 import com.atomiccv.resume.application.usecase.UpdateBlockUseCase
@@ -29,6 +34,7 @@ import com.atomiccv.resume.domain.repository.BlockRepository
 import com.atomiccv.resume.domain.repository.FeedbackRepository
 import com.atomiccv.resume.domain.repository.ResumeBlockRepository
 import com.atomiccv.resume.domain.repository.ResumeRepository
+import com.atomiccv.resume.domain.repository.ViewSessionRepository
 import com.atomiccv.shared.application.port.S3Port
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -108,6 +114,10 @@ class ResumeUseCaseConfiguration {
     fun getResumesUseCase(resumeRepository: ResumeRepository): GetResumesUseCase = GetResumesUseCase(resumeRepository)
 
     @Bean
+    fun getPublicResumeUseCase(resumeRepository: ResumeRepository): GetPublicResumeUseCase =
+        GetPublicResumeUseCase(resumeRepository)
+
+    @Bean
     fun updateResumeVisibilityUseCase(resumeRepository: ResumeRepository): UpdateResumeVisibilityUseCase =
         UpdateResumeVisibilityUseCase(resumeRepository)
 }
@@ -139,6 +149,12 @@ class FeedbackUseCaseConfiguration {
     ): GetFeedbackUseCase = GetFeedbackUseCase(resumeRepository, feedbackRepository)
 
     @Bean
+    fun getFeedbackStatsUseCase(
+        resumeRepository: ResumeRepository,
+        feedbackRepository: FeedbackRepository,
+    ): GetFeedbackStatsUseCase = GetFeedbackStatsUseCase(resumeRepository, feedbackRepository)
+
+    @Bean
     fun deleteFeedbackUseCase(
         resumeRepository: ResumeRepository,
         feedbackRepository: FeedbackRepository,
@@ -149,4 +165,25 @@ class FeedbackUseCaseConfiguration {
         resumeRepository: ResumeRepository,
         feedbackRepository: FeedbackRepository,
     ): GetAllFeedbacksUseCase = GetAllFeedbacksUseCase(resumeRepository, feedbackRepository)
+}
+
+@Configuration
+class AnalyticsUseCaseConfiguration {
+    @Bean
+    fun startViewSessionUseCase(
+        resumeRepository: ResumeRepository,
+        viewSessionRepository: ViewSessionRepository,
+    ): StartViewSessionUseCase = StartViewSessionUseCase(resumeRepository, viewSessionRepository)
+
+    @Bean
+    fun recordViewDurationUseCase(
+        resumeRepository: ResumeRepository,
+        viewSessionRepository: ViewSessionRepository,
+    ): RecordViewDurationUseCase = RecordViewDurationUseCase(resumeRepository, viewSessionRepository)
+
+    @Bean
+    fun getResumeAnalyticsUseCase(
+        resumeRepository: ResumeRepository,
+        viewSessionRepository: ViewSessionRepository,
+    ): GetResumeAnalyticsUseCase = GetResumeAnalyticsUseCase(resumeRepository, viewSessionRepository)
 }

@@ -23,9 +23,9 @@ class GetAllFeedbacksUseCaseTest {
             .copy(deletedAt = LocalDateTime.now())
 
     private val feedback1 =
-        Feedback(id = 1L, resumeId = 1L, rating = 5, comment = null, reviewerIp = "1.1.1.1")
+        Feedback(id = 1L, resumeId = 1L, rating = 5.0, comment = null, reviewerIp = "1.1.1.1")
     private val feedback2 =
-        Feedback(id = 2L, resumeId = 2L, rating = 3, comment = "보통", reviewerIp = "2.2.2.2")
+        Feedback(id = 2L, resumeId = 2L, rating = 3.0, comment = "보통", reviewerIp = "2.2.2.2")
 
     private val query = GetAllFeedbacksQuery(requestUserId = 10L, page = 1, size = 10)
 

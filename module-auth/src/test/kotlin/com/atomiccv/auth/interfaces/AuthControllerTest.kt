@@ -7,7 +7,10 @@ import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.TokenResult
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
+import com.atomiccv.auth.domain.model.SocialAccount
+import com.atomiccv.auth.domain.model.SocialProvider
 import com.atomiccv.auth.domain.model.User
+import com.atomiccv.auth.domain.repository.SocialAccountRepository
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.auth.interfaces.rest.AuthController
 import com.atomiccv.shared.common.exception.BusinessException
@@ -50,6 +53,9 @@ class AuthControllerTest {
     lateinit var userRepository: UserRepository
 
     @Autowired
+    lateinit var socialAccountRepository: SocialAccountRepository
+
+    @Autowired
     lateinit var socialLoginUseCase: SocialLoginUseCase
 
     @TestConfiguration
@@ -65,6 +71,9 @@ class AuthControllerTest {
 
         @Bean
         fun userRepository(): UserRepository = mockk()
+
+        @Bean
+        fun socialAccountRepository(): SocialAccountRepository = mockk()
 
         @Bean
         fun jwtPort(): JwtPort = mockk(relaxed = true)
@@ -121,11 +130,48 @@ class AuthControllerTest {
     fun `GET me — 인증된 사용자의 정보를 반환한다`() {
         val user = User(id = 1L, email = "test@example.com", name = "홍길동")
         every { userRepository.findById(1L) } returns user
+        every { socialAccountRepository.findAllByUserId(1L) } returns emptyList()
 
         mockMvc.get("/api/auth/me").andExpect {
             status { isOk() }
             jsonPath("$.data.email") { value("test@example.com") }
             jsonPath("$.data.name") { value("홍길동") }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "1")
+    fun `GET me — 연결된 소셜 계정 목록을 provider·연결상태·연결일과 함께 반환한다`() {
+        val user = User(id = 1L, email = "test@example.com", name = "홍길동")
+        every { userRepository.findById(1L) } returns user
+        every { socialAccountRepository.findAllByUserId(1L) } returns
+            listOf(
+                SocialAccount(
+                    id = 10L,
+                    userId = 1L,
+                    provider = SocialProvider.KAKAO,
+                    providerUserId = "kakao-123",
+                    isActive = true,
+                    createdAt = java.time.LocalDateTime.of(2026, 5, 1, 12, 0),
+                ),
+                SocialAccount(
+                    id = 11L,
+                    userId = 1L,
+                    provider = SocialProvider.GOOGLE,
+                    providerUserId = "google-456",
+                    isActive = false,
+                ),
+            )
+
+        mockMvc.get("/api/auth/me").andExpect {
+            status { isOk() }
+            jsonPath("$.data.socialAccounts.length()") { value(2) }
+            jsonPath("$.data.socialAccounts[0].provider") { value("KAKAO") }
+            jsonPath("$.data.socialAccounts[0].isActive") { value(true) }
+            jsonPath("$.data.socialAccounts[0].connectedAt") { value("2026-05-01T12:00:00") }
+            jsonPath("$.data.socialAccounts[1].provider") { value("GOOGLE") }
+            jsonPath("$.data.socialAccounts[1].isActive") { value(false) }
+            jsonPath("$.data.socialAccounts[0].providerUserId") { doesNotExist() }
         }
     }
 

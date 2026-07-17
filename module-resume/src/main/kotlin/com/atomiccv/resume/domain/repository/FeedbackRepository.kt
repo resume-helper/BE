@@ -13,6 +13,9 @@ interface FeedbackRepository {
         size: Int,
     ): List<Feedback>
 
+    /** 통계 집계용 전체 조회 (페이징 없음) */
+    fun findAllByResumeId(resumeId: Long): List<Feedback>
+
     fun countByResumeId(resumeId: Long): Long
 
     fun findAllByResumeIdIn(

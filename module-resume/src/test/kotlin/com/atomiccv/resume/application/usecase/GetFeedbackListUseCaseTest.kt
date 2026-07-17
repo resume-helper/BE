@@ -21,7 +21,7 @@ class GetFeedbackListUseCaseTest {
     private val resume = Resume(id = 1L, userId = 10L, type = ResumeType.WEB, title = "내 이력서", isPublic = true)
 
     private val feedback =
-        Feedback(id = 1L, resumeId = 1L, rating = 5, comment = null, reviewerIp = "1.2.3.4", tags = emptyList())
+        Feedback(id = 1L, resumeId = 1L, rating = 5.0, comment = null, reviewerIp = "1.2.3.4", tags = emptyList())
 
     @Test
     fun `소유자가 피드백 목록을 조회하면 피드백 리스트와 총 개수를 반환한다`() {

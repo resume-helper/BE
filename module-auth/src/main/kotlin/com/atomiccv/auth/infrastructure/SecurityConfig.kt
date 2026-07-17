@@ -52,6 +52,9 @@ class SecurityConfig(
                         "/v3/api-docs/**",
                     ).permitAll()
                 it.requestMatchers(HttpMethod.POST, "/api/resumes/*/feedbacks").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/public/resumes/*").permitAll()
+                it.requestMatchers(HttpMethod.POST, "/api/public/resumes/*/view-sessions").permitAll()
+                it.requestMatchers(HttpMethod.PUT, "/api/public/resumes/*/view-sessions/*").permitAll()
                 it.anyRequest().authenticated()
             }.exceptionHandling {
                 it.authenticationEntryPoint { _, response, _ ->

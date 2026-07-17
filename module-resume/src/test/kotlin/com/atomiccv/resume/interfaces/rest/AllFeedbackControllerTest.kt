@@ -32,7 +32,7 @@ class AllFeedbackControllerTest {
         Feedback(
             id = 1L,
             resumeId = 1L,
-            rating = 4,
+            rating = 4.0,
             comment = "좋습니다",
             reviewerIp = "1.2.3.4",
             tags = listOf("성과중심"),

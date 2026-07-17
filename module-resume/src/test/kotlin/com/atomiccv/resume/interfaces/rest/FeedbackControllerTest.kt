@@ -1,10 +1,15 @@
 package com.atomiccv.resume.interfaces.rest
 
 import com.atomiccv.resume.application.usecase.DeleteFeedbackUseCase
+import com.atomiccv.resume.application.usecase.FeedbackGroupStats
 import com.atomiccv.resume.application.usecase.FeedbackListResult
+import com.atomiccv.resume.application.usecase.FeedbackStatsResult
 import com.atomiccv.resume.application.usecase.GetFeedbackListUseCase
+import com.atomiccv.resume.application.usecase.GetFeedbackStatsUseCase
 import com.atomiccv.resume.application.usecase.GetFeedbackUseCase
+import com.atomiccv.resume.application.usecase.SectionFeedbackStats
 import com.atomiccv.resume.application.usecase.SubmitFeedbackUseCase
+import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.resume.domain.model.Feedback
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
@@ -49,13 +54,16 @@ class FeedbackControllerTest {
     lateinit var getFeedbackUseCase: GetFeedbackUseCase
 
     @Autowired
+    lateinit var getFeedbackStatsUseCase: GetFeedbackStatsUseCase
+
+    @Autowired
     lateinit var deleteFeedbackUseCase: DeleteFeedbackUseCase
 
     private val feedback =
         Feedback(
             id = 1L,
             resumeId = 1L,
-            rating = 4,
+            rating = 4.0,
             comment = "좋습니다",
             reviewerIp = "1.2.3.4",
             tags = listOf("성과중심"),
@@ -72,6 +80,9 @@ class FeedbackControllerTest {
 
         @Bean
         fun getFeedbackUseCase(): GetFeedbackUseCase = mockk()
+
+        @Bean
+        fun getFeedbackStatsUseCase(): GetFeedbackStatsUseCase = mockk()
 
         @Bean
         fun deleteFeedbackUseCase(): DeleteFeedbackUseCase = mockk()
@@ -103,7 +114,7 @@ class FeedbackControllerTest {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
                 jsonPath("$.data.id") { value(1) }
-                jsonPath("$.data.rating") { value(4) }
+                jsonPath("$.data.rating") { value(4.0) }
                 jsonPath("$.data.tags[0]") { value("성과중심") }
             }
     }
@@ -140,6 +151,37 @@ class FeedbackControllerTest {
 
     @Test
     @WithMockUser(username = "10")
+    fun `GET api-resumes-resumeId-feedbacks-stats - 피드백 통계를 반환한다`() {
+        every { getFeedbackStatsUseCase.getStats(any()) } returns
+            FeedbackStatsResult(
+                totalCount = 3L,
+                overall =
+                    FeedbackGroupStats(
+                        count = 2L,
+                        averageRating = 4.5,
+                        tagCounts = mapOf("전체적으로 잘 읽혀요" to 2L),
+                    ),
+                sections =
+                    listOf(
+                        SectionFeedbackStats(
+                            section = BlockType.CAREER,
+                            count = 1L,
+                            averageRating = 3.5,
+                            tagCounts = emptyMap(),
+                        ),
+                    ),
+            )
+
+        mockMvc.get("/api/resumes/1/feedbacks/stats").andExpect {
+            status { isOk() }
+            jsonPath("$.data.totalCount") { value(3) }
+            jsonPath("$.data.overall.averageRating") { value(4.5) }
+            jsonPath("$.data.sections[0].section") { value("CAREER") }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "10")
     fun `GET api-resumes-resumeId-feedbacks-feedbackId - 피드백 단건을 반환한다`() {
         every { getFeedbackUseCase.get(any()) } returns feedback
 
@@ -147,7 +189,7 @@ class FeedbackControllerTest {
             status { isOk() }
             jsonPath("$.success") { value(true) }
             jsonPath("$.data.id") { value(1) }
-            jsonPath("$.data.rating") { value(4) }
+            jsonPath("$.data.rating") { value(4.0) }
         }
     }
 
