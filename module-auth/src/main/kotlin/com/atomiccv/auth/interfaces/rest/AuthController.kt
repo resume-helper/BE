@@ -5,7 +5,9 @@ import com.atomiccv.auth.application.usecase.SocialLoginUseCase
 import com.atomiccv.auth.application.usecase.TokenRefreshUseCase
 import com.atomiccv.auth.application.usecase.WithdrawCommand
 import com.atomiccv.auth.application.usecase.WithdrawUseCase
+import com.atomiccv.auth.domain.model.SocialAccount
 import com.atomiccv.auth.domain.model.SocialProvider
+import com.atomiccv.auth.domain.repository.SocialAccountRepository
 import com.atomiccv.auth.domain.repository.UserRepository
 import com.atomiccv.auth.interfaces.rest.dto.SocialLoginRequest
 import com.atomiccv.shared.common.exception.BusinessException
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 @Tag(name = "Auth", description = "인증 API — 토큰 갱신, 로그아웃, 내 정보 조회, 회원 탈퇴")
@@ -39,6 +42,7 @@ class AuthController(
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
     private val userRepository: UserRepository,
+    private val socialAccountRepository: SocialAccountRepository,
     private val socialLoginUseCase: SocialLoginUseCase,
 ) {
     @Operation(
@@ -189,7 +193,10 @@ class AuthController(
         val user =
             userRepository.findById(userId)
                 ?: throw BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다.")
-        return ResponseEntity.ok(ApiResponse.ok(UserResponse(user.id, user.email, user.name, user.profileImageUrl)))
+        val socialAccounts = socialAccountRepository.findAllByUserId(userId).map { it.toResponse() }
+        return ResponseEntity.ok(
+            ApiResponse.ok(UserResponse(user.id, user.email, user.name, user.profileImageUrl, socialAccounts)),
+        )
     }
 
     @Operation(
@@ -245,4 +252,23 @@ data class UserResponse(
     val name: String,
     @Schema(description = "프로필 이미지 URL", nullable = true, example = "https://example.com/profile.jpg")
     val profileImageUrl: String?,
+    @Schema(description = "연결된 소셜 계정 목록")
+    val socialAccounts: List<SocialAccountResponse> = emptyList(),
 )
+
+@Schema(description = "연결된 소셜 계정")
+data class SocialAccountResponse(
+    @Schema(description = "로그인 제공자", example = "KAKAO")
+    val provider: SocialProvider,
+    @Schema(description = "연결 상태 (false = 탈퇴 유예 중)", example = "true")
+    val isActive: Boolean,
+    @Schema(description = "연결 일시", example = "2026-05-01T12:00:00")
+    val connectedAt: LocalDateTime,
+)
+
+fun SocialAccount.toResponse() =
+    SocialAccountResponse(
+        provider = provider,
+        isActive = isActive,
+        connectedAt = createdAt,
+    )

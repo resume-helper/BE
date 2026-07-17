@@ -10,6 +10,8 @@ interface FeedbackJpaRepository : JpaRepository<FeedbackJpaEntity, Long> {
         pageable: Pageable,
     ): Page<FeedbackJpaEntity>
 
+    fun findAllByResumeId(resumeId: Long): List<FeedbackJpaEntity>
+
     fun countByResumeId(resumeId: Long): Long
 
     fun findAllByResumeIdIn(

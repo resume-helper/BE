@@ -30,6 +30,21 @@ ALTER TABLE block_drafts MODIFY COLUMN `block_type`
 `BASIC_INFO`, `SUMMARY`, `INTRODUCTION` 3개가 DB enum 에서 누락돼 해당 타입 블록 생성이 500 이었다.
 **dev DB 는 위 ALTER 적용 완료.** **prod DB 는 동일 드리프트 가능성 높음 → 적용 여부 확인 필요.**
 
+## ⚠️ feedbacks.rating DECIMAL 마이그레이션 (2026-07-17, 미적용)
+
+피드백 별점이 0.5 단위(기획 풀스펙)로 바뀌며 도메인 `rating: Double?` · 엔티티 `DECIMAL(2,1)` 이 됐다.
+기존 컬럼은 `TINYINT` — **`ddl-auto: update` 는 컬럼 타입을 바꾸지 않으므로** 모든 환경(dev, prod) DB 에 직접 ALTER 를 실행해야 한다. 미적용 상태에서 0.5 단위 별점을 저장하면 반올림·오류가 난다.
+
+```sql
+-- 기존 정수 별점(1~5)은 1.0~5.0 으로 그대로 보존된다 (비파괴)
+ALTER TABLE feedbacks MODIFY COLUMN rating DECIMAL(2,1) NULL;
+```
+
+`feedbacks.section`(VARCHAR(20), 섹션 피드백 대상)은 **신규 컬럼**이라 ddl-auto 가 추가해준다.
+section 을 native enum 이 아닌 VARCHAR 로 고정한 이유 = 위 "BlockType enum ↔ DB 컬럼 드리프트" 함정 회피.
+
+- **적용 현황: dev ❌ / prod ❌ (둘 다 미적용, 배포 시 실행 필요)**
+
 ## 트랜잭션 / 영속성 주의
 
 `ResumeBlockJpaRepository.deleteAllByResumeId` 는 `@Modifying(flushAutomatically = true, clearAutomatically = true)` 이다.

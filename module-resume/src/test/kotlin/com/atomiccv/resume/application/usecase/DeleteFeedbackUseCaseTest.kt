@@ -24,7 +24,7 @@ class DeleteFeedbackUseCaseTest {
     private val resume = Resume(id = 1L, userId = 10L, type = ResumeType.WEB, title = "내 이력서", isPublic = true)
 
     private val feedback =
-        Feedback(id = 5L, resumeId = 1L, rating = 4, comment = null, reviewerIp = "1.2.3.4")
+        Feedback(id = 5L, resumeId = 1L, rating = 4.0, comment = null, reviewerIp = "1.2.3.4")
 
     @Test
     fun `소유자가 피드백을 삭제하면 deleteById가 호출된다`() {

@@ -43,6 +43,18 @@ class FeedbackRepositoryImpl(
         }
     }
 
+    override fun findAllByResumeId(resumeId: Long): List<Feedback> {
+        val entities = feedbackJpaRepository.findAllByResumeId(resumeId)
+        if (entities.isEmpty()) return emptyList()
+        val tagsMap =
+            feedbackTagJpaRepository
+                .findAllByFeedbackIdIn(entities.map { it.id })
+                .groupBy { it.feedbackId }
+        return entities.map { entity ->
+            entity.toDomain(tagsMap[entity.id]?.map { it.tag } ?: emptyList())
+        }
+    }
+
     override fun countByResumeId(resumeId: Long): Long = feedbackJpaRepository.countByResumeId(resumeId)
 
     override fun findAllByResumeIdIn(
