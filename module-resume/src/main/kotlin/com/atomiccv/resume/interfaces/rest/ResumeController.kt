@@ -14,6 +14,7 @@ import com.atomiccv.resume.application.usecase.UpdateResumeVisibilityCommand
 import com.atomiccv.resume.application.usecase.UpdateResumeVisibilityUseCase
 import com.atomiccv.resume.domain.model.BlockType
 import com.atomiccv.resume.domain.model.Resume
+import com.atomiccv.resume.domain.model.ResumeTemplate
 import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeBlockDetail
 import com.atomiccv.resume.domain.repository.ResumeDetail
@@ -97,6 +98,7 @@ class ResumeController(
                     userId = userId,
                     title = request.title,
                     type = request.type,
+                    template = request.template,
                     pdfS3Key = request.pdfS3Key,
                     blocks = request.blocks.map { ResumeBlockInput(blockId = it.blockId, orderIndex = it.orderIndex) },
                 ),
@@ -257,6 +259,7 @@ class ResumeController(
                     resumeId = id,
                     userId = userId,
                     title = request.title,
+                    template = request.template,
                     blocks = request.blocks.map { ResumeBlockInput(blockId = it.blockId, orderIndex = it.orderIndex) },
                 ),
             )
@@ -396,6 +399,8 @@ data class CreateResumeRequest(
     val title: String,
     @Schema(description = "이력서 타입", example = "PDF")
     val type: ResumeType?,
+    @Schema(description = "렌더 템플릿 (A 클래식 / B 모던 / C 미니멀, 미지정 시 A)", example = "A")
+    val template: ResumeTemplate? = null,
     @Schema(description = "PDF S3 키 (PDF 타입일 때 upload-url로 발급받은 s3Key)", example = "resumes/1/uuid/resume.pdf")
     val pdfS3Key: String? = null,
     @Schema(description = "연결할 블록 목록")
@@ -409,6 +414,8 @@ data class UpdateResumeRequest(
     @field:NotBlank
     @field:Size(max = 200)
     val title: String,
+    @Schema(description = "렌더 템플릿 (A 클래식 / B 모던 / C 미니멀, 미지정 시 기존값 유지)", example = "A")
+    val template: ResumeTemplate? = null,
     @Schema(description = "연결할 블록 목록")
     @field:Valid
     val blocks: List<BlockInputRequest> = emptyList(),
@@ -444,6 +451,8 @@ data class ResumeListItemResponse(
     val title: String,
     @Schema(description = "이력서 타입", example = "GENERAL")
     val type: ResumeType?,
+    @Schema(description = "렌더 템플릿", example = "A")
+    val template: ResumeTemplate,
     @Schema(description = "공개 여부", example = "false")
     val isPublic: Boolean,
     @Schema(description = "생성 일시", example = "2026-05-11T10:00:00")
@@ -461,6 +470,8 @@ data class ResumeDetailResponse(
     val title: String,
     @Schema(description = "이력서 타입", example = "GENERAL")
     val type: ResumeType?,
+    @Schema(description = "렌더 템플릿", example = "A")
+    val template: ResumeTemplate,
     @Schema(description = "이력서 슬러그 (공개 URL용)", example = "abc123")
     val slug: String?,
     @Schema(description = "공개 여부", example = "false")
@@ -498,6 +509,7 @@ fun Resume.toListResponse() =
         id = id,
         title = title,
         type = type,
+        template = template,
         isPublic = isPublic,
         createdAt = createdAt,
         updatedAt = updatedAt,
@@ -508,6 +520,7 @@ fun ResumeDetail.toDetailResponse(pdfDownloadUrl: String?) =
         id = resume.id,
         title = resume.title,
         type = resume.type,
+        template = resume.template,
         slug = resume.slug,
         isPublic = resume.isPublic,
         pdfS3Key = resume.pdfS3Key,

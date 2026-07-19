@@ -1,6 +1,7 @@
 package com.atomiccv.resume.infrastructure.persistence
 
 import com.atomiccv.resume.domain.model.Resume
+import com.atomiccv.resume.domain.model.ResumeTemplate
 import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.shared.infrastructure.persistence.BaseJpaEntity
 import jakarta.persistence.Column
@@ -24,6 +25,10 @@ class ResumeJpaEntity(
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     val type: ResumeType? = null,
+    // ddl-auto 추가 컬럼 — 기존 행 null = 기본 템플릿 A
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true, length = 10)
+    val template: ResumeTemplate? = null,
     @Column(nullable = false, length = 200)
     val title: String,
     @Column(nullable = true, length = 100, unique = true)
@@ -40,6 +45,7 @@ class ResumeJpaEntity(
             id = id,
             userId = userId,
             type = type,
+            template = template ?: ResumeTemplate.A,
             title = title,
             slug = slug,
             isPublic = isPublic,
@@ -55,6 +61,7 @@ class ResumeJpaEntity(
                 id = resume.id,
                 userId = resume.userId,
                 type = resume.type,
+                template = resume.template,
                 title = resume.title,
                 slug = resume.slug,
                 isPublic = resume.isPublic,
