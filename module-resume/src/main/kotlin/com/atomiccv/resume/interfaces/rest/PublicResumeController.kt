@@ -2,6 +2,7 @@ package com.atomiccv.resume.interfaces.rest
 
 import com.atomiccv.resume.application.usecase.GetPublicResumeQuery
 import com.atomiccv.resume.application.usecase.GetPublicResumeUseCase
+import com.atomiccv.resume.domain.model.ResumeTemplate
 import com.atomiccv.resume.domain.repository.ResumeDetail
 import com.atomiccv.shared.common.response.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -59,6 +60,8 @@ data class PublicResumeResponse(
     val id: Long,
     @Schema(description = "이력서 제목", example = "카카오 백엔드 개발자 이력서")
     val title: String,
+    @Schema(description = "렌더 템플릿", example = "A")
+    val template: ResumeTemplate,
     @Schema(description = "연결된 블록 목록")
     val blocks: List<ResumeBlockDetailResponse>,
     @Schema(description = "수정 일시", example = "2026-07-01T10:00:00")
@@ -71,6 +74,7 @@ fun ResumeDetail.toPublicResponse() =
     PublicResumeResponse(
         id = resume.id,
         title = resume.title,
+        template = resume.template,
         blocks = blocks.map { it.toResponse() },
         updatedAt = resume.updatedAt,
     )

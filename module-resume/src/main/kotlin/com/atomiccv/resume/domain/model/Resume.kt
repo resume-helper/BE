@@ -6,6 +6,7 @@ data class Resume(
     val id: Long = 0,
     val userId: Long,
     val type: ResumeType? = null,
+    val template: ResumeTemplate = ResumeTemplate.A,
     val title: String,
     val slug: String? = null,
     val isPublic: Boolean = false,

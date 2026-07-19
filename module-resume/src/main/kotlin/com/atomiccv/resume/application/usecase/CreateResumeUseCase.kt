@@ -2,6 +2,7 @@ package com.atomiccv.resume.application.usecase
 
 import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.model.ResumeBlock
+import com.atomiccv.resume.domain.model.ResumeTemplate
 import com.atomiccv.resume.domain.model.ResumeType
 import com.atomiccv.resume.domain.repository.ResumeRepository
 import org.springframework.transaction.annotation.Transactional
@@ -11,6 +12,7 @@ data class CreateResumeCommand(
     val userId: Long,
     val title: String,
     val type: ResumeType?,
+    val template: ResumeTemplate? = null,
     val pdfS3Key: String? = null,
     val blocks: List<ResumeBlockInput>,
 )
@@ -35,6 +37,7 @@ class CreateResumeUseCase(
             userId = command.userId,
             title = command.title,
             type = command.type,
+            template = command.template ?: ResumeTemplate.A,
             slug = if (command.type == ResumeType.WEB) UUID.randomUUID().toString().replace("-", "") else null,
             pdfS3Key = command.pdfS3Key,
         )

@@ -2,6 +2,7 @@ package com.atomiccv.resume.application.usecase
 
 import com.atomiccv.resume.domain.model.Resume
 import com.atomiccv.resume.domain.model.ResumeBlock
+import com.atomiccv.resume.domain.model.ResumeTemplate
 import com.atomiccv.resume.domain.repository.ResumeRepository
 import com.atomiccv.shared.common.exception.BusinessException
 import com.atomiccv.shared.common.exception.ErrorCode
@@ -12,6 +13,7 @@ data class UpdateResumeCommand(
     val resumeId: Long,
     val userId: Long,
     val title: String,
+    val template: ResumeTemplate? = null,
     val blocks: List<ResumeBlockInput>,
 )
 
@@ -22,7 +24,14 @@ class UpdateResumeUseCase(
     fun update(command: UpdateResumeCommand): Resume {
         val resume = findActiveResume(command.resumeId)
         verifyOwnership(resume, command.userId)
-        val updated = resumeRepository.save(resume.copy(title = command.title, updatedAt = LocalDateTime.now()))
+        val updated =
+            resumeRepository.save(
+                resume.copy(
+                    title = command.title,
+                    template = command.template ?: resume.template,
+                    updatedAt = LocalDateTime.now(),
+                ),
+            )
         replaceBlocks(command.resumeId, command.blocks)
         return updated
     }
