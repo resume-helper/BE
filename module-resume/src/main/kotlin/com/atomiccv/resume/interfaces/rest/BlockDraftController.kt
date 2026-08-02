@@ -93,7 +93,8 @@ class BlockDraftController(
         @Valid @RequestBody request: CreateBlockDraftRequest,
     ): ResponseEntity<ApiResponse<BlockDraftResponse>> {
         val userId = resolveUserId(authentication)
-        BlockContentValidator.validate(request.blockType, request.contentJson)
+        // 임시저장(draft)은 작성 중 부분 저장이 목적 — 내용 완성 검증(BlockContentValidator)은
+        // 최종 저장(BlockController)에서만 강제한다. draft 는 유효 JSON·제목만 요구.
         val draft =
             createBlockDraftUseCase.create(
                 CreateBlockDraftCommand(
@@ -246,7 +247,7 @@ class BlockDraftController(
         @Valid @RequestBody request: UpdateBlockDraftRequest,
     ): ResponseEntity<ApiResponse<BlockDraftResponse>> {
         val userId = resolveUserId(authentication)
-        BlockContentValidator.validate(request.blockType, request.contentJson)
+        // 임시저장(draft)은 작성 중 부분 저장이 목적 — 내용 완성 검증은 최종 저장에서만 강제한다.
         val draft =
             updateBlockDraftUseCase.update(
                 UpdateBlockDraftCommand(
